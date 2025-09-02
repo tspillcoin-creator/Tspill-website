@@ -8,17 +8,34 @@
     <style>
       html{scroll-behavior:smooth}
       body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#e8f0ff}
+
+      /* Accessibility: skip link */
       .skip{position:absolute;left:-9999px;top:auto}
       .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
-      header{padding:20px 20px 10px;text-align:center}
+
+      /* Header and nav */
+      header{position:sticky;top:0;background:#0b0f14;padding:20px 20px 10px;text-align:center;z-index:10}
       .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
       .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none}
+
+      /* Layout */
       .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
       h3{margin:0 0 12px}
       .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
       footer{padding:24px;text-align:center;color:#9fb3d1}
+
+      /* Reveal-on-anchor behavior:
+         - Show only Overview by default
+         - Show the section matching the hash (#tokenomics, etc.)
+         - If a hash exists, hide Overview unless it is the target
+      */
+      main section{display:none}
+      main #overview{display:block}
+      main section:target{display:block}
+      /* When any section is targeted, keep only the target visible */
+      :target ~ section{display:none}
     </style>
   </head>
   <body>
@@ -31,6 +48,7 @@
         The currency for creators, innovators, and designers.
       </p>
       <nav class="nav" aria-label="Primary">
+        <a class="btn" href="#overview">Overview</a>
         <a class="btn" href="#tokenomics">Tokenomics</a>
         <a class="btn" href="#whitepaper">Whitepaper</a>
         <a class="btn" href="#roadmap">Roadmap</a>
@@ -107,7 +125,7 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // If a stray hash is present that doesn't match an element, remove it to avoid unexpected scroll on load
+      // If a hash is present but doesn't match any element, strip it so we show the default Overview.
       if (location.hash && !document.querySelector(location.hash)) {
         history.replaceState(null, "", location.pathname + location.search);
       }
