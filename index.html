@@ -21,6 +21,7 @@
       /* Sections + cards */
       .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
+      h2{margin:8px 0 6px}
       h3{margin:0 0 12px}
       .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
@@ -57,13 +58,14 @@
     </header>
 
     <main id="main">
-      <!-- HOME (shows by default and when Home is clicked) -->
+      <!-- HOME (landing view; shows by default and when Home is clicked) -->
       <section class="hero" id="overview">
-        <span style="display:inline-block;padding:4px 8px;border:1px solid #2a3550;border-radius:8px;color:#cfe3ff;margin-bottom:8px">Home</span>
-        <h2 style="margin:8px 0 6px">Build with creators. Ship with manufacturers.</h2>
+        <h2>Build with creators. Ship with manufacturers.</h2>
         <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
 
-        <p style="margin:10px 0 0">Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
+        <p style="margin:10px 0 0">
+          Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong>
+        </p>
 
         <div class="grid" style="margin-top:16px">
           <div class="card">
@@ -94,7 +96,7 @@
         </div>
       </section>
 
-      <!-- OTHER SECTIONS -->
+      <!-- OTHER SECTIONS (hidden until clicked) -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
         <p>Final distribution: Presale 30%, Ecosystem & Community 35%, Team/Dev 12.5%, Treasury & Partnerships 12.5%, Liquidity 5%, Staking 5%.</p>
@@ -148,7 +150,7 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // If a stray hash is present that doesn't match a section, strip it so Home shows by default
+      // Strip any unmatched hash so Home shows by default
       (function() {
         if (location.hash && !document.querySelector(location.hash)) {
           history.replaceState(null, "", location.pathname + location.search);
