@@ -23,16 +23,25 @@
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
       h2{margin:8px 0 6px}
       h3{margin:0 0 12px}
-      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:20px 0}
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
       footer{padding:24px;text-align:center;color:#9fb3d1}
 
-      /* Reveal-one-section logic: show only one section at a time */
+      /* One-section view:
+         - Default: show only #overview (landing)
+         - If a hash matches a section, show only that section
+         - If the hash is #overview (Home), show landing again
+      */
       main section{display:none}
-      main #overview{display:block}
-      main section:target{display:block}
-      main:has(section:target) #overview{display:none}
-      main:has(section:target) section:not(:target){display:none}
+      main #overview{display:block}                 /* default landing */ /* [2] */
+      main section:target{display:block}            /* show targeted */   /* [2] */
+
+      /* Hide non-targets when any target is active */
+      main:has(section:target) section{display:none}                       /* [3] */
+      main:has(section:target) section:target{display:block}               /* [3] */
+
+      /* Ensure Home (#overview) always shows the landing content */
+      main:has(#overview:target) #overview{display:block}                  /* [2] */
     </style>
   </head>
   <body>
@@ -58,7 +67,7 @@
     </header>
 
     <main id="main">
-      <!-- HOME (landing view; shows by default and when Home is clicked) -->
+      <!-- LANDING / HOME (shown by default and on Home click) -->
       <section class="hero" id="overview">
         <h2>Build with creators. Ship with manufacturers.</h2>
         <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
@@ -96,7 +105,7 @@
         </div>
       </section>
 
-      <!-- OTHER SECTIONS (hidden until clicked) -->
+      <!-- OTHER SECTIONS (hidden until selected) -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
         <p>Final distribution: Presale 30%, Ecosystem & Community 35%, Team/Dev 12.5%, Treasury & Partnerships 12.5%, Liquidity 5%, Staking 5%.</p>
@@ -150,8 +159,8 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // Strip any unmatched hash so Home shows by default
-      (function() {
+      // Remove unmatched hashes so the landing view shows by default
+      (function(){
         if (location.hash && !document.querySelector(location.hash)) {
           history.replaceState(null, "", location.pathname + location.search);
         }
