@@ -9,16 +9,16 @@
       html{scroll-behavior:smooth}
       body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#e8f0ff}
 
-      /* Accessibility: skip link */
+      /* Accessibility */
       .skip{position:absolute;left:-9999px;top:auto}
       .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
 
-      /* Header and nav */
+      /* Header + nav */
       header{position:sticky;top:0;background:#0b0f14;padding:20px 20px 10px;text-align:center;z-index:10}
       .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
       .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none}
 
-      /* Layout */
+      /* Sections + cards */
       .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
       h3{margin:0 0 12px}
@@ -26,16 +26,16 @@
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
       footer{padding:24px;text-align:center;color:#9fb3d1}
 
-      /* Reveal-on-anchor behavior:
-         - Show only Overview by default
-         - Show the section matching the hash (#tokenomics, etc.)
-         - If a hash exists, hide Overview unless it is the target
+      /* Reveal-one-section logic
+         - Default: show only #overview
+         - When a hash matches a section, show only that section
       */
       main section{display:none}
       main #overview{display:block}
       main section:target{display:block}
-      /* When any section is targeted, keep only the target visible */
-      :target ~ section{display:none}
+      /* Hide all non-target siblings when a target is active */
+      main:has(section:target) #overview{display:none}
+      main:has(section:target) section:not(:target){display:none}
     </style>
   </head>
   <body>
@@ -125,10 +125,12 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // If a hash is present but doesn't match any element, strip it so we show the default Overview.
-      if (location.hash && !document.querySelector(location.hash)) {
-        history.replaceState(null, "", location.pathname + location.search);
-      }
+      // Normalize accidental hashes that don't match any section so Overview shows by default
+      (function() {
+        if (location.hash && !document.querySelector(location.hash)) {
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+      })();
     </script>
   </body>
 </html>
