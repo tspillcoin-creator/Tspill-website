@@ -63,14 +63,11 @@
     </header>
 
     <main id="main" data-active="overview">
-      <!-- LANDING / HOME -->
+      <!-- HOME / LANDING -->
       <section class="hero" id="overview">
         <h2>Build with creators. Ship with manufacturers.</h2>
         <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
-
-        <p style="margin:10px 0 0">
-          Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong>
-        </p>
+        <p style="margin:10px 0 0">Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
 
         <div class="grid" style="margin-top:16px">
           <div class="card">
@@ -105,7 +102,7 @@
       <section id="tokenomics">
         <h3>Tokenomics</h3>
 
-        <!-- Mint line placed above boxes to avoid overflow -->
+        <!-- Mint placed above boxes to avoid overflow -->
         <div class="card" style="margin:14px 0">
           <strong>Mint</strong>
           <p style="margin:8px 0 0;word-break:break-all">
@@ -159,11 +156,10 @@
       <!-- WHITEPAPER -->
       <section id="whitepaper">
         <h3>Whitepaper</h3>
-
-        <!-- Download / View links -->
         <p style="margin:0 0 12px">
-          <a href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View full whitepaper (PDF)</a> •
-          <a href="./TSPILL_Whitepaper.pdf" download="TSPILL_Whitepaper.pdf">Download PDF</a>
+          <a href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View full whitepaper (PDF)</a>
+          &nbsp;•&nbsp;
+          <a href="./TSPILL_Whitepaper.pdf" download="TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">Download PDF</a>
         </p>
 
         <div class="grid">
@@ -220,14 +216,14 @@
         </div>
 
         <div class="card" style="margin-top:14px">
-          <strong>Risks & disclaimers</strong>
+          <strong>Risks & disclosures</strong>
           <p style="margin:8px 0 0">
-            Market, execution, and regulatory risks may affect timelines and availability; materials are provided for information purposes consistent with common disclosure practices.
+            Market, execution, and regulatory risks may affect timelines and availability; materials are provided for information purposes and will be updated as programs evolve.
           </p>
         </div>
       </section>
 
-      <!-- ROADMAP (kept separate for detail) -->
+      <!-- ROADMAP -->
       <section id="roadmap">
         <h3>Roadmap</h3>
         <ul>
@@ -293,7 +289,7 @@
 
         // Smooth-scroll even on same-hash clicks
         document.addEventListener('click', function(e){
-          const a = e.target.closest('a[href^=\"#\"]');
+          const a = e.target.closest('a[href^="#"]');
           if(!a) return;
           const id = a.getAttribute('href').slice(1);
           if(valid.has(id)){
