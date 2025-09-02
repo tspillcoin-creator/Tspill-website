@@ -27,18 +27,20 @@
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
       footer{padding:24px;text-align:center;color:#9fb3d1}
 
-      /* One-section view (strict) */
-      /* Default: only #overview is visible */
+      /* One-section view without :has()
+         - Hide all sections
+         - Show the section whose id equals main[data-active]
+      */
       main section{display:none}
-      main #overview{display:block}                                 /* default landing */ /* [2] */
-
-      /* When any hash targets a section, show only that section */
-      main section:target{display:block}                            /* show target */     /* [2] */
-      main:has(section:target) section{display:none}                                    /* hide all */      /* [3] */
-      main:has(section:target) section:target{display:block}                            /* show only target */
-
-      /* Ensure Home (#overview) always shows landing when targeted */
-      main:has(#overview:target) #overview{display:block}                              /* [2] */
+      main[data-active="overview"] #overview{display:block}
+      main[data-active="tokenomics"] #tokenomics{display:block}
+      main[data-active="whitepaper"] #whitepaper{display:block}
+      main[data-active="roadmap"] #roadmap{display:block}
+      main[data-active="presale"] #presale{display:block}
+      main[data-active="staking"] #staking{display:block}
+      main[data-active="sponsors"] #sponsors{display:block}
+      main[data-active="community"] #community{display:block}
+      main[data-active="trust"] #trust{display:block}
     </style>
   </head>
   <body>
@@ -63,7 +65,7 @@
       </nav>
     </header>
 
-    <main id="main">
+    <main id="main" data-active="overview">
       <!-- LANDING / HOME -->
       <section class="hero" id="overview">
         <h2>Build with creators. Ship with manufacturers.</h2>
@@ -156,20 +158,16 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // 1) Remove unmatched hash so landing shows by default
-      (function(){
-        if (location.hash && !document.querySelector(location.hash)) {
-          history.replaceState(null, "", location.pathname + location.search);
-        }
-      })();
-      // 2) Scroll to the top of the target section for clarity (optional polish)
-      document.addEventListener("click", function(e){
-        const a = e.target.closest('a[href^="#"]');
-        if(!a) return;
-        const id = a.getAttribute("href");
-        const el = document.querySelector(id);
-        if(el){ el.scrollIntoView({behavior:"smooth", block:"start"}); }
-      });
+      // Normalize hash -> set data-active to the matching id (fallback when :has is unavailable)
+      function setActiveFromHash(){
+        var h = location.hash.replace('#','') || 'overview';
+        // Only allow known IDs to prevent empty states
+        var ids = ['overview','tokenomics','whitepaper','roadmap','presale','staking','sponsors','community','trust'];
+        if(!ids.includes(h)) h = 'overview';
+        document.getElementById('main').setAttribute('data-active', h);
+      }
+      window.addEventListener('hashchange', setActiveFromHash);
+      window.addEventListener('DOMContentLoaded', setActiveFromHash);
     </script>
   </body>
 </html>
