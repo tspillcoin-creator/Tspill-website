@@ -48,7 +48,7 @@
         The currency for creators, innovators, and designers.
       </p>
       <nav class="nav" aria-label="Primary">
-        <a class="btn" href="#overview">Overview</a>
+        <a class="btn" href="#overview">Home</a>
         <a class="btn" href="#tokenomics">Tokenomics</a>
         <a class="btn" href="#whitepaper">Whitepaper</a>
         <a class="btn" href="#roadmap">Roadmap</a>
@@ -61,17 +61,42 @@
     </header>
 
     <main id="main">
+      <!-- HOME (shows by default) -->
       <section class="hero" id="overview">
-        <h2>The production‑link network for creators</h2>
-        <p>Connecting creators to vetted manufacturers with on‑chain attribution, royalties, and transparent economics.</p>
-        <div class="grid">
-          <div class="card"><strong>Mint authority:</strong> revoked</div>
-          <div class="card"><strong>Update authority:</strong> secured</div>
-          <div class="card"><strong>Presale:</strong> 30% with vesting & LP locks</div>
-          <div class="card"><strong>Domain:</strong> tspill.fun</div>
+        <h2 style="margin-bottom:10px">Build with creators. Ship with manufacturers.</h2>
+        <p style="margin-top:0">Mint address: <strong>[PASTE_MINT_ADDRESS]</strong></p>
+
+        <!-- Three boxes row -->
+        <div class="grid" style="margin-top:14px">
+          <div class="card">
+            <strong>Explanation</strong>
+            <p style="margin:8px 0 0">
+              TSPILL is a production‑link token that helps move creator concepts toward real‑world products with clear attribution and simple rewards.
+            </p>
+          </div>
+
+          <div class="card">
+            <strong>Token function</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access open calls and submit concepts</li>
+              <li>Incentivize useful participation</li>
+              <li>Fees/discounts for programs and partners</li>
+              <li>Community signals for what to fund next</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Ecosystem benefits</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Creators: recognition and rewards</li>
+              <li>Manufacturers: qualified briefs, predictable runs</li>
+              <li>Sponsors: transparent spend, measurable results</li>
+            </ul>
+          </div>
         </div>
       </section>
 
+      <!-- OTHER SECTIONS (hidden until clicked) -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
         <p>Final distribution: Presale 30%, Ecosystem & Community 35%, Team/Dev 12.5%, Treasury & Partnerships 12.5%, Liquidity 5%, Staking 5%.</p>
@@ -115,8 +140,8 @@
       <section id="trust">
         <h3>Trust</h3>
         <ul>
-          <li>Mint authority: revoked (explorer link)</li>
-          <li>Update authority: secured (address)</li>
+          <li>Mint authority: revoked</li>
+          <li>Update authority: secured</li>
           <li>LP lock proofs and vesting calendar</li>
         </ul>
       </section>
@@ -125,7 +150,7 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // Normalize accidental hashes that don't match any section so Overview shows by default
+      // If a stray hash is present that doesn't match any section, strip it so Home shows by default
       (function() {
         if (location.hash && !document.querySelector(location.hash)) {
           history.replaceState(null, "", location.pathname + location.search);
