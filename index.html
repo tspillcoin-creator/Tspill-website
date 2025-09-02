@@ -105,10 +105,18 @@
       <section id="tokenomics">
         <h3>Tokenomics</h3>
 
+        <!-- Mint line placed above boxes to avoid overflow -->
+        <div class="card" style="margin:14px 0">
+          <strong>Mint</strong>
+          <p style="margin:8px 0 0;word-break:break-all">
+            2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK
+          </p>
+        </div>
+
         <div class="card" style="margin:14px 0">
           <strong>Supply</strong>
           <p style="margin:8px 0 0">
-            Total supply: 1,000,000,000 TSPILL (9 decimals). Initial circulating supply at TGE: 35,000,000 (3.5%); all other allocations are locked on schedule. [ICS is what’s liquid at launch.] 
+            Total supply: 1,000,000,000 TSPILL (9 decimals). Initial circulating supply at TGE: 35,000,000 (3.5%); the rest follows locks and vesting.
           </p>
         </div>
 
@@ -130,7 +138,7 @@
             <ul style="margin:8px 0 0 18px">
               <li>Presale: 10% TGE (30,000,000), 90% linear over 9 months</li>
               <li>Team/Dev: 12‑month cliff, then 36‑month linear (0% TGE)</li>
-              <li>Ecosystem & Community: up to 2% TGE (20,000,000) for pilots; remainder linear over 36 months</li>
+              <li>Ecosystem & Community: up to 2% TGE (20,000,000); remainder linear over 36 months</li>
               <li>Treasury & Partnerships: 6‑month cliff, then 24‑month linear; multisig approvals</li>
               <li>Liquidity: 5% reserved for listing; LP tokens locked 12 months (proof on listing)</li>
               <li>Staking/Rewards: emissions over 24 months with quarterly step‑downs</li>
@@ -141,7 +149,6 @@
             <strong>Utility & transparency</strong>
             <ul style="margin:8px 0 0 18px">
               <li>Access to open calls; participation incentives; program fees/discounts; community signals</li>
-              <li>Mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</li>
               <li>Authorities: Mint revoked; Update secured (publish explorer proofs)</li>
               <li>Public unlock calendar (36 months) and LP lock link posted at listing</li>
             </ul>
@@ -149,24 +156,90 @@
         </div>
       </section>
 
-      <!-- OTHER SECTIONS -->
+      <!-- WHITEPAPER -->
       <section id="whitepaper">
         <h3>Whitepaper</h3>
-        <p>Problem → Solution overview and links to full document.</p>
+
+        <!-- Download / View links -->
+        <p style="margin:0 0 12px">
+          <a href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View full whitepaper (PDF)</a> •
+          <a href="./TSPILL_Whitepaper.pdf" download="TSPILL_Whitepaper.pdf">Download PDF</a>
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Executive summary</strong>
+            <p style="margin:8px 0 0">
+              TSPILL connects creators and vetted manufacturers to turn concepts into real products with clear attribution, straightforward royalties, and transparent economics; the token powers access, incentives, and program rails for challenges, pilots, and runs.
+            </p>
+          </div>
+
+          <div class="card">
+            <strong>Problem</strong>
+            <p style="margin:8px 0 0">
+              Creators face opaque factory access and limited share in downstream value; manufacturers need qualified briefs, predictable runs, and brand‑safe demand. Existing platforms don’t link production with attribution and ongoing rewards.
+            </p>
+          </div>
+
+          <div class="card">
+            <strong>Solution</strong>
+            <p style="margin:8px 0 0">
+              Standardized briefs and open challenges select viable concepts; winners advance to vetted manufacturing with transparent timelines and costs; attribution and simple reward rules are defined upfront and published.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <strong>How it works</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Challenges: briefs, submissions, shortlists</li>
+              <li>Production: vetted factories with clear specs and lead times</li>
+              <li>Launch: products ship; attribution and reward rules apply</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Token utility</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access programs and tools</li>
+              <li>Participation incentives for measurable progress</li>
+              <li>Program fees/discounts for pilots and runs</li>
+              <li>Signals for what to launch next</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Trust & controls</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Mint revoked; update secured</li>
+              <li>36‑month unlock calendar; LP lock proof at listing</li>
+              <li>Treasury under multisig with posted approvals</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <strong>Risks & disclaimers</strong>
+          <p style="margin:8px 0 0">
+            Market, execution, and regulatory risks may affect timelines and availability; materials are provided for information purposes consistent with common disclosure practices.
+          </p>
+        </div>
       </section>
 
+      <!-- ROADMAP (kept separate for detail) -->
       <section id="roadmap">
         <h3>Roadmap</h3>
         <ul>
-          <li>Q4: Site live, trust proofs, partner onboarding</li>
-          <li>Q1: Presale and LP lock</li>
-          <li>Q2: Creator bounties and staking emissions</li>
+          <li>Phase 1: Presale launch, manufacturer onboarding, trust proofs</li>
+          <li>Phase 2: First challenges and pilots, listing with LP lock</li>
+          <li>Phase 3: Expanded categories, sponsor programs, integrations</li>
         </ul>
       </section>
 
       <section id="presale">
         <h3>Presale</h3>
-        <p>Tranches, pricing, wallet connect, and vesting as per Tokenomics.</p>
+        <p>Tranches, pricing, wallet connect, and vesting schedule as per Tokenomics.</p>
       </section>
 
       <section id="staking">
@@ -189,7 +262,7 @@
         <ul>
           <li>Mint authority: revoked</li>
           <li>Update authority: secured</li>
-          <li>LP lock proof and vesting calendar links (on listing)</li>
+          <li>LP lock proof and 36‑month vesting calendar links (on listing)</li>
         </ul>
       </section>
     </main>
@@ -197,7 +270,7 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // Robust section switcher without :has - mirrors hash into data-active on <main>
+      // Robust section switcher without :has — mirrors hash into data-active on <main>
       (function(){
         const main = document.getElementById('main');
         const valid = new Set(['overview','tokenomics','whitepaper','roadmap','presale','staking','sponsors','community','trust']);
@@ -206,7 +279,6 @@
           let h = (location.hash || '#overview').slice(1);
           if(!valid.has(h)) h = 'overview';
           main.setAttribute('data-active', h);
-          // Scroll target into view for clarity
           const el = document.getElementById(h);
           if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
         }
@@ -218,12 +290,13 @@
 
         window.addEventListener('hashchange', setActiveFromHash);
         window.addEventListener('DOMContentLoaded', setActiveFromHash);
+
+        // Smooth-scroll even on same-hash clicks
         document.addEventListener('click', function(e){
-          const a = e.target.closest('a[href^="#"]');
+          const a = e.target.closest('a[href^=\"#\"]');
           if(!a) return;
           const id = a.getAttribute('href').slice(1);
           if(valid.has(id)){
-            // prevent double-jump on same hash clicks
             if(location.hash.slice(1) === id){ setActiveFromHash(); }
           }
         });
