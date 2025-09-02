@@ -26,14 +26,10 @@
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
       footer{padding:24px;text-align:center;color:#9fb3d1}
 
-      /* Reveal-one-section logic
-         - Default: show only #overview
-         - When a hash matches a section, show only that section
-      */
+      /* Reveal-one-section logic: show only one section at a time */
       main section{display:none}
       main #overview{display:block}
       main section:target{display:block}
-      /* Hide all non-target siblings when a target is active */
       main:has(section:target) #overview{display:none}
       main:has(section:target) section:not(:target){display:none}
     </style>
@@ -61,42 +57,44 @@
     </header>
 
     <main id="main">
-      <!-- HOME (shows by default) -->
+      <!-- HOME (shows by default and when Home is clicked) -->
       <section class="hero" id="overview">
-        <h2 style="margin-bottom:10px">Build with creators. Ship with manufacturers.</h2>
-        <p style="margin-top:0">Mint address: <strong>[PASTE_MINT_ADDRESS]</strong></p>
+        <span style="display:inline-block;padding:4px 8px;border:1px solid #2a3550;border-radius:8px;color:#cfe3ff;margin-bottom:8px">Home</span>
+        <h2 style="margin:8px 0 6px">Build with creators. Ship with manufacturers.</h2>
+        <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
 
-        <!-- Three boxes row -->
-        <div class="grid" style="margin-top:14px">
+        <p style="margin:10px 0 0">Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
+
+        <div class="grid" style="margin-top:16px">
           <div class="card">
-            <strong>Explanation</strong>
+            <strong>About</strong>
             <p style="margin:8px 0 0">
-              TSPILL is a production‑link token that helps move creator concepts toward real‑world products with clear attribution and simple rewards.
+              TSPILL is a production‑link network that connects creators and vetted manufacturers to turn concepts into real products with clear attribution, straightforward royalties, and transparent economics—not a funding platform.
             </p>
           </div>
 
           <div class="card">
             <strong>Token function</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Access open calls and submit concepts</li>
-              <li>Incentivize useful participation</li>
-              <li>Fees/discounts for programs and partners</li>
-              <li>Community signals for what to fund next</li>
+              <li>Access: join open calls, submit concepts</li>
+              <li>Incentives: earn for useful participation</li>
+              <li>Program rails: simple fees/discounts for pilots and runs</li>
+              <li>Signals: community input on what to launch next</li>
             </ul>
           </div>
 
           <div class="card">
             <strong>Ecosystem benefits</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Creators: recognition and rewards</li>
-              <li>Manufacturers: qualified briefs, predictable runs</li>
-              <li>Sponsors: transparent spend, measurable results</li>
+              <li>Creators: recognition that lasts and rewards that continue</li>
+              <li>Manufacturers: qualified briefs and predictable runs</li>
+              <li>Sponsors: transparent spend with measurable outcomes</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <!-- OTHER SECTIONS (hidden until clicked) -->
+      <!-- OTHER SECTIONS -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
         <p>Final distribution: Presale 30%, Ecosystem & Community 35%, Team/Dev 12.5%, Treasury & Partnerships 12.5%, Liquidity 5%, Staking 5%.</p>
@@ -150,7 +148,7 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // If a stray hash is present that doesn't match any section, strip it so Home shows by default
+      // If a stray hash is present that doesn't match a section, strip it so Home shows by default
       (function() {
         if (location.hash && !document.querySelector(location.hash)) {
           history.replaceState(null, "", location.pathname + location.search);
