@@ -27,20 +27,17 @@
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
       footer{padding:24px;text-align:center;color:#9fb3d1}
 
-      /* One-section view without :has()
-         - Hide all sections
-         - Show the section whose id equals main[data-active]
-      */
+      /* One-section view using data-active (no :has dependency) */
       main section{display:none}
-      main[data-active="overview"] #overview{display:block}
+      main[data-active="overview"]   #overview{display:block}
       main[data-active="tokenomics"] #tokenomics{display:block}
       main[data-active="whitepaper"] #whitepaper{display:block}
-      main[data-active="roadmap"] #roadmap{display:block}
-      main[data-active="presale"] #presale{display:block}
-      main[data-active="staking"] #staking{display:block}
-      main[data-active="sponsors"] #sponsors{display:block}
-      main[data-active="community"] #community{display:block}
-      main[data-active="trust"] #trust{display:block}
+      main[data-active="roadmap"]    #roadmap{display:block}
+      main[data-active="presale"]    #presale{display:block}
+      main[data-active="staking"]    #staking{display:block}
+      main[data-active="sponsors"]   #sponsors{display:block}
+      main[data-active="community"]  #community{display:block}
+      main[data-active="trust"]      #trust{display:block}
     </style>
   </head>
   <body>
@@ -104,13 +101,55 @@
         </div>
       </section>
 
-      <!-- OTHER SECTIONS -->
+      <!-- TOKENOMICS -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
-        <p>Final distribution: Presale 30%, Ecosystem & Community 35%, Team/Dev 12.5%, Treasury & Partnerships 12.5%, Liquidity 5%, Staking 5%.</p>
-        <div id="chart" class="card">[Pie chart placeholder]</div>
+
+        <div class="card" style="margin:14px 0">
+          <strong>Supply</strong>
+          <p style="margin:8px 0 0">
+            Total supply: 1,000,000,000 TSPILL (9 decimals). Initial circulating supply at TGE: 35,000,000 (3.5%); all other allocations are locked on schedule. [ICS is what’s liquid at launch.] 
+          </p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Allocation</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale: 30% (300,000,000)</li>
+              <li>Ecosystem & Community: 35% (350,000,000)</li>
+              <li>Team/Dev: 12.5% (125,000,000)</li>
+              <li>Treasury & Partnerships: 12.5% (125,000,000)</li>
+              <li>Liquidity: 5% (50,000,000)</li>
+              <li>Staking/Rewards: 5% (50,000,000)</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Vesting & locks</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale: 10% TGE (30,000,000), 90% linear over 9 months</li>
+              <li>Team/Dev: 12‑month cliff, then 36‑month linear (0% TGE)</li>
+              <li>Ecosystem & Community: up to 2% TGE (20,000,000) for pilots; remainder linear over 36 months</li>
+              <li>Treasury & Partnerships: 6‑month cliff, then 24‑month linear; multisig approvals</li>
+              <li>Liquidity: 5% reserved for listing; LP tokens locked 12 months (proof on listing)</li>
+              <li>Staking/Rewards: emissions over 24 months with quarterly step‑downs</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Utility & transparency</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access to open calls; participation incentives; program fees/discounts; community signals</li>
+              <li>Mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</li>
+              <li>Authorities: Mint revoked; Update secured (publish explorer proofs)</li>
+              <li>Public unlock calendar (36 months) and LP lock link posted at listing</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
+      <!-- OTHER SECTIONS -->
       <section id="whitepaper">
         <h3>Whitepaper</h3>
         <p>Problem → Solution overview and links to full document.</p>
@@ -127,12 +166,12 @@
 
       <section id="presale">
         <h3>Presale</h3>
-        <p>Wallet connect and tranche details (coming soon).</p>
+        <p>Tranches, pricing, wallet connect, and vesting as per Tokenomics.</p>
       </section>
 
       <section id="staking">
         <h3>Staking</h3>
-        <p>Rewards schedule and APY policy (coming soon).</p>
+        <p>Emissions over 24 months with quarterly step‑downs.</p>
       </section>
 
       <section id="sponsors">
@@ -150,7 +189,7 @@
         <ul>
           <li>Mint authority: revoked</li>
           <li>Update authority: secured</li>
-          <li>LP lock proofs and vesting calendar</li>
+          <li>LP lock proof and vesting calendar links (on listing)</li>
         </ul>
       </section>
     </main>
@@ -158,16 +197,37 @@
     <footer>© TSPILL</footer>
 
     <script>
-      // Normalize hash -> set data-active to the matching id (fallback when :has is unavailable)
-      function setActiveFromHash(){
-        var h = location.hash.replace('#','') || 'overview';
-        // Only allow known IDs to prevent empty states
-        var ids = ['overview','tokenomics','whitepaper','roadmap','presale','staking','sponsors','community','trust'];
-        if(!ids.includes(h)) h = 'overview';
-        document.getElementById('main').setAttribute('data-active', h);
-      }
-      window.addEventListener('hashchange', setActiveFromHash);
-      window.addEventListener('DOMContentLoaded', setActiveFromHash);
+      // Robust section switcher without :has - mirrors hash into data-active on <main>
+      (function(){
+        const main = document.getElementById('main');
+        const valid = new Set(['overview','tokenomics','whitepaper','roadmap','presale','staking','sponsors','community','trust']);
+
+        function setActiveFromHash(){
+          let h = (location.hash || '#overview').slice(1);
+          if(!valid.has(h)) h = 'overview';
+          main.setAttribute('data-active', h);
+          // Scroll target into view for clarity
+          const el = document.getElementById(h);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+
+        // Normalize bad hashes at load
+        if(location.hash && !document.querySelector(location.hash)){
+          history.replaceState(null, "", location.pathname + location.search + '#overview');
+        }
+
+        window.addEventListener('hashchange', setActiveFromHash);
+        window.addEventListener('DOMContentLoaded', setActiveFromHash);
+        document.addEventListener('click', function(e){
+          const a = e.target.closest('a[href^="#"]');
+          if(!a) return;
+          const id = a.getAttribute('href').slice(1);
+          if(valid.has(id)){
+            // prevent double-jump on same hash clicks
+            if(location.hash.slice(1) === id){ setActiveFromHash(); }
+          }
+        });
+      })();
     </script>
   </body>
 </html>
