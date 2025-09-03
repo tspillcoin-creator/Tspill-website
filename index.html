@@ -1,257 +1,413 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TSPILL — Presale</title>
-  <meta name="description" content="TSPILL presale on Solana — SOL settled at USDT value with on-chain claims at TGE." />
-  <style>
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#e8f0ff}
-    header{padding:20px;text-align:center}
-    .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-    .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none;cursor:pointer;background:#0e1420}
-    main{max-width:1000px;margin:24px auto;padding:0 20px}
-    h2,h3{margin:8px 0 10px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:16px 0}
-    .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    input[type="number"],input[type="text"]{width:100%;padding:10px;border-radius:10px;border:1px solid #1c2538;background:#0b1220;color:#e8f0ff}
-    label{font-size:.95rem;color:#cfe3ff}
-    .muted{color:#9fb3d1;font-size:.95rem}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-    .ok{color:#8ee5a1}
-    .warn{color:#ffd57a}
-    .err{color:#ffa7a7}
-  </style>
-</head>
-<body>
-  <header>
-    <h1>TSPILL Presale</h1>
-    <p class="muted">Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.</p>
-    <div class="row" style="justify-content:center">
-      <button id="connectBtn" class="btn">Connect Phantom</button>
-      <span id="walletBadge" class="muted"></span>
-    </div>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TSPILL</title>
+    <meta name="description" content="TSPILL — The currency for creators, innovators, and designers." />
+    <style>
+      html{scroll-behavior:smooth} /* smooth in-page scrolling */ /* [Ref] */
+      body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#e8f0ff}
 
-  <main>
-    <section class="card">
-      <h3>Presale checkout</h3>
-      <div class="grid">
-        <div class="card">
-          <strong>Enter amount (USDT)</strong>
-          <div class="row" style="margin-top:8px">
-            <input id="usdtInput" type="number" step="0.01" min="5" placeholder="e.g., 50" />
-            <button class="btn" data-q="50">50</button>
-            <button class="btn" data-q="100">100</button>
-            <button class="btn" data-q="250">250</button>
-            <button class="btn" data-q="1000">1000</button>
+      .skip{position:absolute;left:-9999px;top:auto}
+      .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
+
+      header{position:sticky;top:0;background:#0b0f14;padding:16px 20px 10px;text-align:center;z-index:10;border-bottom:1px solid #121a2a}
+      .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+      .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none;background:#0e1420;cursor:pointer}
+
+      .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
+      main section{max-width:1000px;margin:40px auto;padding:0 20px}
+      h2{margin:8px 0 6px}
+      h3{margin:0 0 12px}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:20px 0}
+      .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
+      footer{padding:24px;text-align:center;color:#9fb3d1}
+
+      /* Section visibility via data-active */
+      main section{display:none}
+      main[data-active="overview"]   #overview{display:block}
+      main[data-active="tokenomics"] #tokenomics{display:block}
+      main[data-active="whitepaper"] #whitepaper{display:block}
+      main[data-active="roadmap"]    #roadmap{display:block}
+      main[data-active="presale"]    #presale{display:block}
+      main[data-active="staking"]    #staking{display:block}
+      main[data-active="sponsors"]   #sponsors{display:block}
+      main[data-active="community"]  #community{display:block}
+      main[data-active="trust"]      #trust{display:block}
+
+      /* Presale form elements */
+      .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+      input[type="number"],input[type="text"]{width:100%;padding:10px;border-radius:10px;border:1px solid #1c2538;background:#0b1220;color:#e8f0ff}
+      label{font-size:.95rem;color:#cfe3ff}
+      .muted{color:#9fb3d1;font-size:.95rem}
+      .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+      .ok{color:#8ee5a1}
+      .warn{color:#ffd57a}
+      .err{color:#ffa7a7}
+    </style>
+  </head>
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <header id="top">
+      <img src="./Tea_spill_logo.png" alt="TSPILL logo" width="72" height="72" style="display:block;margin:6px auto 4px" />
+      <h1 style="margin:6px 0 6px;text-align:center">TSPILL</h1>
+      <nav class="nav" aria-label="Primary">
+        <a class="btn" href="#overview">Home</a>
+        <a class="btn" href="#tokenomics">Tokenomics</a>
+        <a class="btn" href="#whitepaper">Whitepaper</a>
+        <a class="btn" href="#roadmap">Roadmap</a>
+        <a class="btn" href="#presale">Presale</a>
+        <a class="btn" href="#community">Community</a>
+        <a class="btn" href="#trust">Trust</a>
+      </nav>
+      <div class="row" style="justify-content:center;margin-top:6px">
+        <button id="connectBtn" class="btn">Connect Phantom</button>
+        <span id="walletBadge" class="muted"></span>
+      </div>
+    </header>
+
+    <main id="main" data-active="overview">
+      <!-- HOME -->
+      <section class="hero" id="overview">
+        <h2>Build with creators. Ship with manufacturers.</h2>
+        <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
+        <p style="margin:10px 0 0">Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
+
+        <div class="grid" style="margin-top:16px">
+          <div class="card">
+            <strong>About</strong>
+            <p style="margin:8px 0 0">
+              TSPILL links creators and vetted manufacturers to turn concepts into real products with attribution, fair rewards, and transparent economics.
+            </p>
           </div>
-          <p class="muted" style="margin:8px 0 0">Min 5 • Max 1000 (USDT value)</p>
+          <div class="card">
+            <strong>Token function</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access programs and open calls</li>
+              <li>Participation incentives</li>
+              <li>Program rails (fees/discounts)</li>
+              <li>Signals for launches</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Ecosystem benefits</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Creators: lasting recognition and rewards</li>
+              <li>Manufacturers: qualified briefs and predictable runs</li>
+              <li>Sponsors: measurable outcomes</li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
-          <div style="margin-top:12px">
-            <label for="solOut">Estimated SOL to send</label>
-            <input id="solOut" type="text" readonly />
-            <p class="muted" id="quoteNote">Quote pending…</p>
+      <!-- TOKENOMICS -->
+      <section id="tokenomics">
+        <h3>Tokenomics</h3>
+        <div class="grid">
+          <div class="card">
+            <strong>Supply</strong>
+            <p style="margin:8px 0 0">
+              Total supply: 1,000,000,000 TSPILL (9 decimals). Presale allocation: 30% (300,000,000).
+            </p>
+          </div>
+          <div class="card">
+            <strong>Vesting & locks</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale: 10% TGE, 90% linear over 9 months</li>
+              <li>Ecosystem: programmatic releases</li>
+              <li>Treasury: multisig approvals</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Utility & transparency</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access, incentives, program rails, signals</li>
+              <li>Public unlock calendar</li>
+              <li>Mint revoked; update secured</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- WHITEPAPER -->
+      <section id="whitepaper">
+        <h3>Whitepaper</h3>
+        <p>
+          <a class="btn" href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View Whitepaper (PDF)</a>
+          <a class="btn" href="./TSPILL_Whitepaper.pdf" download="TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">Download PDF</a>
+        </p>
+      </section>
+
+      <!-- ROADMAP -->
+      <section id="roadmap">
+        <h3>Roadmap</h3>
+        <div class="grid">
+          <div class="card">
+            <strong>Presale‑01</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Site live; presale treasury open</li>
+              <li>Public ledger updates</li>
+              <li>Vesting claim plan published pre‑TGE</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Programs</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Open calls and prototype support</li>
+              <li>Pilot runs with vetted partners</li>
+              <li>Receipts for distributions</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Scale</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Recurring challenges</li>
+              <li>Dashboards and emissions reviews</li>
+              <li>Tooling integrations</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRESALE -->
+      <section id="presale">
+        <h3>Presale</h3>
+        <p class="muted">Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.</p>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Checkout</strong>
+            <div class="row" style="margin-top:8px">
+              <input id="usdtInput" type="number" step="0.01" min="5" placeholder="USDT value (e.g., 50)" />
+              <button class="btn" data-q="50">50</button>
+              <button class="btn" data-q="100">100</button>
+              <button class="btn" data-q="250">250</button>
+              <button class="btn" data-q="1000">1000</button>
+            </div>
+            <p class="muted" style="margin:8px 0 0">Min 5 • Max 1000 (USDT value)</p>
+
+            <div style="margin-top:12px">
+              <label for="solOut">Estimated SOL to send</label>
+              <input id="solOut" type="text" readonly />
+              <p class="muted" id="quoteNote">Quote pending…</p>
+            </div>
+
+            <div style="margin-top:12px">
+              <label for="tspillOut">You receive (TSPILL)</label>
+              <input id="tspillOut" type="text" readonly />
+              <p class="muted">Price: 0.001 USDT per TSPILL</p>
+            </div>
+
+            <div style="margin-top:12px">
+              <button id="sendBtn" class="btn">Send SOL to Presale</button>
+              <p id="sendHint" class="muted">Phantom will open to review and sign the SOL transfer.</p>
+              <p id="txStatus" class="muted"></p>
+            </div>
           </div>
 
-          <div style="margin-top:12px">
-            <label for="tspillOut">You receive (TSPILL)</label>
-            <input id="tspillOut" type="text" readonly />
-            <p class="muted">Price: 0.001 USDT per TSPILL</p>
-          </div>
-
-          <div style="margin-top:12px">
-            <button id="sendBtn" class="btn">Send SOL to Presale</button>
-            <p id="sendHint" class="muted">Phantom will open to review and sign a SOL transfer.</p>
-            <p id="txStatus" class="muted"></p>
+          <div class="card">
+            <strong>Key parameters</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Allocation: 30% (300,000,000 TSPILL)</li>
+              <li>Token price: 0.001 USDT per TSPILL</li>
+              <li>Accepted currency: SOL (quoted at settlement)</li>
+              <li>Per‑wallet cap: up to 1,000 USDT equivalent</li>
+              <li>Soft/Hard caps: 50,000 / 300,000 USDT</li>
+              <li>Window: 21 days (optional 7‑day extension)</li>
+            </ul>
+            <div style="margin-top:12px">
+              <strong>Wallets & mint</strong>
+              <p class="mono" style="margin:8px 0 0">Presale treasury (SOL): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
+              <p class="mono" style="margin:6px 0 0">Admin (dev): BsBpUykVhosqpkQpwVbnoMLyFWT3RxFxiXgpG8kQWY8P</p>
+              <p class="mono" style="margin:6px 0 0">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p>
+            </div>
+            <p class="muted" style="margin-top:10px">
+              Use Phantom. Do not send from exchange addresses. Quotes are live and valid briefly.
+            </p>
           </div>
         </div>
 
         <div class="card">
-          <strong>Details</strong>
-          <ul style="margin:8px 0 0 18px">
-            <li>Presale allocation: 30% (300,000,000 TSPILL)</li>
-            <li>Soft cap: 50,000 USDT • Hard cap: 300,000 USDT</li>
-            <li>Per‑wallet: up to 1,000 USDT equivalent in SOL</li>
-            <li>Distribution: 10% at TGE, 90% linear over 9 months</li>
-          </ul>
-          <div style="margin-top:12px">
-            <strong>Wallets & mints</strong>
-            <p class="mono" style="margin:8px 0 0">Presale treasury (SOL): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
-            <p class="mono" style="margin:6px 0 0">Admin (dev): BsBpUykVhosqpkQpwVbnoMLyFWT3RxFxiXgpG8kQWY8P</p>
-            <p class="mono" style="margin:6px 0 0">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p>
-          </div>
-          <p class="muted" style="margin-top:10px">
-            Use Phantom. Do not send from exchange addresses. Quotes are based on a live SOL/USDT feed and valid for a short window.
+          <strong>Positive roll‑forward</strong>
+          <p style="margin:8px 0 0">
+            If the soft cap is not reached by the end date, all confirmed allocations automatically roll into Presale‑02 at the same price and vesting terms; no action is required.
           </p>
         </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <h3>Transparency</h3>
-      <ul style="margin:8px 0 0 18px">
-        <li>Public read‑only ledger will display total raised (USDT value) and allocations.</li>
-        <li>Before TGE, vesting claim parameters will be published for deterministic claims.</li>
-        <li>No third‑party custody; funds held in the presale treasury wallet.</li>
-      </ul>
-    </section>
-  </main>
+        <div class="card">
+          <strong>Transparency</strong>
+          <ul style="margin:8px 0 0 18px">
+            <li>Public read‑only ledger shows total raised (USDT value), allocations, and remaining capacity.</li>
+            <li>Before TGE, vesting claim parameters (Merkle root/stream settings) will be published for deterministic claims.</li>
+            <li>No third‑party custody; funds held in the presale treasury wallet.</li>
+          </ul>
+        </div>
+      </section>
 
-  <!-- Minimal dependencies via CDN -->
-  <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" integrity="" crossorigin="anonymous"></script>
+      <!-- COMMUNITY -->
+      <section id="community">
+        <h3>Community</h3>
+        <p>Follow along on X, Discord, and GitHub for program updates and presale ledger links.</p>
+      </section>
 
-  <script>
-  ;(function(){
-    const treasury = new solanaWeb3.PublicKey("DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK");
-    const PRICE_USDT_PER_TSPILL = 0.001;
-    const MIN_USDT = 5;
-    const MAX_USDT = 1000;
+      <!-- TRUST -->
+      <section id="trust">
+        <h3>Trust</h3>
+        <ul>
+          <li>Mint authority: revoked • Update authority: secured</li>
+          <li>Presale: SOL‑settled at USDT value with on‑chain claims at TGE</li>
+          <li>Public ledger and program references published before TGE</li>
+        </ul>
+      </section>
+    </main>
 
-    const connectBtn = document.getElementById('connectBtn');
-    const walletBadge = document.getElementById('walletBadge');
-    const usdtInput = document.getElementById('usdtInput');
-    const solOut = document.getElementById('solOut');
-    const tspillOut = document.getElementById('tspillOut');
-    const quoteNote = document.getElementById('quoteNote');
-    const sendBtn = document.getElementById('sendBtn');
-    const txStatus = document.getElementById('txStatus');
+    <footer>© TSPILL</footer>
 
-    const quickBtns = document.querySelectorAll('button[data-q]');
+    <!-- Solana web3.js via CDN -->
+    <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" crossorigin="anonymous"></script>
 
-    let provider = null;      // Phantom provider
-    let connection = null;    // RPC connection
-    let quote = { solPerUsdt: 0, ts: 0 }; // latest quote
+    <script>
+      // Hash routing to show one section and keep smooth scroll
+      (function(){
+        const main = document.getElementById('main');
+        const valid = new Set(['overview','tokenomics','whitepaper','roadmap','presale','community','trust']);
+        function setActiveFromHash(){
+          let h = (location.hash || '#overview').slice(1);
+          if(!valid.has(h)) h = 'overview';
+          main.setAttribute('data-active', h);
+          const el = document.getElementById(h);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+        if(location.hash && !document.querySelector(location.hash)){
+          history.replaceState(null, "", location.pathname + location.search + '#overview');
+        }
+        window.addEventListener('hashchange', setActiveFromHash);
+        window.addEventListener('DOMContentLoaded', setActiveFromHash);
+        document.addEventListener('click', function(e){
+          const a = e.target.closest('a[href^="#"]');
+          if(!a) return;
+          const id = a.getAttribute('href').slice(1);
+          if(valid.has(id)){
+            if(location.hash.slice(1) === id){ setActiveFromHash(); }
+          }
+        });
+      })();
+    </script>
 
-    // Use mainnet public RPC; replace with your own if rate-limited
-    const RPC = "https://api.mainnet-beta.solana.com";
+    <script>
+      // Presale: Phantom connect, quote, send SOL transfer to treasury
+      (function(){
+        const RPC = "https://api.mainnet-beta.solana.com";
+        const connection = new solanaWeb3.Connection(RPC, 'confirmed');
 
-    // Basic Phantom detection
-    function getProvider() {
-      if ('solana' in window) {
-        const any = window.solana;
-        if (any && any.isPhantom) return any;
-      }
-      return null;
-    }
+        const treasury = new solanaWeb3.PublicKey("DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK");
+        const PRICE_USDT_PER_TSPILL = 0.001;
+        const MIN_USDT = 5;
+        const MAX_USDT = 1000;
 
-    async function connect() {
-      provider = getProvider();
-      if (!provider) {
-        walletBadge.textContent = "Phantom not found — install the wallet.";
-        return;
-      }
-      try {
-        const resp = await provider.connect();
-        walletBadge.textContent = "Connected: " + resp.publicKey.toBase58().slice(0,4) + "…" + resp.publicKey.toBase58().slice(-4);
-        connection = new solanaWeb3.Connection(RPC, 'confirmed');
-      } catch (e) {
-        walletBadge.textContent = "Connect cancelled.";
-      }
-    }
+        const connectBtn = document.getElementById('connectBtn');
+        const walletBadge = document.getElementById('walletBadge');
+        const usdtInput = document.getElementById('usdtInput');
+        const solOut = document.getElementById('solOut');
+        const tspillOut = document.getElementById('tspillOut');
+        const quoteNote = document.getElementById('quoteNote');
+        const sendBtn = document.getElementById('sendBtn');
+        const txStatus = document.getElementById('txStatus');
+        const quickBtns = document.querySelectorAll('button[data-q]');
 
-    connectBtn.addEventListener('click', connect);
+        let provider = null;
+        let quote = { solPerUsdt: 0, ts: 0 };
 
-    // Quick amount buttons
-    quickBtns.forEach(b=>{
-      b.addEventListener('click', ()=>{
-        usdtInput.value = b.getAttribute('data-q');
-        recalc();
-      });
-    });
+        function getProvider() {
+          if ('solana' in window) {
+            const any = window.solana;
+            if (any && any.isPhantom) return any;
+          }
+          return null;
+        }
 
-    // Fetch a SOL/USDT price. For production, integrate a robust feed (e.g., Pyth price service endpoint).
-    async function fetchQuote() {
-      try {
-        // Simple fallback quote via a public API (example). Replace with Pyth/your oracle backend in production.
-        const r = await fetch("https://price.jup.ag/v6/price?ids=SOL");
-        const j = await r.json();
-        const solUsd = j.data.SOL.price; // USD per SOL
-        // Assume USDT ~ 1 USD
-        quote.solPerUsdt = 1 / solUsd;
-        quote.ts = Date.now();
-        quoteNote.textContent = "Quote: 1 USDT ≈ " + (quote.solPerUsdt).toFixed(9) + " SOL • updated just now";
-      } catch (e) {
-        quoteNote.textContent = "Quote unavailable. Retry.";
-      }
-    }
+        async function connect() {
+          provider = getProvider();
+          if (!provider) { walletBadge.textContent = "Phantom not found — install the wallet."; return; }
+          try {
+            const resp = await provider.connect();
+            walletBadge.textContent = "Connected: " + resp.publicKey.toBase58().slice(0,4) + "…" + resp.publicKey.toBase58().slice(-4);
+          } catch (e) {
+            walletBadge.textContent = "Connect cancelled.";
+          }
+        }
+        connectBtn.addEventListener('click', connect);
 
-    async function recalc() {
-      const usdt = parseFloat(usdtInput.value || "0");
-      if (!isFinite(usdt) || usdt <= 0) {
-        solOut.value = "";
-        tspillOut.value = "";
-        return;
-      }
-      if (!quote.ts || Date.now() - quote.ts > 30_000) {
-        await fetchQuote();
-      }
-      const solAmt = usdt * quote.solPerUsdt;
-      solOut.value = solAmt.toFixed(6) + " SOL";
-      const tspill = usdt / PRICE_USDT_PER_TSPILL;
-      tspillOut.value = Math.floor(tspill).toLocaleString() + " TSPILL";
-      if (usdt < MIN_USDT || usdt > MAX_USDT) {
-        quoteNote.textContent = "Amount must be between " + MIN_USDT + " and " + MAX_USDT + " USDT (equivalent).";
-      }
-    }
+        quickBtns.forEach(b=>{
+          b.addEventListener('click', ()=>{ usdtInput.value = b.getAttribute('data-q'); recalc(); });
+        });
 
-    usdtInput.addEventListener('input', recalc);
+        async function fetchQuote() {
+          try {
+            const r = await fetch("https://price.jup.ag/v6/price?ids=SOL");
+            const j = await r.json();
+            const solUsd = j.data.SOL.price;
+            quote.solPerUsdt = 1 / solUsd; // 1 USDT ≈ 1 USD
+            quote.ts = Date.now();
+            quoteNote.textContent = "Quote: 1 USDT ≈ " + (quote.solPerUsdt).toFixed(9) + " SOL • updated just now";
+          } catch (e) {
+            quoteNote.textContent = "Quote unavailable. Retry.";
+          }
+        }
 
-    // Build and send SOL transfer
-    async function sendSol() {
-      txStatus.textContent = "";
-      const usdt = parseFloat(usdtInput.value || "0");
-      if (!provider) { await connect(); if(!provider) return; }
-      if (!connection) connection = new solanaWeb3.Connection(RPC, 'confirmed');
+        async function recalc() {
+          const usdt = parseFloat(usdtInput.value || "0");
+          if (!isFinite(usdt) || usdt <= 0) { solOut.value = ""; tspillOut.value = ""; return; }
+          if (!quote.ts || Date.now() - quote.ts > 30_000) await fetchQuote();
+          const solAmt = usdt * quote.solPerUsdt;
+          solOut.value = solAmt.toFixed(6) + " SOL";
+          const tspill = usdt / PRICE_USDT_PER_TSPILL;
+          tspillOut.value = Math.floor(tspill).toLocaleString() + " TSPILL";
+          if (usdt < MIN_USDT || usdt > MAX_USDT) quoteNote.textContent = "Amount must be between " + MIN_USDT + " and " + MAX_USDT + " USDT (equivalent).";
+        }
+        usdtInput.addEventListener('input', recalc);
+        fetchQuote();
 
-      if (!isFinite(usdt) || usdt < MIN_USDT || usdt > MAX_USDT) {
-        txStatus.innerHTML = "<span class='warn'>Enter an amount between " + MIN_USDT + " and " + MAX_USDT + " USDT.</span>";
-        return;
-      }
-      if (!quote.ts || Date.now() - quote.ts > 30_000) {
-        await fetchQuote();
-      }
-      if (!quote.solPerUsdt) {
-        txStatus.innerHTML = "<span class='err'>Quote unavailable. Try again.</span>";
-        return;
-      }
-      const solAmount = usdt * quote.solPerUsdt;
-      const lamports = Math.round(solAmount * solanaWeb3.LAMPORTS_PER_SOL);
+        async function sendSol() {
+          txStatus.textContent = "";
+          const usdt = parseFloat(usdtInput.value || "0");
+          if (!provider) { await connect(); if(!provider) return; }
+          if (!isFinite(usdt) || usdt < MIN_USDT || usdt > MAX_USDT) {
+            txStatus.innerHTML = "<span class='warn'>Enter an amount between " + MIN_USDT + " and " + MAX_USDT + " USDT.</span>";
+            return;
+          }
+          if (!quote.ts || Date.now() - quote.ts > 30_000) await fetchQuote();
+          if (!quote.solPerUsdt) { txStatus.innerHTML = "<span class='err'>Quote unavailable. Try again.</span>"; return; }
 
-      try {
-        const fromPubkey = provider.publicKey;
-        const tx = new solanaWeb3.Transaction().add(
-          solanaWeb3.SystemProgram.transfer({
-            fromPubkey,
-            toPubkey: treasury,
-            lamports
-          })
-        );
-        tx.feePayer = fromPubkey;
-        const { blockhash } = await connection.getLatestBlockhash();
-        tx.recentBlockhash = blockhash;
+          const solAmount = usdt * quote.solPerUsdt;
+          const lamports = Math.round(solAmount * solanaWeb3.LAMPORTS_PER_SOL);
 
-        const signed = await provider.signTransaction(tx);
-        const sig = await connection.sendRawTransaction(signed.serialize(), { skipPreflight:false });
-        await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight: (await connection.getLatestBlockhash()).lastValidBlockHeight }, 'confirmed');
+          try {
+            const fromPubkey = provider.publicKey;
+            const tx = new solanaWeb3.Transaction().add(
+              solanaWeb3.SystemProgram.transfer({ fromPubkey, toPubkey: treasury, lamports })
+            );
+            tx.feePayer = fromPubkey;
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+            tx.recentBlockhash = blockhash;
 
-        const tspill = Math.floor(usdt / PRICE_USDT_PER_TSPILL);
-        txStatus.innerHTML = "<span class='ok'>Sent.</span> Tx: <span class='mono'>" + sig + "</span><br/>" +
-          "Record for ledger — Wallet: <span class='mono'>" + fromPubkey.toBase58() + "</span> • USDT value: " + usdt.toFixed(2) +
-          " • SOL: " + (lamports/solanaWeb3.LAMPORTS_PER_SOL).toFixed(6) +
-          " • TSPILL: " + tspill.toLocaleString() + ".";
+            const signed = await provider.signTransaction(tx);
+            const sig = await connection.sendRawTransaction(signed.serialize(), { skipPreflight:false });
+            await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, 'confirmed');
 
-      } catch (e) {
-        txStatus.innerHTML = "<span class='err'>Transaction failed or cancelled.</span>";
-      }
-    }
-
-    sendBtn.addEventListener('click', sendSol);
-
-    // Initial quote
-    fetchQuote();
-  })();
-  </script>
-</body>
+            const tspill = Math.floor(usdt / PRICE_USDT_PER_TSPILL);
+            txStatus.innerHTML = "<span class='ok'>Sent.</span> Tx: <span class='mono'>" + sig + "</span><br/>" +
+              "Record — Wallet: <span class='mono'>" + fromPubkey.toBase58() + "</span> • USDT value: " + usdt.toFixed(2) +
+              " • SOL: " + (lamports/solanaWeb3.LAMPORTS_PER_SOL).toFixed(6) +
+              " • TSPILL: " + tspill.toLocaleString() + ".";
+          } catch (e) {
+            txStatus.innerHTML = "<span class='err'>Transaction failed or cancelled.</span>";
+          }
+        }
+        document.getElementById('sendBtn').addEventListener('click', sendSol);
+      })();
+    </script>
+  </body>
 </html>
