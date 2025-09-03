@@ -9,16 +9,31 @@
       html{scroll-behavior:smooth}
       body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#e8f0ff}
 
+      /* Brand colors */
+      :root{
+        --brand-btn:#8c5a24;          /* warm brown */
+        --brand-btn-hover:#a46829;    /* hover */
+        --btn-text:#ffffff;           /* readable text */
+      }
+
       /* Accessibility */
       .skip{position:absolute;left:-9999px;top:auto}
       .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
 
       /* Header + nav */
-      header{position:sticky;top:0;background:#0b0f14;padding:20px 20px 10px;text-align:center;z-index:10}
+      header{position:sticky;top:0;background:#0b0f14;padding:20px 20px 10px;text-align:center;z-index:10;border-bottom:1px solid #121a2a}
       .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
       .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none}
 
-      /* Sections + cards */
+      /* Global fixed connect (top-right) */
+      .connect-fixed{
+        position:fixed; top:10px; right:10px; z-index:20; /* pinned */ /* [Ref] */
+        background:var(--brand-btn); color:var(--btn-text); border:0; border-radius:10px;
+        padding:8px 12px; cursor:pointer; box-shadow:0 0 0 1px #2a3550 inset;
+      }
+      .connect-fixed:hover{ background:var(--brand-btn-hover); }
+
+      /* Hero + sections */
       .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
       h2{margin:8px 0 6px}
@@ -46,10 +61,20 @@
       main[data-active="sponsors"]   #sponsors{display:block}
       main[data-active="community"]  #community{display:block}
       main[data-active="trust"]      #trust{display:block}
+
+      /* Inline Connect Phantom (kept for Presale page; fixed color) */
+      .btn-connect{
+        background:var(--brand-btn); color:var(--btn-text); border:0; border-radius:10px;
+        padding:8px 12px; cursor:pointer; margin-top:6px;
+      }
+      .btn-connect:hover{ background:var(--brand-btn-hover); }
     </style>
   </head>
   <body>
     <a href="#main" class="skip">Skip to content</a>
+
+    <!-- Top-right connect available on all sections -->
+    <button id="connectBtnFixed" class="connect-fixed">Connect Phantom</button>
 
     <header id="top">
       <img src="./Tea_spill_logo.png" alt="TSPILL logo" width="88" height="88" style="display:block;margin:8px auto 6px" />
@@ -69,7 +94,8 @@
         <a class="btn" href="#trust">Trust</a>
       </nav>
       <div class="row" style="justify-content:center;margin-top:6px">
-        <button id="connectBtn" class="btn">Connect Phantom</button>
+        <!-- Inline connect retained, now readable -->
+        <button id="connectBtn" class="btn-connect">Connect Phantom</button>
         <span id="walletBadge" class="muted"></span>
       </div>
     </header>
@@ -114,7 +140,6 @@
       <section id="tokenomics">
         <h3>Tokenomics</h3>
 
-        <!-- Mint placed above boxes to avoid overflow -->
         <div class="card" style="margin:14px 0">
           <strong>Mint</strong>
           <p style="margin:8px 0 0;word-break:break-all">
@@ -181,130 +206,64 @@
               TSPILL connects creators and vetted manufacturers to turn concepts into real products with clear attribution, straightforward royalties, and transparent economics; the token powers access, incentives, and program rails for challenges, pilots, and runs.
             </p>
           </div>
-
           <div class="card">
             <strong>Problem</strong>
             <p style="margin:8px 0 0">
-              Creators face opaque factory access and limited share in downstream value; manufacturers need qualified briefs, predictable runs, and brand‑safe demand. Existing platforms don’t link production with attribution and ongoing rewards.
+              Creators face opaque factory access and limited share in downstream value; manufacturers need qualified briefs, predictable runs, and brand‑safe demand.
             </p>
           </div>
-
           <div class="card">
             <strong>Solution</strong>
             <p style="margin:8px 0 0">
-              Standardized briefs and open challenges select viable concepts; winners advance to vetted manufacturing with transparent timelines and costs; attribution and simple reward rules are defined upfront and published.
+              Standardized briefs and open challenges select viable concepts; winners advance to vetted manufacturing with transparent timelines and costs.
             </p>
           </div>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <strong>How it works</strong>
-            <ul style="margin:8px 0 0 18px">
-              <li>Challenges: briefs, submissions, shortlists</li>
-              <li>Production: vetted factories with clear specs and lead times</li>
-              <li>Launch: products ship; attribution and reward rules apply</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <strong>Token utility</strong>
-            <ul style="margin:8px 0 0 18px">
-              <li>Access programs and tools</li>
-              <li>Participation incentives for measurable progress</li>
-              <li>Program fees/discounts for pilots and runs</li>
-              <li>Signals for what to launch next</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <strong>Trust & controls</strong>
-            <ul style="margin:8px 0 0 18px">
-              <li>Mint revoked; update secured</li>
-              <li>36‑month unlock calendar; LP lock proof at listing</li>
-              <li>Treasury under multisig with posted approvals</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <strong>Risks & disclosures</strong>
-          <p style="margin:8px 0 0">
-            Market, execution, and regulatory risks may affect timelines and availability; materials are provided for information purposes and will be updated as programs evolve.
-          </p>
         </div>
       </section>
 
       <!-- ROADMAP -->
       <section id="roadmap">
         <h3>Roadmap</h3>
-
         <div class="grid">
           <div class="card">
             <strong>Phase 1: Presale setup</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Site live: Home, Tokenomics, Whitepaper, Trust; mint and authorities published; PDF whitepaper downloadable</li>
-              <li>Manufacturer onboarding: shortlist vetted partners, capture MOQs/lead times; publish categories for first challenges</li>
-              <li>Presale execution: tranche info, wallet connect, presale terms; publish 36‑month unlock calendar</li>
+              <li>Site live; mint and authorities published; PDF whitepaper downloadable</li>
+              <li>Manufacturer onboarding; first categories</li>
+              <li>Presale execution; unlock calendar posted</li>
             </ul>
           </div>
-
           <div class="card">
             <strong>Phase 2: First programs</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Open calls in 2–3 categories with standardized briefs and submission windows</li>
-              <li>Selection and prototypes: shortlist entries; produce finalist prototypes with vetted manufacturers; publish timelines and reward rules</li>
-              <li>Post‑launch program support for selected categories</li>
+              <li>Open calls; prototype finalists with vetted partners</li>
+              <li>Timelines and reward rules published</li>
+              <li>Program support for selected categories</li>
             </ul>
           </div>
-
           <div class="card">
             <strong>Phase 3: Production link</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Pilot runs: convert winning prototypes into limited runs with transparent MOQs, costs, delivery windows</li>
-              <li>Reward execution: apply participation rewards; post receipt‑style proof of distributions</li>
-              <li>Ecosystem growth: sponsor programs, discounts, category expansion via community signals</li>
+              <li>Pilot runs with transparent MOQs and costs</li>
+              <li>Receipt‑style proof of distributions</li>
+              <li>Sponsor programs and discounts</li>
             </ul>
           </div>
-
           <div class="card">
             <strong>Phase 4: Scale and data</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Recurring challenges with throughput metrics (submissions, shortlist rate, pilot conversion, releases)</li>
-              <li>Public dashboards for program outcomes and unlocks; periodic emissions reviews</li>
-              <li>Integrations: marketplace listings; optional tools for briefs, BOMs, lead‑time tracking</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <strong>Quarter markers</strong>
-            <ul style="margin:8px 0 0 18px">
-              <li>Q1: Presale live; manufacturer shortlist; trust proofs; unlock calendar published</li>
-              <li>Q2: Open calls; prototypes underway</li>
-              <li>Q3: Pilot runs; sponsor programs; rewards receipts</li>
-              <li>Q4: Expanded categories; reporting dashboards; refinements from signals</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <strong>Principles</strong>
-            <ul style="margin:8px 0 0 18px">
-              <li>Production link, not funding: ship real products with attribution and simple, upfront rewards</li>
-              <li>Transparency by default: publish authorities, unlocks, and program outcomes with references</li>
-              <li>Measurable progress: prioritize milestones that move concepts toward manufacturing and delivery</li>
+              <li>Recurring challenges with throughput metrics</li>
+              <li>Public dashboards and emissions reviews</li>
+              <li>Integrations and tooling</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <!-- PRESALE (NEW, MATCHED STYLING) -->
+      <!-- PRESALE -->
       <section id="presale">
         <h3>Presale</h3>
-        <p style="margin:0 0 12px" class="muted">
-          Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.
-        </p>
+        <p class="muted">Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.</p>
 
         <div class="grid">
           <div class="card">
@@ -331,7 +290,7 @@
             </div>
 
             <div style="margin-top:12px">
-              <button id="sendBtn" class="btn">Send SOL to Presale</button>
+              <button id="sendBtn" class="btn-connect">Send SOL to Presale</button>
               <p id="sendHint" class="muted">Phantom opens to review and sign a SOL transfer to the treasury.</p>
               <p id="txStatus" class="muted"></p>
             </div>
@@ -347,7 +306,6 @@
               <li>Soft/Hard caps: 50,000 / 300,000 USDT</li>
               <li>Window: 21 days (optional 7‑day extension)</li>
             </ul>
-
             <div style="margin-top:12px">
               <strong>Wallets & mint</strong>
               <p class="mono" style="margin:8px 0 0">Presale treasury (SOL): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
@@ -376,7 +334,29 @@
       <!-- STAKING -->
       <section id="staking">
         <h3>Staking</h3>
-        <p>Emissions over 24 months with quarterly step‑downs.</p>
+        <div class="grid">
+          <div class="card">
+            <strong>Pools & APR</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Core pool (flexible): APR floats 8%–12% by utilization; rewards accrue continuously; claim any time or compound.</li>
+              <li>Booster pools (coming): 30/60/90 day locks with +2%/+4%/+6% boosts, applied pro‑rata over the lock; early exit forfeits current booster only.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Emissions schedule</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Budget: 50,000,000 TSPILL over 24 months with quarterly step‑downs.</li>
+              <li>Epoch cadence: 7‑day checkpoints; APR scales with total staked to keep rewards sustainable.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Compounding & exits</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Claim to wallet any time; one‑click compound to increase effective APY.</li>
+              <li>Flexible pool unbonding up to 72 hours to prevent in‑and‑out farming; booster early exit keeps principal and realized rewards.</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <!-- SPONSORS -->
@@ -388,7 +368,7 @@
       <!-- COMMUNITY -->
       <section id="community">
         <h3>Community</h3>
-        <p>Links to X, Discord, GitHub.</p>
+        <p>Links to X, Discord, and GitHub.</p>
       </section>
 
       <!-- TRUST -->
@@ -404,7 +384,7 @@
 
     <footer>© TSPILL</footer>
 
-    <!-- Router: keep all sections aligned with hash -->
+    <!-- Router -->
     <script>
       (function(){
         const main = document.getElementById('main');
@@ -446,6 +426,7 @@
         const MIN_USDT=5, MAX_USDT=1000;
 
         const connectBtn=document.getElementById('connectBtn');
+        const connectBtnFixed=document.getElementById('connectBtnFixed');
         const walletBadge=document.getElementById('walletBadge');
         const usdtInput=document.getElementById('usdtInput');
         const solOut=document.getElementById('solOut');
@@ -461,23 +442,27 @@
 
         function getProvider(){ if('solana' in window){ const p=window.solana; if(p && p.isPhantom) return p; } return null; }
 
-        async function connect(){
+        async function doConnect(){
           provider=getProvider();
-          if(!provider){ walletBadge.textContent="Phantom not found — install the wallet."; return; }
+          if(!provider){ if(walletBadge) walletBadge.textContent="Phantom not found — install the wallet."; return; }
           try{
             const r=await provider.connect();
-            walletBadge.textContent="Connected: "+r.publicKey.toBase58().slice(0,4)+"…"+r.publicKey.toBase58().slice(-4);
-          }catch(e){ walletBadge.textContent="Connect cancelled."; }
+            if(walletBadge) walletBadge.textContent="Connected: "+r.publicKey.toBase58().slice(0,4)+"…"+r.publicKey.toBase58().slice(-4);
+          }catch(e){
+            if(walletBadge) walletBadge.textContent="Connect cancelled.";
+          }
         }
-        connectBtn.addEventListener('click',connect);
-        quickBtns.forEach(b=>b.addEventListener('click',()=>{ usdtInput.value=b.getAttribute('data-q'); recalc(); }));
+        if(connectBtn) connectBtn.addEventListener('click', doConnect);
+        if(connectBtnFixed) connectBtnFixed.addEventListener('click', doConnect);
+
+        if(quickBtns) quickBtns.forEach(b=>b.addEventListener('click',()=>{ if(usdtInput){ usdtInput.value=b.getAttribute('data-q'); recalc(); } }));
 
         async function fetchFromJupiter(){
-          const r=await fetch("https://price.jup.ag/v6/price?ids=SOL"); /* Jupiter Price API v6 */ /* [Ref] */
+          const r=await fetch("https://price.jup.ag/v6/price?ids=SOL");
           const j=await r.json();
           if(!j?.data?.SOL?.price) throw new Error("No Jupiter price");
           const solUsd=j.data.SOL.price;
-          return 1/solUsd; // 1 USDT ≈ 1 USD
+          return 1/solUsd; // USDT≈USD
         }
         async function fetchFromCoingecko(){
           const r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
@@ -513,13 +498,13 @@
           }
           const tspill=usdt/PRICE_USDT_PER_TSPILL; if(tspillOut) tspillOut.value=Math.floor(tspill).toLocaleString()+" TSPILL";
         }
-        if(usdtInput) usdtInput.addEventListener('input',recalc);
+        if(usdtInput) usdtInput.addEventListener('input', recalc);
         fetchQuote();
 
         async function sendSol(){
           if(txStatus) txStatus.textContent="";
           const usdt=parseFloat(usdtInput?.value||"0");
-          if(!provider){ await connect(); if(!provider) return; }
+          if(!provider){ await doConnect(); if(!provider) return; }
           if(!isFinite(usdt) || usdt<MIN_USDT || usdt>MAX_USDT){
             if(txStatus) txStatus.innerHTML="<span class='warn'>Enter between "+MIN_USDT+" and "+MAX_USDT+" USDT (equivalent).</span>";
             return;
@@ -552,7 +537,7 @@
             if(txStatus) txStatus.innerHTML="<span class='err'>Transaction failed or cancelled.</span>";
           }
         }
-        if(sendBtn) sendBtn.addEventListener('click',sendSol);
+        if(sendBtn) sendBtn.addEventListener('click', sendSol);
       })();
     </script>
   </body>
