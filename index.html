@@ -4,42 +4,67 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TSPILL</title>
-    <meta name="description" content="TSPILL — Presale on Solana. SOL settled at USDT value with on-chain claims at TGE." />
+    <meta name="description" content="TSPILL — The currency for creators, innovators, and designers." />
     <style>
       html{scroll-behavior:smooth}
       body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b0f14;color:#e8f0ff}
-      header{position:sticky;top:0;background:#0b0f14;padding:16px 20px 10px;text-align:center;z-index:10;border-bottom:1px solid #121a2a}
+
+      /* Accessibility */
+      .skip{position:absolute;left:-9999px;top:auto}
+      .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
+
+      /* Header + nav */
+      header{position:sticky;top:0;background:#0b0f14;padding:20px 20px 10px;text-align:center;z-index:10}
       .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
-      .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none;background:#0e1420;cursor:pointer}
+      .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none}
+
+      /* Sections + cards */
+      .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
+      h2{margin:8px 0 6px}
+      h3{margin:0 0 12px}
       .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:20px 0}
       .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:#0e1420}
+      footer{padding:24px;text-align:center;color:#9fb3d1}
+
+      /* Inputs */
       .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
       input[type="number"],input[type="text"]{width:100%;padding:10px;border-radius:10px;border:1px solid #1c2538;background:#0b1220;color:#e8f0ff}
+      label{font-size:.95rem;color:#cfe3ff}
       .muted{color:#9fb3d1;font-size:.95rem}
       .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
       .ok{color:#8ee5a1}.warn{color:#ffd57a}.err{color:#ffa7a7}
-      /* Router: show one section at a time */
-      main{max-width:1000px}
+
+      /* One-section view using data-active */
       main section{display:none}
       main[data-active="overview"]   #overview{display:block}
       main[data-active="tokenomics"] #tokenomics{display:block}
       main[data-active="whitepaper"] #whitepaper{display:block}
       main[data-active="roadmap"]    #roadmap{display:block}
       main[data-active="presale"]    #presale{display:block}
+      main[data-active="staking"]    #staking{display:block}
+      main[data-active="sponsors"]   #sponsors{display:block}
       main[data-active="community"]  #community{display:block}
       main[data-active="trust"]      #trust{display:block}
     </style>
   </head>
   <body>
-    <header>
-      <h1 style="margin:6px 0 6px">TSPILL</h1>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <header id="top">
+      <img src="./Tea_spill_logo.png" alt="TSPILL logo" width="88" height="88" style="display:block;margin:8px auto 6px" />
+      <h1 style="margin:6px 0 6px;text-align:center">TSPILL</h1>
+      <p style="margin:0 0 14px;text-align:center;color:#cfe3ff;opacity:0.95;font-size:1.05rem;">
+        The currency for creators, innovators, and designers.
+      </p>
       <nav class="nav" aria-label="Primary">
         <a class="btn" href="#overview">Home</a>
         <a class="btn" href="#tokenomics">Tokenomics</a>
         <a class="btn" href="#whitepaper">Whitepaper</a>
         <a class="btn" href="#roadmap">Roadmap</a>
         <a class="btn" href="#presale">Presale</a>
+        <a class="btn" href="#staking">Staking</a>
+        <a class="btn" href="#sponsors">Sponsors</a>
         <a class="btn" href="#community">Community</a>
         <a class="btn" href="#trust">Trust</a>
       </nav>
@@ -50,22 +75,36 @@
     </header>
 
     <main id="main" data-active="overview">
-      <!-- HOME -->
-      <section id="overview">
+      <!-- HOME / LANDING -->
+      <section class="hero" id="overview">
         <h2>Build with creators. Ship with manufacturers.</h2>
-        <p class="muted">Mint: <span class="mono">2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</span></p>
+        <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
+        <p style="margin:10px 0 0">Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
+
         <div class="grid" style="margin-top:16px">
           <div class="card">
             <strong>About</strong>
-            <p style="margin:8px 0 0">TSPILL links creators and manufacturers to turn concepts into products with attribution, fair rewards, and transparent economics.</p>
+            <p style="margin:8px 0 0">
+              TSPILL is a production‑link network that connects creators and vetted manufacturers to turn concepts into real products with clear attribution, straightforward royalties, and transparent economics—not a funding platform.
+            </p>
           </div>
+
           <div class="card">
-            <strong>Utility</strong>
+            <strong>Token function</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Access programs and open calls</li>
-              <li>Participation incentives</li>
-              <li>Program rails (fees/discounts)</li>
-              <li>Signals for launches</li>
+              <li>Access: join open calls, submit concepts</li>
+              <li>Incentives: earn for useful participation</li>
+              <li>Program rails: simple fees/discounts for pilots and runs</li>
+              <li>Signals: community input on what to launch next</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Ecosystem benefits</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Creators: recognition that lasts and rewards that continue</li>
+              <li>Manufacturers: qualified briefs and predictable runs</li>
+              <li>Sponsors: transparent spend with measurable outcomes</li>
             </ul>
           </div>
         </div>
@@ -74,17 +113,53 @@
       <!-- TOKENOMICS -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
+
+        <!-- Mint placed above boxes to avoid overflow -->
+        <div class="card" style="margin:14px 0">
+          <strong>Mint</strong>
+          <p style="margin:8px 0 0;word-break:break-all">
+            2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK
+          </p>
+        </div>
+
+        <div class="card" style="margin:14px 0">
+          <strong>Supply</strong>
+          <p style="margin:8px 0 0">
+            Total supply: 1,000,000,000 TSPILL (9 decimals). Initial circulating supply at TGE: 35,000,000 (3.5%); the rest follows locks and vesting.
+          </p>
+        </div>
+
         <div class="grid">
           <div class="card">
-            <strong>Supply</strong>
-            <p style="margin:8px 0 0">Total supply: 1,000,000,000 TSPILL. Presale allocation: 30% (300,000,000). Presale vesting: 10% TGE, 90% over 9 months.</p>
-          </div>
-          <div class="card">
-            <strong>Governance & locks</strong>
+            <strong>Allocation</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Mint authority revoked</li>
-              <li>Program references published pre‑TGE</li>
-              <li>Treasury movements via dual control</li>
+              <li>Presale: 30% (300,000,000)</li>
+              <li>Ecosystem & Community: 35% (350,000,000)</li>
+              <li>Team/Dev: 12.5% (125,000,000)</li>
+              <li>Treasury & Partnerships: 12.5% (125,000,000)</li>
+              <li>Liquidity: 5% (50,000,000)</li>
+              <li>Staking/Rewards: 5% (50,000,000)</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Vesting & locks</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale: 10% TGE (30,000,000), 90% linear over 9 months</li>
+              <li>Team/Dev: 12‑month cliff, then 36‑month linear (0% TGE)</li>
+              <li>Ecosystem & Community: up to 2% TGE (20,000,000); remainder linear over 36 months</li>
+              <li>Treasury & Partnerships: 6‑month cliff, then 24‑month linear; multisig approvals</li>
+              <li>Liquidity: 5% reserved for listing; LP tokens locked 12 months (proof on listing)</li>
+              <li>Staking/Rewards: emissions over 24 months with quarterly step‑downs</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Utility & transparency</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access to open calls; participation incentives; program fees/discounts; community signals</li>
+              <li>Authorities: Mint revoked; Update secured (publish explorer proofs)</li>
+              <li>Public unlock calendar (36 months) and LP lock link posted at listing</li>
             </ul>
           </div>
         </div>
@@ -93,44 +168,143 @@
       <!-- WHITEPAPER -->
       <section id="whitepaper">
         <h3>Whitepaper</h3>
-        <p><a class="btn" href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View PDF</a></p>
+        <p style="margin:0 0 12px">
+          <a href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View full whitepaper (PDF)</a>
+          &nbsp;•&nbsp;
+          <a href="./TSPILL_Whitepaper.pdf" download="TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">Download PDF</a>
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Executive summary</strong>
+            <p style="margin:8px 0 0">
+              TSPILL connects creators and vetted manufacturers to turn concepts into real products with clear attribution, straightforward royalties, and transparent economics; the token powers access, incentives, and program rails for challenges, pilots, and runs.
+            </p>
+          </div>
+
+          <div class="card">
+            <strong>Problem</strong>
+            <p style="margin:8px 0 0">
+              Creators face opaque factory access and limited share in downstream value; manufacturers need qualified briefs, predictable runs, and brand‑safe demand. Existing platforms don’t link production with attribution and ongoing rewards.
+            </p>
+          </div>
+
+          <div class="card">
+            <strong>Solution</strong>
+            <p style="margin:8px 0 0">
+              Standardized briefs and open challenges select viable concepts; winners advance to vetted manufacturing with transparent timelines and costs; attribution and simple reward rules are defined upfront and published.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <strong>How it works</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Challenges: briefs, submissions, shortlists</li>
+              <li>Production: vetted factories with clear specs and lead times</li>
+              <li>Launch: products ship; attribution and reward rules apply</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Token utility</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Access programs and tools</li>
+              <li>Participation incentives for measurable progress</li>
+              <li>Program fees/discounts for pilots and runs</li>
+              <li>Signals for what to launch next</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Trust & controls</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Mint revoked; update secured</li>
+              <li>36‑month unlock calendar; LP lock proof at listing</li>
+              <li>Treasury under multisig with posted approvals</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <strong>Risks & disclosures</strong>
+          <p style="margin:8px 0 0">
+            Market, execution, and regulatory risks may affect timelines and availability; materials are provided for information purposes and will be updated as programs evolve.
+          </p>
+        </div>
       </section>
 
       <!-- ROADMAP -->
       <section id="roadmap">
         <h3>Roadmap</h3>
+
         <div class="grid">
           <div class="card">
-            <strong>Presale‑01</strong>
+            <strong>Phase 1: Presale setup</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Site live; presale treasury open</li>
-              <li>Public ledger updates</li>
-              <li>Claim parameters published pre‑TGE</li>
+              <li>Site live: Home, Tokenomics, Whitepaper, Trust; mint and authorities published; PDF whitepaper downloadable</li>
+              <li>Manufacturer onboarding: shortlist vetted partners, capture MOQs/lead times; publish categories for first challenges</li>
+              <li>Presale execution: tranche info, wallet connect, presale terms; publish 36‑month unlock calendar</li>
             </ul>
           </div>
+
           <div class="card">
-            <strong>Programs</strong>
+            <strong>Phase 2: First programs</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Open calls and prototype support</li>
-              <li>Pilot runs with vetted partners</li>
-              <li>Receipts for distributions</li>
+              <li>Open calls in 2–3 categories with standardized briefs and submission windows</li>
+              <li>Selection and prototypes: shortlist entries; produce finalist prototypes with vetted manufacturers; publish timelines and reward rules</li>
+              <li>Post‑launch program support for selected categories</li>
             </ul>
           </div>
+
           <div class="card">
-            <strong>Scale</strong>
+            <strong>Phase 3: Production link</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Recurring challenges</li>
-              <li>Dashboards and emissions reviews</li>
-              <li>Tooling integrations</li>
+              <li>Pilot runs: convert winning prototypes into limited runs with transparent MOQs, costs, delivery windows</li>
+              <li>Reward execution: apply participation rewards; post receipt‑style proof of distributions</li>
+              <li>Ecosystem growth: sponsor programs, discounts, category expansion via community signals</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Phase 4: Scale and data</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Recurring challenges with throughput metrics (submissions, shortlist rate, pilot conversion, releases)</li>
+              <li>Public dashboards for program outcomes and unlocks; periodic emissions reviews</li>
+              <li>Integrations: marketplace listings; optional tools for briefs, BOMs, lead‑time tracking</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Quarter markers</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Q1: Presale live; manufacturer shortlist; trust proofs; unlock calendar published</li>
+              <li>Q2: Open calls; prototypes underway</li>
+              <li>Q3: Pilot runs; sponsor programs; rewards receipts</li>
+              <li>Q4: Expanded categories; reporting dashboards; refinements from signals</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <strong>Principles</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Production link, not funding: ship real products with attribution and simple, upfront rewards</li>
+              <li>Transparency by default: publish authorities, unlocks, and program outcomes with references</li>
+              <li>Measurable progress: prioritize milestones that move concepts toward manufacturing and delivery</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <!-- PRESALE -->
+      <!-- PRESALE (NEW, MATCHED STYLING) -->
       <section id="presale">
         <h3>Presale</h3>
-        <p class="muted">Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.</p>
+        <p style="margin:0 0 12px" class="muted">
+          Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.
+        </p>
 
         <div class="grid">
           <div class="card">
@@ -166,13 +340,14 @@
           <div class="card">
             <strong>Key parameters</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Allocation: 30% (300,000,000 TSPILL)</li>
+              <li>Presale allocation: 30% (300,000,000 TSPILL)</li>
               <li>Token price: 0.001 USDT per TSPILL</li>
               <li>Accepted currency: SOL (quoted at settlement)</li>
               <li>Per‑wallet cap: up to 1,000 USDT equivalent</li>
               <li>Soft/Hard caps: 50,000 / 300,000 USDT</li>
               <li>Window: 21 days (optional 7‑day extension)</li>
             </ul>
+
             <div style="margin-top:12px">
               <strong>Wallets & mint</strong>
               <p class="mono" style="margin:8px 0 0">Presale treasury (SOL): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
@@ -198,44 +373,70 @@
         </div>
       </section>
 
+      <!-- STAKING -->
+      <section id="staking">
+        <h3>Staking</h3>
+        <p>Emissions over 24 months with quarterly step‑downs.</p>
+      </section>
+
+      <!-- SPONSORS -->
+      <section id="sponsors">
+        <h3>Sponsors</h3>
+        <p>Models and inquiry contact.</p>
+      </section>
+
       <!-- COMMUNITY -->
       <section id="community">
         <h3>Community</h3>
-        <p>Follow updates on X, Discord, and GitHub.</p>
+        <p>Links to X, Discord, GitHub.</p>
       </section>
 
       <!-- TRUST -->
       <section id="trust">
         <h3>Trust</h3>
         <ul>
-          <li>Mint authority revoked; update secured.</li>
-          <li>Presale SOL‑settled at USDT value with on‑chain claims.</li>
+          <li>Mint authority: revoked</li>
+          <li>Update authority: secured</li>
+          <li>LP lock proof and 36‑month vesting calendar links (on listing)</li>
         </ul>
       </section>
     </main>
 
-    <footer style="text-align:center;padding:24px;color:#9fb3d1">© TSPILL</footer>
+    <footer>© TSPILL</footer>
 
-    <!-- Solana web3.js via CDN -->
-    <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" crossorigin="anonymous"></script>
-
+    <!-- Router: keep all sections aligned with hash -->
     <script>
-      // Robust hash router so Home and all sections render on load + navigation. [Ref]
       (function(){
-        const main=document.getElementById('main');
-        const ids=new Set(['overview','tokenomics','whitepaper','roadmap','presale','community','trust']);
-        function setActive(){
-          let h=(location.hash||'#overview').slice(1);
-          if(!ids.has(h)) h='overview';
-          main.setAttribute('data-active',h);
+        const main = document.getElementById('main');
+        const valid = new Set(['overview','tokenomics','whitepaper','roadmap','presale','staking','sponsors','community','trust']);
+        function setActiveFromHash(){
+          let h = (location.hash || '#overview').slice(1);
+          if(!valid.has(h)) h = 'overview';
+          main.setAttribute('data-active', h);
+          const el = document.getElementById(h);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
         }
-        window.addEventListener('hashchange',setActive);
-        window.addEventListener('DOMContentLoaded',setActive);
+        if(location.hash && !document.querySelector(location.hash)){
+          history.replaceState(null, "", location.pathname + location.search + '#overview');
+        }
+        window.addEventListener('hashchange', setActiveFromHash);
+        window.addEventListener('DOMContentLoaded', setActiveFromHash);
+        document.addEventListener('click', function(e){
+          const a = e.target.closest('a[href^="#"]');
+          if(!a) return;
+          const id = a.getAttribute('href').slice(1);
+          if(valid.has(id)){
+            if(location.hash.slice(1) === id){ setActiveFromHash(); }
+          }
+        });
       })();
     </script>
 
+    <!-- Solana web3.js -->
+    <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" crossorigin="anonymous"></script>
+
+    <!-- Phantom connect + dual-source quote + SOL transfer -->
     <script>
-      // Phantom connect + dual-source SOL/USDT quote + SOL transfer. [Refs]
       (function(){
         const RPC="https://api.mainnet-beta.solana.com";
         const connection=new solanaWeb3.Connection(RPC,'confirmed');
@@ -271,13 +472,12 @@
         connectBtn.addEventListener('click',connect);
         quickBtns.forEach(b=>b.addEventListener('click',()=>{ usdtInput.value=b.getAttribute('data-q'); recalc(); }));
 
-        // Primary: Jupiter Price API v6 • Fallback: CoinGecko simple price. [Refs]
         async function fetchFromJupiter(){
-          const r=await fetch("https://price.jup.ag/v6/price?ids=SOL");
+          const r=await fetch("https://price.jup.ag/v6/price?ids=SOL"); /* Jupiter Price API v6 */ /* [Ref] */
           const j=await r.json();
           if(!j?.data?.SOL?.price) throw new Error("No Jupiter price");
-          const solUsd=j.data.SOL.price; // USD per SOL
-          return 1/solUsd; // USDT≈USD per 1 USDT -> SOL
+          const solUsd=j.data.SOL.price;
+          return 1/solUsd; // 1 USDT ≈ 1 USD
         }
         async function fetchFromCoingecko(){
           const r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
@@ -289,46 +489,46 @@
         async function fetchQuote(){
           try{
             const v=await fetchFromJupiter(); quote.solPerUsdt=v; quote.ts=Date.now();
-            quoteNote.textContent="Quote: 1 USDT ≈ "+v.toFixed(9)+" SOL • updated just now";
-            estimateBlock.style.display='';
+            if(quoteNote) quoteNote.textContent="Quote: 1 USDT ≈ "+v.toFixed(9)+" SOL • updated just now";
+            if(estimateBlock) estimateBlock.style.display='';
           }catch(_){
             try{
               const v=await fetchFromCoingecko(); quote.solPerUsdt=v; quote.ts=Date.now();
-              quoteNote.textContent="Quote (fallback): 1 USDT ≈ "+v.toFixed(9)+" SOL";
-              estimateBlock.style.display='';
+              if(quoteNote) quoteNote.textContent="Quote (fallback): 1 USDT ≈ "+v.toFixed(9)+" SOL";
+              if(estimateBlock) estimateBlock.style.display='';
             }catch(e2){
-              quoteNote.textContent="Quote unavailable. Proceed without estimate or retry.";
-              estimateBlock.style.display='none';
+              if(quoteNote) quoteNote.textContent="Quote unavailable. Proceed without estimate or retry.";
+              if(estimateBlock) estimateBlock.style.display='none';
             }
           }
         }
-        setInterval(()=>{ if(document.getElementById('presale').offsetParent!==null){ fetchQuote(); } }, 30000);
+        setInterval(()=>{ const pres=document.getElementById('presale'); if(pres && pres.offsetParent!==null){ fetchQuote(); } }, 30000);
 
         async function recalc(){
-          const usdt=parseFloat(usdtInput.value||"0");
-          if(!isFinite(usdt) || usdt<=0){ solOut.value=""; tspillOut.value=""; return; }
+          const usdt=parseFloat(usdtInput?.value||"0");
+          if(!isFinite(usdt) || usdt<=0){ if(solOut) solOut.value=""; if(tspillOut) tspillOut.value=""; return; }
           if(!quote.ts || Date.now()-quote.ts>30_000){ await fetchQuote(); }
-          if(quote.solPerUsdt && estimateBlock.style.display!=='none'){
-            const solAmt=usdt*quote.solPerUsdt; solOut.value=solAmt.toFixed(6)+" SOL";
+          if(quote.solPerUsdt && estimateBlock && estimateBlock.style.display!=='none'){
+            const solAmt=usdt*quote.solPerUsdt; if(solOut) solOut.value=solAmt.toFixed(6)+" SOL";
           }
-          const tspill=usdt/PRICE_USDT_PER_TSPILL;
-          tspillOut.value=Math.floor(tspill).toLocaleString()+" TSPILL";
+          const tspill=usdt/PRICE_USDT_PER_TSPILL; if(tspillOut) tspillOut.value=Math.floor(tspill).toLocaleString()+" TSPILL";
         }
-        usdtInput.addEventListener('input',recalc);
+        if(usdtInput) usdtInput.addEventListener('input',recalc);
         fetchQuote();
 
         async function sendSol(){
-          txStatus.textContent="";
-          const usdt=parseFloat(usdtInput.value||"0");
+          if(txStatus) txStatus.textContent="";
+          const usdt=parseFloat(usdtInput?.value||"0");
           if(!provider){ await connect(); if(!provider) return; }
           if(!isFinite(usdt) || usdt<MIN_USDT || usdt>MAX_USDT){
-            txStatus.innerHTML="<span class='warn'>Enter between "+MIN_USDT+" and "+MAX_USDT+" USDT (equivalent).</span>";
+            if(txStatus) txStatus.innerHTML="<span class='warn'>Enter between "+MIN_USDT+" and "+MAX_USDT+" USDT (equivalent).</span>";
             return;
           }
           if(!quote.ts || Date.now()-quote.ts>30_000){ await fetchQuote(); }
-          if(!quote.solPerUsdt){ txStatus.innerHTML="<span class='warn'>Proceeding without estimate.</span>"; }
+          if(!quote.solPerUsdt && txStatus){ txStatus.innerHTML="<span class='warn'>Proceeding without estimate.</span>"; }
+
           const solAmount=(quote.solPerUsdt? usdt*quote.solPerUsdt : 0);
-          const lamports=Math.max(1, Math.round(solAmount*solanaWeb3.LAMPORTS_PER_SOL)); // avoid 0 lamports
+          const lamports=Math.max(1, Math.round(solAmount*solanaWeb3.LAMPORTS_PER_SOL));
 
           try{
             const fromPubkey=provider.publicKey;
@@ -344,15 +544,15 @@
             await connection.confirmTransaction({ signature:sig, blockhash, lastValidBlockHeight }, 'confirmed');
 
             const tspill=Math.floor(usdt/PRICE_USDT_PER_TSPILL);
-            txStatus.innerHTML="<span class='ok'>Sent.</span> Tx: <span class='mono'>"+sig+"</span><br/>"+
+            if(txStatus) txStatus.innerHTML="<span class='ok'>Sent.</span> Tx: <span class='mono'>"+sig+"</span><br/>"+
               "Record — Wallet: <span class='mono'>"+fromPubkey.toBase58()+"</span> • USDT value: "+usdt.toFixed(2)+
               " • SOL: "+(lamports/solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)+
               " • TSPILL: "+tspill.toLocaleString()+".";
           }catch(e){
-            txStatus.innerHTML="<span class='err'>Transaction failed or cancelled.</span>";
+            if(txStatus) txStatus.innerHTML="<span class='err'>Transaction failed or cancelled.</span>";
           }
         }
-        document.getElementById('sendBtn').addEventListener('click',sendSol);
+        if(sendBtn) sendBtn.addEventListener('click',sendSol);
       })();
     </script>
   </body>
