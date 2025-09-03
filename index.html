@@ -42,6 +42,14 @@
       .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
       .ok{color:#8ee5a1}.warn{color:#ffd57a}.err{color:#ffa7a7}
 
+      /* Long-string wrapping for mints/addresses/URLs */
+      .wrap{
+        word-break:break-word;        /* break long words */
+        overflow-wrap:break-word;     /* allow breaks in URLs */
+        white-space:normal;           /* ensure wrapping */
+      }
+
+      /* Inputs */
       input[type="number"],input[type="text"]{
         width:100%;padding:10px;border-radius:10px;border:1px solid var(--field-border);
         background:var(--field-bg);color:var(--field-text);
@@ -111,7 +119,7 @@
       <section class="hero" id="overview">
         <h2>Build with creators. Ship with manufacturers.</h2>
         <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
-        <p style="margin:10px 0 0">Mint address: <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
+        <p style="margin:10px 0 0">Mint address: <strong class="wrap">2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
         <div class="grid" style="margin-top:16px">
           <div class="card"><strong>About</strong><p style="margin:8px 0 0">TSPILL connects creators and vetted manufacturers to turn concepts into real products with attribution, straightforward rewards, and transparent economics.</p></div>
           <div class="card"><strong>Token function</strong><ul style="margin:8px 0 0 18px"><li>Access: open calls, submissions</li><li>Incentives: useful participation</li><li>Program rails: fees/discounts</li><li>Signals: what to launch next</li></ul></div>
@@ -122,7 +130,7 @@
       <!-- TOKENOMICS -->
       <section id="tokenomics">
         <h3>Tokenomics</h3>
-        <div class="card" style="margin:14px 0"><strong>Mint</strong><p style="margin:8px 0 0;word-break:break-all">2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p></div>
+        <div class="card" style="margin:14px 0"><strong>Mint</strong><p class="wrap" style="margin:8px 0 0">2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p></div>
         <div class="card" style="margin:14px 0"><strong>Supply</strong><p style="margin:8px 0 0">Total supply: 1,000,000,000 TSPILL (9 decimals). Initial circulating at TGE: 35,000,000 (3.5%).</p></div>
         <div class="grid">
           <div class="card"><strong>Allocation</strong><ul style="margin:8px 0 0 18px"><li>Presale: 30% (300,000,000)</li><li>Ecosystem & Community: 35%</li><li>Team/Dev: 12.5%</li><li>Treasury & Partnerships: 12.5%</li><li>Liquidity: 5%</li><li>Staking/Rewards: 5%</li></ul></div>
@@ -201,8 +209,8 @@
             </ul>
             <div style="margin-top:12px">
               <strong>Addresses & mint</strong>
-              <p class="mono" style="margin:8px 0 0">Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
-              <p class="mono" style="margin:6px 0 0">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p>
+              <p class="mono wrap" style="margin:8px 0 0">Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
+              <p class="mono wrap" style="margin:6px 0 0">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p>
             </div>
             <p class="muted" style="margin-top:10px">Use Phantom; do not send from exchange addresses. Quotes are live and valid briefly.</p>
           </div>
@@ -279,13 +287,13 @@
             <ul style="margin:8px 0 0 18px">
               <li>Mint authority: revoked</li>
               <li>Update authority: secured</li>
-              <li>TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</li>
+              <li class="wrap">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</li>
             </ul>
           </div>
           <div class="card">
             <strong>Addresses & custody</strong>
             <ul style="margin:8px 0 0 18px">
-              <li>Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</li>
+              <li class="wrap">Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</li>
               <li>No third‑party custody; receipts published</li>
             </ul>
           </div>
