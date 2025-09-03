@@ -19,20 +19,16 @@
         --field-placeholder:#b8c6e0;
       }
 
-      /* Accessibility */
       .skip{position:absolute;left:-9999px;top:auto}
       .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
 
-      /* Header + nav */
       header{position:sticky;top:0;background:#0b0f14;padding:20px 20px 10px;text-align:center;z-index:10;border-bottom:1px solid #121a2a}
       .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
       .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none}
 
-      /* Global fixed Connect (top-right only) */
       .connect-fixed{position:fixed;top:10px;right:10px;z-index:20;background:var(--brand-btn);color:var(--btn-text);border:0;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 0 0 1px #2a3550 inset}
       .connect-fixed:hover{background:var(--brand-btn-hover)}
 
-      /* Sections */
       .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
       main section{max-width:1000px;margin:40px auto;padding:0 20px}
       h2{margin:8px 0 6px}
@@ -46,7 +42,6 @@
       .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
       .ok{color:#8ee5a1}.warn{color:#ffd57a}.err{color:#ffa7a7}
 
-      /* Inputs */
       input[type="number"],input[type="text"]{
         width:100%;padding:10px;border-radius:10px;border:1px solid var(--field-border);
         background:var(--field-bg);color:var(--field-text);
@@ -55,7 +50,6 @@
       ::placeholder{color:var(--field-placeholder);opacity:1}
       :-ms-input-placeholder{color:var(--field-placeholder)}
       ::-ms-input-placeholder{color:var(--field-placeholder)}
-      /* Autofill fix */
       input:-webkit-autofill,
       input:-webkit-autofill:hover,
       input:-webkit-autofill:focus,
@@ -65,18 +59,11 @@
         -webkit-text-fill-color:var(--field-text) !important;
         caret-color:var(--field-text) !important;
       }
-      input:-internal-autofill-selected{
-        background-color:var(--field-bg) !important;color:var(--field-text) !important;
-      }
+      input:-internal-autofill-selected{background-color:var(--field-bg) !important;color:var(--field-text) !important}
 
-      /* Quick amount chips (fix white-on-white) */
-      .chip{
-        background:var(--brand-btn);color:#fff;border:0;border-radius:10px;
-        padding:8px 10px;cursor:pointer;min-width:56px;text-align:center;
-      }
+      .chip{background:var(--brand-btn);color:#fff;border:0;border-radius:10px;padding:8px 10px;cursor:pointer;min-width:56px;text-align:center}
       .chip:hover{background:var(--brand-btn-hover)}
 
-      /* One-section view */
       main section{display:none}
       main[data-active="overview"]   #overview{display:block}
       main[data-active="tokenomics"] #tokenomics{display:block}
@@ -88,12 +75,11 @@
       main[data-active="community"]  #community{display:block}
       main[data-active="trust"]      #trust{display:block}
 
-      /* Community icon links */
       .icon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
       .icon-link{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #1c2538;border-radius:12px;background:#0b1220;text-decoration:none;color:#e8f0ff}
       .icon-link:hover{border-color:#2a3550;background:#0f1626}
       .icon-link img{width:24px;height:24px}
-      .handle{opacity:.9;word-break:break-all}
+      .handle{opacity:.9;word-break:break-word;overflow-wrap:break-word}
     </style>
   </head>
   <body>
@@ -214,9 +200,8 @@
               <li>Window: 21 days (optional 7‑day extension)</li>
             </ul>
             <div style="margin-top:12px">
-              <strong>Wallets & mint</strong>
-              <p class="mono" style="margin:8px 0 0">Presale treasury (SOL): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
-              <p class="mono" style="margin:6px 0 0">Admin (dev): BsBpUykVhosqpkQpwVbnoMLyFWT3RxFxiXgpG8kQWY8P</p>
+              <strong>Addresses & mint</strong>
+              <p class="mono" style="margin:8px 0 0">Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
               <p class="mono" style="margin:6px 0 0">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p>
             </div>
             <p class="muted" style="margin-top:10px">Use Phantom; do not send from exchange addresses. Quotes are live and valid briefly.</p>
@@ -288,17 +273,36 @@
       <!-- TRUST -->
       <section id="trust">
         <h3>Trust</h3>
-        <ul>
-          <li>Mint authority revoked; update secured.</li>
-          <li>Presale SOL‑settled at USDT value with on‑chain claims.</li>
-          <li>Unlock calendar and references published before TGE.</li>
-        </ul>
+        <div class="grid">
+          <div class="card">
+            <strong>Authorities</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Mint authority: revoked</li>
+              <li>Update authority: secured</li>
+              <li>TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Addresses & custody</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</li>
+              <li>No third‑party custody; receipts published</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Vesting & proofs</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale: 10% TGE, 90% linear 9 months</li>
+              <li>Claim parameters published before TGE</li>
+              <li>Public ledger for allocations and tx hashes</li>
+            </ul>
+          </div>
+        </div>
       </section>
     </main>
 
     <footer>© TSPILL</footer>
 
-    <!-- Router -->
     <script>
       (function(){
         const main=document.getElementById('main');
@@ -311,10 +315,7 @@
       })();
     </script>
 
-    <!-- Solana web3.js -->
     <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" crossorigin="anonymous"></script>
-
-    <!-- Connect + Quote + Send -->
     <script>
       (function(){
         const RPC="https://api.mainnet-beta.solana.com";
@@ -332,8 +333,8 @@
         const quoteNote=document.getElementById('quoteNote');
         const estimateBlock=document.getElementById('estimateBlock');
         const sendBtn=document.getElementById('sendBtn');
-        const txStatus=document.getElementById('txStatus');
         const chips=document.querySelectorAll('.chip');
+        const txStatus=document.getElementById('txStatus');
 
         let provider=null;
         let quote={solPerUsdt:0, ts:0};
