@@ -1,3 +1,4 @@
+ndex.html
 <!doctype html>
 <html lang="en">
   <head>
@@ -15,4 +16,635 @@
       :root{
         --brand-btn:#8c5a24;
         --brand-btn-hover:#a46829;
-        --btn-text:#ffffff
+        --btn-text:#ffffff;
+        --field-bg:#0b1220;
+        --field-border:#1c2538;
+        --field-text:#e8f0ff;
+        --field-placeholder:#b8c6e0;
+      }
+
+      .background-anim{
+        position:fixed; inset:0; z-index:-2; pointer-events:none;
+        background:
+          radial-gradient(1200px 800px at 15% 20%, rgba(140,90,36,0.07) 0%, rgba(140,90,36,0.0) 55%),
+          radial-gradient(900px 600px at 85% 30%, rgba(65,90,140,0.06) 0%, rgba(65,90,140,0.0) 55%),
+          radial-gradient(1000px 700px at 50% 90%, rgba(20,30,48,0.06) 0%, rgba(20,30,48,0.0) 55%),
+          #0b0f14;
+        background-size: 140% 140%;
+        animation: bg-drift 30s ease-in-out infinite;
+      }
+      @keyframes bg-drift{
+        0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 0%; }
+        50%  { background-position: 100% 100%, 0% 100%, 50% 0%, 0% 0%; }
+        100% { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 0%; }
+      }
+      .background-noise{
+        position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.035;
+        background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.55"/></svg>');
+        background-size:80px 80px; mix-blend-mode:overlay;
+      }
+
+      .skip{position:absolute;left:-9999px;top:auto}
+      .skip:focus{left:10px;top:10px;background:#fff;color:#000;padding:8px 10px;border-radius:6px}
+
+      header{position:sticky;top:0;background:rgba(11,15,20,0.9);backdrop-filter:saturate(120%) blur(6px);
+        padding:20px 20px 10px;text-align:center;z-index:10;border-bottom:1px solid #121a2a}
+      .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+      .btn{padding:8px 12px;border:1px solid #2a3550;border-radius:10px;color:#cfe3ff;text-decoration:none}
+
+      .connect-fixed{position:fixed;top:10px;right:10px;z-index:20;background:var(--brand-btn);color:var(--btn-text);border:0;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 0 0 1px #2a3550 inset}
+      .connect-fixed:hover{background:var(--brand-btn-hover)}
+
+      .hero{max-width:900px;margin:24px auto;padding:0 20px;text-align:center}
+      main section{max-width:1000px;margin:40px auto;padding:0 20px}
+      h2{margin:8px 0 6px}
+      h3{margin:0 0 12px}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:20px 0}
+      .card{padding:16px;border:1px solid #1c2538;border-radius:14px;background:rgba(14,20,32,0.96)}
+      footer{padding:24px;text-align:center;color:#9fb3d1}
+
+      .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+      .muted{color:#9fb3d1;font-size:.95rem}
+      .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+      .ok{color:#8ee5a1}.warn{color:#ffd57a}.err{color:#ffa7a7}
+
+      .wrap{word-break:break-word;overflow-wrap:break-word;white-space:normal}
+
+      input[type="number"],input[type="text"],input[type="email"]{
+        width:100%;padding:10px;border-radius:10px;border:1px solid var(--field-border);
+        background:var(--field-bg);color:var(--field-text);
+        -webkit-text-fill-color:var(--field-text);caret-color:var(--field-text);
+      }
+      ::placeholder{color:var(--field-placeholder);opacity:1}
+      input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
+        -webkit-box-shadow:0 0 0 1000px var(--field-bg) inset !important;
+        box-shadow:0 0 0 1000px var(--field-bg) inset !important;
+        -webkit-text-fill-color:var(--field-text) !important; caret-color:var(--field-text) !important;
+      }
+
+      .chip{background:var(--brand-btn);color:#fff;border:0;border-radius:10px;padding:8px 10px;cursor:pointer;min-width:56px;text-align:center}
+      .chip:hover{background:var(--brand-btn-hover)}
+
+      /* Section router */
+      main section{display:none}
+      main[data-active="universe"]    #universe{display:block}
+      main[data-active="overview"]   #overview{display:block}
+      main[data-active="tokenomics"] #tokenomics{display:block}
+      main[data-active="whitepaper"] #whitepaper{display:block}
+      main[data-active="roadmap"]    #roadmap{display:block}
+      main[data-active="presale"]    #presale{display:block}
+      main[data-active="staking"]    #staking{display:block}
+      main[data-active="sponsors"]   #sponsors{display:block}
+      main[data-active="community"]  #community{display:block}
+      main[data-active="trust"]      #trust{display:block}
+
+      /* Universe starfield styles */
+      .starfield-container{
+        position:relative;
+        width:100%;
+        height:600px;
+        background:linear-gradient(135deg, rgba(15,20,35,0.8) 0%, rgba(20,25,45,0.9) 100%);
+        border:1px solid #1c2538;
+        border-radius:14px;
+        overflow:hidden;
+        margin:20px 0;
+      }
+
+      .star{
+        position:absolute;
+        width:12px;
+        height:12px;
+        background:#fff;
+        border-radius:50%;
+        box-shadow:0 0 8px rgba(140,90,36,0.6);
+        cursor:pointer;
+        animation:float-star linear infinite;
+        opacity:0.7;
+        transition:all 0.3s ease;
+      }
+
+      .star:hover{
+        transform:scale(1.5);
+        opacity:1;
+        box-shadow:0 0 20px rgba(140,90,36,1);
+      }
+
+      @keyframes float-star{
+        0%{ transform:translateY(0px) rotate(0deg); }
+        100%{ transform:translateY(20px) rotate(360deg); }
+      }
+
+      .modal-overlay{
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.7);
+        z-index:100;
+        align-items:center;
+        justify-content:center;
+      }
+
+      .modal-overlay.show{display:flex}
+
+      .modal-box{
+        background:#0f1626;
+        border:1px solid #1c2538;
+        border-radius:14px;
+        padding:24px;
+        max-width:500px;
+        width:90%;
+        box-shadow:0 10px 40px rgba(0,0,0,0.5);
+      }
+
+      .modal-box h3{margin:0 0 16px}
+      .modal-box p{margin:0 0 12px;color:#cfe3ff}
+
+      .modal-close{
+        position:absolute;
+        top:16px;
+        right:16px;
+        background:none;
+        border:none;
+        color:#cfe3ff;
+        font-size:24px;
+        cursor:pointer;
+      }
+
+      .icon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+      .icon-link{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #1c2538;border-radius:12px;background:#0b1220;text-decoration:none;color:#e8f0ff}
+      .icon-link:hover{border-color:#2a3550;background:#0f1626}
+      .icon-link img{width:24px;height:24px}
+      .handle{opacity:0.9;word-break:break-word;overflow-wrap:break-word}
+    </style>
+  </head>
+  <body>
+    <div class="background-anim"></div>
+    <div class="background-noise"></div>
+
+    <a href="#main" class="skip">Skip to content</a>
+    <button id="connectBtnFixed" class="connect-fixed">Connect Phantom</button>
+
+    <header id="top">
+      <img src="./Tea_spill_logo.png" alt="TSPILL logo" width="88" height="88" style="display:block;margin:8px auto 6px" />
+      <h1 style="margin:6px 0 6px;text-align:center">TSPILL Universe</h1>
+      <p style="margin:0 0 14px;text-align:center;color:#cfe3ff;opacity:0.95;font-size:1.05rem;">Light a star with your feelings to the universe.</p>
+      <nav class="nav" aria-label="Primary">
+        <a class="btn" href="#universe">Universe</a>
+        <a class="btn" href="#overview">About</a>
+        <a class="btn" href="#whitepaper">Whitepaper</a>
+        <a class="btn" href="#roadmap">Roadmap</a>
+        <a class="btn" href="#presale">Presale</a>
+        <a class="btn" href="#community">Community</a>
+        <a class="btn" href="#trust">Trust</a>
+      </nav>
+      <div class="row" style="justify-content:center;margin-top:6px">
+        <span id="walletBadge" class="muted"></span>
+      </div>
+    </header>
+
+    <main id="main" data-active="universe">
+      <!-- UNIVERSE SECTION (NEW) -->
+      <section id="universe">
+        <div class="hero">
+          <h2>TSPILL Universe</h2>
+          <p style="margin:0 0 12px;opacity:.92">Click a star. Pay 1 USD. Share your feeling with the universe.</p>
+          <p class="muted">Your words become light in our collective sky. No guaranteed results—just symbolic expression and community connection.</p>
+        </div>
+
+        <div class="starfield-container" id="starfield">
+          <!-- Stars will be generated by JavaScript -->
+        </div>
+
+        <div class="card" style="margin:20px auto;max-width:600px;text-align:center">
+          <h3>How it works</h3>
+          <ol style="margin:8px 0 0 18px;text-align:left;display:inline-block">
+            <li>Click a star in the universe above</li>
+            <li>Connect your Phantom wallet</li>
+            <li>Send 1 USD equivalent in SOL/USDC</li>
+            <li>Type your wish, fear, or feeling</li>
+            <li>Your message becomes a new floating star</li>
+          </ol>
+        </div>
+
+        <div class="card" style="margin:20px auto;max-width:600px">
+          <h3 style="margin:0 0 12px">Transparency</h3>
+          <p><span class="ok" id="totalStars">0</span> stars lit • <span class="ok" id="totalRaised">0.00</span> USD raised</p>
+          <p class="muted">Funds support TSPILL liquidity pool and project development.</p>
+          <p class="mono wrap muted" style="font-size:0.85rem">Receive address: DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
+        </div>
+      </section>
+
+      <!-- HOME / ABOUT -->
+      <section class="hero" id="overview">
+        <h2>Build with creators. Ship with manufacturers.</h2>
+        <p style="margin:0 0 6px;opacity:.92">From concept to shelf—with credit and rewards intact.</p>
+        <p style="margin:10px 0 0">Mint address: <strong class="wrap">2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong></p>
+        <div class="grid" style="margin-top:16px">
+          <div class="card"><strong>About</strong><p style="margin:8px 0 0">TSPILL connects creators and vetted manufacturers to turn concepts into real products with attribution, straightforward rewards, and transparent economics.</p></div>
+          <div class="card"><strong>Token function</strong><ul style="margin:8px 0 0 18px"><li>Access: open calls, submissions</li><li>Incentives: useful participation</li><li>Program rails: fees/discounts</li><li>Signals: what to launch next</li></ul></div>
+          <div class="card"><strong>Ecosystem benefits</strong><ul style="margin:8px 0 0 18px"><li>Creators: recognition and rewards</li><li>Manufacturers: qualified briefs</li><li>Sponsors: measurable outcomes</li></ul></div>
+        </div>
+      </section>
+
+      <!-- TOKENOMICS -->
+      <section id="tokenomics">
+        <h3>Tokenomics</h3>
+        <div class="card" style="margin:14px 0"><strong>Mint</strong><p class="wrap" style="margin:8px 0 0">2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p></div>
+        <div class="card" style="margin:14px 0"><strong>Supply</strong><p style="margin:8px 0 0">Total supply: 1,000,000,000 TSPILL (9 decimals). Initial circulating at TGE: 35,000,000 (3.5%).</p></div>
+        <div class="grid">
+          <div class="card"><strong>Allocation</strong><ul style="margin:8px 0 0 18px"><li>Presale: 30% (300,000,000)</li><li>Ecosystem & Community: 35%</li><li>Team/Dev: 12.5%</li><li>Treasury & Partnerships: 12.5%</li><li>Liquidity: 5%</li><li>Staking/Rewards: 5%</li></ul></div>
+          <div class="card"><strong>Vesting & locks</strong><ul style="margin:8px 0 0 18px"><li>Presale: 10% TGE, 90% linear 9 months</li><li>Team/Dev: 12‑month cliff, then 36‑month linear</li><li>Ecosystem: tiny TGE; 36‑month linear</li><li>Treasury: 6‑month cliff; 24‑month linear</li><li>Liquidity: LP lock 12 months</li></ul></div>
+          <div class="card"><strong>Utility & transparency</strong><ul style="margin:8px 0 0 18px"><li>Access, incentives, program rails, signals</li><li>Mint revoked; update secured</li><li>Unlock calendar and proofs published</li></ul></div>
+        </div>
+      </section>
+
+      <!-- WHITEPAPER -->
+      <section id="whitepaper">
+        <h3>Whitepaper</h3>
+        <p style="margin:0 0 12px"><a href="./TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">View PDF</a> &nbsp;•&nbsp; <a href="./TSPILL_Whitepaper.pdf" download="TSPILL_Whitepaper.pdf" target="_blank" rel="noopener">Download</a></p>
+        <div class="grid">
+          <div class="card"><strong>Executive summary</strong><p style="margin:8px 0 0">Open challenges → prototypes → vetted production, with attribution and simple rewards defined upfront.</p></div>
+          <div class="card"><strong>Problem</strong><p style="margin:8px 0 0">Creators need factory access and ongoing rewards; manufacturers need qualified briefs and predictable runs.</p></div>
+          <div class="card"><strong>Solution</strong><p style="margin:8px 0 0">Transparent briefs, timelines, and costs, with receipts for distributions.</p></div>
+        </div>
+      </section>
+
+      <!-- ROADMAP -->
+      <section id="roadmap">
+        <h3>Roadmap</h3>
+        <div class="grid">
+          <div class="card"><strong>Phase 1: Presale setup</strong><ul style="margin:8px 0 0 18px"><li>Site live; authorities published</li><li>Manufacturer shortlist</li><li>Presale execution; unlock calendar</li></ul></div>
+          <div class="card"><strong>Phase 2: First programs</strong><ul style="margin:8px 0 0 18px"><li>Open calls; prototype finalists</li><li>Vetted production timelines</li><li>Program support</li></ul></div>
+          <div class="card"><strong>Phase 3: Production link</strong><ul style="margin:8px 0 0 18px"><li>Pilot runs with clear MOQs and costs</li><li>Reward receipts</li><li>Sponsor programs</li></ul></div>
+          <div class="card"><strong>Phase 4: Scale and data</strong><ul style="margin:8px 0 0 18px"><li>Recurring challenges and metrics</li><li>Dashboards and emissions reviews</li><li>Integrations and tooling</li></ul></div>
+        </div>
+      </section>
+
+      <!-- PRESALE -->
+      <section id="presale">
+        <h3>Presale</h3>
+        <p class="muted">Buy TSPILL on Solana — USDT value paid in SOL. 10% at TGE, then monthly over 9 months.</p>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Checkout</strong>
+            <div class="row" style="margin-top:8px">
+              <input id="usdtInput" type="number" step="0.01" min="5" placeholder="USDT value (e.g., 50)" />
+              <button class="chip" data-q="50">50</button>
+              <button class="chip" data-q="100">100</button>
+              <button class="chip" data-q="250">250</button>
+              <button class="chip" data-q="1000">1000</button>
+            </div>
+            <p class="muted" style="margin:8px 0 0">Min 5 • Max 1000 (USDT value)</p>
+
+            <div id="estimateBlock" style="margin-top:12px">
+              <label for="solOut">Estimated SOL to send</label>
+              <input id="solOut" type="text" readonly />
+              <p class="muted" id="quoteNote">Fetching quote…</p>
+            </div>
+
+            <div style="margin-top:12px">
+              <label for="tspillOut">You receive (TSPILL)</label>
+              <input id="tspillOut" type="text" readonly />
+              <p class="muted">Price: 0.001 USDT per TSPILL</p>
+            </div>
+
+            <div style="margin-top:12px">
+              <button id="sendBtn" class="connect-fixed" style="position:static">Send SOL to Presale</button>
+              <p id="sendHint" class="muted">Phantom opens to review and sign a SOL transfer to the treasury.</p>
+              <p id="txStatus" class="muted"></p>
+            </div>
+          </div>
+
+          <div class="card">
+            <strong>Key parameters</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale allocation: 30% (300,000,000 TSPILL)</li>
+              <li>Token price: 0.001 USDT per TSPILL</li>
+              <li>Accepted currency: SOL (quoted at settlement)</li>
+              <li>Per‑wallet cap: up to 1,000 USDT equivalent</li>
+              <li>Soft/Hard caps: 50,000 / 300,000 USDT</li>
+              <li>Window: 21 days (optional 7‑day extension)</li>
+            </ul>
+            <div style="margin-top:12px">
+              <strong>Addresses & mint</strong>
+              <p class="mono wrap" style="margin:8px 0 0">Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</p>
+              <p class="mono wrap" style="margin:6px 0 0">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</p>
+            </div>
+            <p class="muted" style="margin-top:10px">Use Phantom; do not send from exchange addresses. Quotes are live and valid briefly.</p>
+          </div>
+        </div>
+
+        <div class="card"><strong>Positive roll‑forward</strong><p style="margin:8px 0 0">If the soft cap is not reached by the end date, all confirmed allocations automatically roll into Presale‑02 at the same price and vesting terms.</p></div>
+        <div class="card"><strong>Transparency</strong><ul style="margin:8px 0 0 18px"><li>Public read‑only ledger shows total raised (USDT value), allocations, and remaining capacity.</li><li>Before TGE, claim parameters will be published for deterministic claims.</li><li>No third‑party custody; funds remain in the presale treasury wallet.</li></ul></div>
+      </section>
+
+      <!-- STAKING -->
+      <section id="staking" style="display:none">
+        <h3>Staking</h3>
+        <div class="grid">
+          <div class="card"><strong>Pools & APR</strong><ul style="margin:8px 0 0 18px"><li>Core pool (flexible): APR floats 8%–12% by utilization; rewards accrue continuously; claim or compound any time.</li><li>Booster pools (coming): 30/60/90 day locks with +2%/+4%/+6% boosts; early exit forfeits current booster only.</li></ul></div>
+          <div class="card"><strong>Emissions schedule</strong><ul style="margin:8px 0 0 18px"><li>Budget: 50,000,000 TSPILL over 24 months with quarterly step‑downs.</li><li>Epoch cadence: 7‑day checkpoints; APR scales with total staked.</li></ul></div>
+          <div class="card"><strong>Compounding & exits</strong><ul style="margin:8px 0 0 18px"><li>Claim to wallet any time; one‑click compound to increase effective APY.</li><li>Flexible pool unbonding up to 72 hours; booster early exit keeps principal and realized rewards.</li></ul></div>
+        </div>
+      </section>
+
+      <!-- COMMUNITY -->
+      <section id="community">
+        <h3>Community</h3>
+        <p class="muted">Connect with TSPILL across platforms. Only links on this page are official.</p>
+        <div class="card">
+          <strong>Official links</strong>
+          <div class="icon-grid" style="margin-top:10px">
+            <a class="icon-link" href="https://x.com/tspillofficial" target="_blank" rel="noopener">
+              <img src="./48x48_Twitter_Logo.png" alt="X logo" /><span>X — <span class="handle">@tspillofficial</span></span>
+            </a>
+            <a class="icon-link" href="https://t.me/tspillofficial" target="_blank" rel="noopener">
+              <img src="./48x48_Telegram_Logo.png" alt="Telegram logo" /><span>Telegram — <span class="handle">@tspillofficial</span></span>
+            </a>
+            <a class="icon-link" href="https://discord.gg/tspillofficial" target="_blank" rel="noopener">
+              <img src="./48x48_Discord_Logo.png" alt="Discord logo" /><span>Discord — <span class="handle">@tspillofficial</span></span>
+            </a>
+            <a class="icon-link" href="https://www.notion.so/tspillofficial" target="_blank" rel="noopener">
+              <img src="./48x48_Notion_Logo.png" alt="Notion logo" /><span>Notion — <span class="handle">@tspillofficial</span></span>
+            </a>
+            <a class="icon-link" href="https://www.pinterest.com/tspillofficial" target="_blank" rel="noopener">
+              <img src="./48x48_Pinterest_Logo.png" alt="Pinterest logo" /><span>Pinterest — <span class="handle">@tspillofficial</span></span>
+            </a>
+            <a class="icon-link" href="https://tspillofficial.gumroad.com" target="_blank" rel="noopener">
+              <img src="./48x48_Gumroad_Logo.png" alt="Gumroad logo" /><span class="handle">Gumroad — tspillofficial.gumroad.com</span>
+            </a>
+          </div>
+          <p class="muted" style="margin-top:10px">Admins never DM for keys or seed phrases. Bookmark this page for verified links.</p>
+        </div>
+      </section>
+
+      <!-- TRUST -->
+      <section id="trust">
+        <h3>Trust</h3>
+        <div class="grid">
+          <div class="card">
+            <strong>Authorities</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Mint authority: revoked</li>
+              <li>Update authority: secured</li>
+              <li class="wrap">TSPILL mint: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Addresses & custody</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li class="wrap">Deposit address (Presale treasury): DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK</li>
+              <li>No third‑party custody; receipts published</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Vesting & proofs</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Presale: 10% TGE, 90% linear 9 months</li>
+              <li>Claim parameters published before TGE</li>
+              <li>Public ledger for allocations and tx hashes</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal for universe payment -->
+    <div class="modal-overlay" id="universeModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="document.getElementById('universeModal').classList.remove('show')">×</button>
+        <h3>Light a Star</h3>
+        <p>Connect your Phantom wallet and send 1 USD equivalent (in SOL or USDC) to share your feeling with the universe.</p>
+        
+        <div style="margin:16px 0">
+          <label for="feelingText">Your feeling (max 500 chars)</label>
+          <textarea id="feelingText" style="width:100%;height:100px;padding:10px;border-radius:10px;border:1px solid #1c2538;background:#0b1220;color:#e8f0ff;font-family:system-ui;resize:none" placeholder="Write your wish, fear, problem, or feeling..." maxlength="500"></textarea>
+          <p class="muted" style="font-size:0.85rem;margin:4px 0 0"><span id="charCount">0</span>/500</p>
+        </div>
+
+        <div style="margin:16px 0">
+          <label for="displayName">Display as (optional)</label>
+          <input id="displayName" type="text" placeholder="Name, initials, or leave blank for anonymous" maxlength="50" />
+        </div>
+
+        <div style="margin:16px 0">
+          <button id="universeConnectBtn" class="chip" style="width:100%;padding:12px;background:var(--brand-btn);color:#fff">Connect Phantom & Send 1 USD</button>
+          <p id="universeStatus" class="muted" style="margin-top:8px"></p>
+        </div>
+      </div>
+    </div>
+
+    <footer>© TSPILL — Light your feelings to the universe</footer>
+
+    <!-- Router -->
+    <script>
+      (function(){
+        const main=document.getElementById('main');
+        const ids=new Set(['universe','overview','tokenomics','whitepaper','roadmap','presale','staking','community','trust']);
+        function setActive(){let h=(location.hash||'#universe').slice(1); if(!ids.has(h)) h='universe'; main.setAttribute('data-active',h); const el=document.getElementById(h); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});}
+        if(location.hash && !document.querySelector(location.hash)){ history.replaceState(null,"",location.pathname+location.search+'#universe'); }
+        window.addEventListener('hashchange',setActive);
+        window.addEventListener('DOMContentLoaded',setActive);
+        document.addEventListener('click',e=>{ const a=e.target.closest('a[href^="#"]'); if(!a) return; const id=a.getAttribute('href').slice(1); if(ids.has(id)){ if(location.hash.slice(1)===id){ setActive(); } }});
+      })();
+    </script>
+
+    <!-- Solana web3.js -->
+    <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" crossorigin="anonymous"></script>
+
+    <!-- Universe Starfield & Phantom Integration -->
+    <script>
+      (function(){
+        const RPC="https://api.mainnet-beta.solana.com";
+        const connection=new solanaWeb3.Connection(RPC,'confirmed');
+        const treasury=new solanaWeb3.PublicKey("DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK");
+        
+        let provider=null;
+        let stars=[];
+        let localStars=[];
+
+        // Initialize starfield with placeholder stars
+        function initStarfield(){
+          const container=document.getElementById('starfield');
+          if(!container) return;
+          
+          // Create 8 placeholder stars
+          for(let i=0;i<8;i++){
+            const star=createStarElement(Math.random()*100,Math.random()*80,i*2);
+            container.appendChild(star);
+            stars.push(star);
+          }
+        }
+
+        function createStarElement(x,y,delay){
+          const star=document.createElement('div');
+          star.className='star';
+          star.style.left=x+'%';
+          star.style.top=y+'%';
+          star.style.animationDelay=delay+'s';
+          star.style.animationDuration=(10+Math.random()*5)+'s';
+          star.addEventListener('click',openModal);
+          return star;
+        }
+
+        function openModal(){
+          document.getElementById('universeModal').classList.add('show');
+          document.getElementById('feelingText').focus();
+        }
+
+        // Char counter
+        document.getElementById('feelingText').addEventListener('input',function(){
+          document.getElementById('charCount').textContent=this.value.length;
+        });
+
+        // Connect Phantom
+        async function connectPhantom(){
+          provider=window.solana;
+          if(!provider || !provider.isPhantom){
+            alert('Phantom wallet not found. Install it first.');
+            return false;
+          }
+          try{
+            const r=await provider.connect();
+            document.getElementById('walletBadge').textContent='Connected: '+r.publicKey.toBase58().slice(0,6)+'...'+r.publicKey.toBase58().slice(-4);
+            return true;
+          }catch(e){
+            alert('Connect cancelled');
+            return false;
+          }
+        }
+
+        document.getElementById('connectBtnFixed').addEventListener('click',connectPhantom);
+
+        // Universe Modal - Send 1 USD
+        document.getElementById('universeConnectBtn').addEventListener('click',async function(){
+          const feeling=document.getElementById('feelingText').value.trim();
+          const displayName=document.getElementById('displayName').value.trim()||'Anonymous';
+          const status=document.getElementById('universeStatus');
+
+          if(!feeling){
+            status.innerHTML='<span class="warn">Please write your feeling first.</span>';
+            return;
+          }
+
+          if(!provider){
+            const connected=await connectPhantom();
+            if(!connected) return;
+          }
+
+          // 1 USD = ~0.004 SOL (approximate)
+          const solAmount=0.004;
+          const lamports=Math.round(solAmount*solanaWeb3.LAMPORTS_PER_SOL);
+
+          try{
+            status.textContent='Processing...';
+            const tx=new solanaWeb3.Transaction().add(
+              solanaWeb3.SystemProgram.transfer({
+                fromPubkey:provider.publicKey,
+                toPubkey:treasury,
+                lamports
+              })
+            );
+            tx.feePayer=provider.publicKey;
+            const {blockhash,lastValidBlockHeight}=await connection.getLatestBlockhash();
+            tx.recentBlockhash=blockhash;
+            const signed=await provider.signTransaction(tx);
+            const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false});
+            await connection.confirmTransaction({signature:sig,blockhash,lastValidBlockHeight},'confirmed');
+
+            // Add new star to display
+            const container=document.getElementById('starfield');
+            const newStar=createStarElement(Math.random()*100,Math.random()*80,0);
+            newStar.title=displayName+': '+feeling;
+            newStar.style.boxShadow='0 0 20px rgba(140,90,36,1)';
+            container.appendChild(newStar);
+
+            // Store locally
+            localStars.push({name:displayName,feeling,tx:sig});
+            localStorage.setItem('tspillStars',JSON.stringify(localStars));
+
+            // Update counters
+            document.getElementById('totalStars').textContent=stars.length+localStars.length;
+            document.getElementById('totalRaised').textContent=(localStars.length*1).toFixed(2);
+
+            status.innerHTML='<span class="ok">✓ Your star is now in the universe!</span><br/><span class="mono" style="font-size:0.8rem">Tx: '+sig.slice(0,10)+'...</span>';
+
+            setTimeout(()=>{
+              document.getElementById('universeModal').classList.remove('show');
+              document.getElementById('feelingText').value='';
+              document.getElementById('displayName').value='';
+              document.getElementById('charCount').textContent='0';
+            },2000);
+          }catch(e){
+            status.innerHTML='<span class="err">Transaction failed. '+e.message+'</span>';
+          }
+        });
+
+        // Load stored stars on page load
+        window.addEventListener('DOMContentLoaded',()=>{
+          initStarfield();
+          const stored=localStorage.getItem('tspillStars');
+          if(stored){
+            localStars=JSON.parse(stored);
+            localStars.forEach(s=>{
+              const container=document.getElementById('starfield');
+              const star=createStarElement(Math.random()*100,Math.random()*80,0);
+              star.title=s.name+': '+s.feeling;
+              container.appendChild(star);
+            });
+          }
+          document.getElementById('totalStars').textContent=stars.length+localStars.length;
+          document.getElementById('totalRaised').textContent=(localStars.length*1).toFixed(2);
+        });
+      })();
+    </script>
+
+    <!-- Presale Logic (existing) -->
+    <script>
+      (function(){
+        const RPC="https://api.mainnet-beta.solana.com";
+        const connection=new solanaWeb3.Connection(RPC,'confirmed');
+        const treasury=new solanaWeb3.PublicKey("DgNqpvhNEhEKrc3wUKRccP1S2iUPFgaKbVqik7QmmYTK");
+        const PRICE_USDT_PER_TSPILL=0.001;
+        const MIN_USDT=5, MAX_USDT=1000;
+
+        const connectBtnFixed=document.getElementById('connectBtnFixed');
+        const walletBadge=document.getElementById('walletBadge');
+        const usdtInput=document.getElementById('usdtInput');
+        const solOut=document.getElementById('solOut');
+        const tspillOut=document.getElementById('tspillOut');
+        const quoteNote=document.getElementById('quoteNote');
+        const estimateBlock=document.getElementById('estimateBlock');
+        const sendBtn=document.getElementById('sendBtn');
+        const chips=document.querySelectorAll('.chip');
+        const txStatus=document.getElementById('txStatus');
+
+        let provider=null;
+        let quote={solPerUsdt:0,ts:0};
+
+        function getProvider(){if('solana' in window){const p=window.solana;if(p && p.isPhantom) return p;}return null;}
+        
+        async function doConnect(){provider=getProvider();if(!provider){if(walletBadge) walletBadge.textContent="Phantom not found — install the wallet.";return;}try{const r=await provider.connect();if(walletBadge) walletBadge.textContent="Connected: "+r.publicKey.toBase58().slice(0,4)+"…"+r.publicKey.toBase58().slice(-4);}catch(e){if(walletBadge) walletBadge.textContent="Connect cancelled.";}}
+        
+        chips.forEach(c=>c.addEventListener('click',()=>{if(usdtInput){usdtInput.value=c.getAttribute('data-q');recalc();}}));
+
+        async function fetchFromJupiter(){const r=await fetch("https://price.jup.ag/v6/price?ids=SOL");const j=await r.json();if(!j?.data?.SOL?.price) throw new Error("No price");return 1/j.data.SOL.price;}
+        async function fetchFromCoingecko(){const r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");const j=await r.json();if(!j?.solana?.usd) throw new Error("No price");return 1/j.solana.usd;}
+        
+        async function fetchQuote(){try{const v=await fetchFromJupiter();quote.solPerUsdt=v;quote.ts=Date.now();if(quoteNote) quoteNote.textContent="Quote: 1 USDT ≈ "+v.toFixed(9)+" SOL • updated just now";if(estimateBlock) estimateBlock.style.display='';}catch(_){try{const v=await fetchFromCoingecko();quote.solPerUsdt=v;quote.ts=Date.now();if(quoteNote) quoteNote.textContent="Quote (fallback): 1 USDT ≈ "+v.toFixed(9)+" SOL";if(estimateBlock) estimateBlock.style.display='';}catch(e2){if(quoteNote) quoteNote.textContent="Quote unavailable. Proceed without estimate or retry.";if(estimateBlock) estimateBlock.style.display='none';}}}
+        
+        setInterval(()=>{const pres=document.getElementById('presale');if(pres && pres.offsetParent!==null){fetchQuote();}},30000);
+
+        async function recalc(){const usdt=parseFloat(usdtInput?.value||"0");if(!isFinite(usdt)||usdt<=0){if(solOut) solOut.value="";if(tspillOut) tspillOut.value="";return;}if(!quote.ts||Date.now()-quote.ts>30_000){await fetchQuote();}if(quote.solPerUsdt && estimateBlock && estimateBlock.style.display!=='none'){const solAmt=usdt*quote.solPerUsdt;if(solOut) solOut.value=solAmt.toFixed(6)+" SOL";}const tspill=usdt/PRICE_USDT_PER_TSPILL;if(tspillOut) tspillOut.value=Math.floor(tspill).toLocaleString()+" TSPILL";}
+        
+        if(usdtInput) usdtInput.addEventListener('input',recalc);
+        fetchQuote();
+
+        async function sendSol(){if(txStatus) txStatus.textContent="";const usdt=parseFloat(usdtInput?.value||"0");if(!provider){await doConnect();if(!provider) return;}if(!isFinite(usdt)||usdt<MIN_USDT||usdt>MAX_USDT){if(txStatus) txStatus.innerHTML="<span class='warn'>Enter between "+MIN_USDT+" and "+MAX_USDT+" USDT (equivalent).</span>";return;}if(!quote.ts||Date.now()-quote.ts>30_000){await fetchQuote();}if(!quote.solPerUsdt && txStatus){txStatus.innerHTML="<span class='warn'>Proceeding without estimate.</span>";}const solAmount=(quote.solPerUsdt?usdt*quote.solPerUsdt:0);const lamports=Math.max(1,Math.round(solAmount*solanaWeb3.LAMPORTS_PER_SOL));try{const fromPubkey=provider.publicKey;const tx=new solanaWeb3.Transaction().add(solanaWeb3.SystemProgram.transfer({fromPubkey,toPubkey:treasury,lamports}));tx.feePayer=fromPubkey;const {blockhash,lastValidBlockHeight}=await connection.getLatestBlockhash();tx.recentBlockhash=blockhash;const signed=await provider.signTransaction(tx);const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false});await connection.confirmTransaction({signature:sig,blockhash,lastValidBlockHeight},'confirmed');const tspill=Math.floor(usdt/PRICE_USDT_PER_TSPILL);if(txStatus) txStatus.innerHTML="<span class='ok'>Sent.</span> Tx: <span class='mono'>"+sig+"</span><br/>Record — Wallet: <span class='mono'>"+fromPubkey.toBase58()+"</span> • USDT value: "+usdt.toFixed(2)+" • SOL: "+(lamports/solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)+" • TSPILL: "+tspill.toLocaleString()+".";}catch(e){if(txStatus) txStatus.innerHTML="<span class='err'>Transaction failed or cancelled.</span>";}}
+        
+        if(sendBtn) sendBtn.addEventListener('click',sendSol);
+      })();
+    </script>
+  </body>
+</html>
