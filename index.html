@@ -4,231 +4,710 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TSPILL — The currency for creators</title>
-
   <meta name="description" content="TSPILL is a creator-first ecosystem where ideas become real products with transparent attribution and rewards." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <style>
-    html { scroll-behavior: smooth }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: #0b0f14;
-      color: #e8f0ff;
+    :root {
+      --bg-primary: #070a0f;
+      --bg-secondary: #0d1117;
+      --bg-card: rgba(15, 22, 33, 0.6);
+      --border-color: rgba(56, 76, 112, 0.3);
+      --border-glow: rgba(212, 160, 85, 0.2);
+      --text-primary: #f0f6ff;
+      --text-secondary: #8b9dc3;
+      --text-muted: #5a6b8a;
+      --accent-gold: #d4a055;
+      --accent-gold-light: #e8c078;
+      --accent-gold-dark: #a67c3d;
+      --gradient-gold: linear-gradient(135deg, #d4a055 0%, #f0c87a 50%, #a67c3d 100%);
+      --gradient-bg: radial-gradient(ellipse at top, #0f1829 0%, #070a0f 50%);
     }
 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--gradient-bg);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated background particles */
+    .bg-effects {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-effects::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(212, 160, 85, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 157, 195, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(212, 160, 85, 0.02) 0%, transparent 30%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, 2%) rotate(1deg); }
+      66% { transform: translate(-1%, 1%) rotate(-1deg); }
+    }
+
+    /* Header */
     header {
       position: sticky;
       top: 0;
-      background: #0b0f14;
-      border-bottom: 1px solid #121a2a;
-      padding: 20px;
-      text-align: center;
-      z-index: 10;
+      background: rgba(7, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px 24px;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-section img {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(212, 160, 85, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .logo-section img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(212, 160, 85, 0.3);
+    }
+
+    .brand {
+      text-align: left;
+    }
+
+    .brand h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
     }
 
     nav {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
-      margin-top: 10px;
     }
 
     nav a {
-      padding: 8px 14px;
-      border: 1px solid #2a3550;
-      border-radius: 10px;
+      padding: 10px 18px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
       text-decoration: none;
-      color: #cfe3ff;
-      font-size: 0.95rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    nav a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(212, 160, 85, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     nav a:hover {
-      background: #111a2b;
+      color: var(--text-primary);
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(212, 160, 85, 0.15);
     }
 
+    nav a:hover::before {
+      opacity: 1;
+    }
+
+    /* Main content */
     main {
-      max-width: 1000px;
-      margin: auto;
-      padding: 30px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      position: relative;
+      z-index: 1;
     }
 
     section {
-      margin-bottom: 60px;
+      margin-bottom: 100px;
     }
 
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-
+    /* Hero section */
     .hero {
       text-align: center;
       max-width: 800px;
-      margin: auto;
+      margin: 0 auto 80px;
+      padding: 40px 0;
     }
 
-    .hero p {
-      opacity: 0.9;
+    .hero h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero > p {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .token-badge {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .token-badge:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 8px 40px rgba(212, 160, 85, 0.1);
+    }
+
+    .token-badge span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .token-badge code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-gold);
+      word-break: break-all;
+      max-width: 100%;
+    }
+
+    /* Section titles */
+    .section-header {
+      margin-bottom: 32px;
+    }
+
+    .section-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-header h3 i {
+      color: var(--accent-gold);
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
       font-size: 1.05rem;
+      max-width: 600px;
     }
 
+    /* Cards grid */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
     }
 
     .card {
-      background: #0e1420;
-      border: 1px solid #1c2538;
-      border-radius: 14px;
-      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-gold);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      border-color: var(--border-glow);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 60px rgba(212, 160, 85, 0.08);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(212, 160, 85, 0.2), rgba(212, 160, 85, 0.05));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--accent-gold);
+    }
+
+    .card h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-primary);
     }
 
     .card p {
-      margin-bottom: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.7;
     }
 
+    /* CTA button */
     .cta {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 10px 18px;
-      border-radius: 12px;
-      background: #8c5a24;
-      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      background: var(--gradient-gold);
+      color: #0a0d12;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(212, 160, 85, 0.3);
     }
 
     .cta:hover {
-      background: #a46829;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(212, 160, 85, 0.4);
     }
 
+    /* Social links */
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+
+    .social-link i {
+      color: var(--accent-gold);
+    }
+
+    .social-link:hover {
+      border-color: var(--accent-gold);
+      color: var(--text-primary);
+      transform: translateX(4px);
+      background: rgba(212, 160, 85, 0.05);
+    }
+
+    /* Warning box */
+    .warning-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-top: 32px;
+      padding: 20px 24px;
+      background: rgba(234, 179, 8, 0.08);
+      border: 1px solid rgba(234, 179, 8, 0.2);
+      border-radius: 14px;
+    }
+
+    .warning-box i {
+      color: #eab308;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .warning-box p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* Footer */
     footer {
       text-align: center;
-      padding: 30px 20px;
-      border-top: 1px solid #121a2a;
-      color: #9fb3d1;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(7, 10, 15, 0.5);
+    }
+
+    .footer-content {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .footer-logo span {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-tagline {
+      color: var(--text-muted);
       font-size: 0.9rem;
+      margin-bottom: 24px;
     }
 
-    .wrap {
-      word-break: break-word;
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
     }
 
-    .links a {
-      display: block;
-      margin: 6px 0;
-      color: #cfe3ff;
+    .footer-links a {
+      color: var(--text-secondary);
       text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
     }
 
-    .links a:hover {
-      text-decoration: underline;
+    .footer-links a:hover {
+      color: var(--accent-gold);
     }
+
+    .footer-copyright {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .logo-section img {
+        width: 52px;
+        height: 52px;
+      }
+
+      .brand h1 {
+        font-size: 1.5rem;
+      }
+
+      nav a {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+      }
+
+      main {
+        padding: 40px 20px;
+      }
+
+      section {
+        margin-bottom: 70px;
+      }
+
+      .hero {
+        padding: 20px 0;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .social-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animations on scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
   </style>
 </head>
 
 <body>
 
-<header>
-  <img src="./Tea_spill_logo.png" alt="TSPILL logo" width="88" height="88" />
-  <h1>TSPILL</h1>
-  <p>The currency for creators, innovators, and designers.</p>
+<div class="bg-effects"></div>
 
-  <nav>
-    <a href="#about">About</a>
-    <a href="#ecosystem">Ecosystem</a>
-    <a href="#documentation">Documentation</a>
-    <a href="#community">Community</a>
-    <a href="#trust">Trust</a>
-  </nav>
+<header>
+  <div class="header-content">
+    <div class="logo-section">
+      <img src="./Tea_spill_logo.png" alt="TSPILL logo" />
+      <div class="brand">
+        <h1>TSPILL</h1>
+        <p>The currency for creators</p>
+      </div>
+    </div>
+
+    <nav>
+      <a href="#about">About</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#documentation">Documentation</a>
+      <a href="#community">Community</a>
+      <a href="#trust">Trust</a>
+    </nav>
+  </div>
 </header>
 
 <main>
 
-  <section class="hero" id="about">
-    <h2>From ideas to real products</h2>
+  <section class="hero fade-in" id="about">
+    <h2>From Ideas to Real Products</h2>
     <p>
       TSPILL is a creator-first ecosystem connecting designers, innovators,
       and manufacturers to turn concepts into real-world products —
       with clear attribution and transparent rewards.
     </p>
 
-    <p class="wrap" style="margin-top:12px;">
-      Token Mint (Solana):<br />
-      <strong>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</strong>
-    </p>
+    <div class="token-badge">
+      <span>Token Mint (Solana)</span>
+      <code>2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</code>
+    </div>
   </section>
 
-  <section id="ecosystem">
-    <h3>What TSPILL enables</h3>
+  <section id="ecosystem" class="fade-in delay-1">
+    <div class="section-header">
+      <h3><i data-lucide="layers"></i> What TSPILL Enables</h3>
+      <p>A complete ecosystem designed to empower every participant in the creative process.</p>
+    </div>
 
     <div class="grid">
       <div class="card">
-        <strong>Creators</strong>
-        <p>Submit ideas, participate in challenges, and receive recognition and rewards.</p>
+        <div class="card-icon">
+          <i data-lucide="palette"></i>
+        </div>
+        <h4>Creators</h4>
+        <p>Submit ideas, participate in challenges, and receive recognition and rewards for your creative contributions.</p>
       </div>
 
       <div class="card">
-        <strong>Manufacturers</strong>
-        <p>Access qualified concepts and collaborate with global creative talent.</p>
+        <div class="card-icon">
+          <i data-lucide="factory"></i>
+        </div>
+        <h4>Manufacturers</h4>
+        <p>Access qualified concepts and collaborate with global creative talent to bring products to market.</p>
       </div>
 
       <div class="card">
-        <strong>Community</strong>
-        <p>Help surface the best ideas and shape what gets built next.</p>
+        <div class="card-icon">
+          <i data-lucide="users"></i>
+        </div>
+        <h4>Community</h4>
+        <p>Help surface the best ideas and shape what gets built next through collective curation.</p>
       </div>
     </div>
   </section>
 
-  <section id="documentation">
-    <h3>Official documentation</h3>
-    <p>
-      TSPILL is built in public. All core documents, updates, and plans
-      are maintained in our official Notion workspace.
-    </p>
-
-   <a class="cta" href="https://chartreuse-cast-b86.notion.site/TSPILL-Concept-Validation-Board-2698ce11cac880c5935afa5c3ac84f60" target="_blank" rel="noopener">
-  View Concept Validation Board →
-</a>
-  </section>
-
-  <section id="community">
-    <h3>Community & updates</h3>
-
-    <div class="links">
-      <a href="https://x.com/tspillofficial" target="_blank">X (Twitter) — @tspillofficial</a>
-      <a href="https://t.me/tspillofficial" target="_blank">Telegram — @tspillofficial</a>
-      <a href="https://discord.gg/tspillofficial" target="_blank">Discord</a>
-      <a href="https://www.pinterest.com/tspillofficial" target="_blank">Pinterest</a>
-      <a href="https://tspillofficial.gumroad.com" target="_blank">Gumroad</a>
+  <section id="documentation" class="fade-in delay-2">
+    <div class="section-header">
+      <h3><i data-lucide="book-open"></i> Official Documentation</h3>
+      <p>
+        TSPILL is built in public. All core documents, updates, and plans
+        are maintained in our official Notion workspace.
+      </p>
     </div>
 
-    <p style="margin-top:12px;" class="wrap">
-      ⚠️ Admins will never DM first or ask for private keys.
-      Only links listed on this site are official.
-    </p>
+    <a class="cta" href="https://www.notion.so/tspillofficial" target="_blank" rel="noopener">
+      View TSPILL Notion
+      <i data-lucide="arrow-right"></i>
+    </a>
   </section>
 
-  <section id="trust">
-    <h3>Trust & transparency</h3>
+  <section id="community" class="fade-in delay-2">
+    <div class="section-header">
+      <h3><i data-lucide="message-circle"></i> Community & Updates</h3>
+      <p>Join our community and stay updated with the latest developments.</p>
+    </div>
+
+    <div class="social-grid">
+      <a class="social-link" href="https://x.com/tspillofficial" target="_blank" rel="noopener">
+        <i data-lucide="twitter"></i>
+        <span>X (Twitter)</span>
+      </a>
+      <a class="social-link" href="https://t.me/tspillofficial" target="_blank" rel="noopener">
+        <i data-lucide="send"></i>
+        <span>Telegram</span>
+      </a>
+      <a class="social-link" href="https://discord.gg/tspillofficial" target="_blank" rel="noopener">
+        <i data-lucide="message-square"></i>
+        <span>Discord</span>
+      </a>
+      <a class="social-link" href="https://www.pinterest.com/tspillofficial" target="_blank" rel="noopener">
+        <i data-lucide="image"></i>
+        <span>Pinterest</span>
+      </a>
+      <a class="social-link" href="https://tspillofficial.gumroad.com" target="_blank" rel="noopener">
+        <i data-lucide="shopping-bag"></i>
+        <span>Gumroad</span>
+      </a>
+    </div>
+
+    <div class="warning-box">
+      <i data-lucide="alert-triangle"></i>
+      <p>
+        <strong>Security Notice:</strong> Admins will never DM first or ask for private keys.
+        Only links listed on this official site are legitimate.
+      </p>
+    </div>
+  </section>
+
+  <section id="trust" class="fade-in delay-3">
+    <div class="section-header">
+      <h3><i data-lucide="shield-check"></i> Trust & Transparency</h3>
+      <p>Built with integrity at every layer of the ecosystem.</p>
+    </div>
 
     <div class="grid">
       <div class="card">
-        <strong>Token integrity</strong>
-        <p>Mint authority revoked. Update authority secured.</p>
+        <div class="card-icon">
+          <i data-lucide="lock"></i>
+        </div>
+        <h4>Token Integrity</h4>
+        <p>Mint authority revoked. Update authority secured. Your trust is protected by design.</p>
       </div>
 
       <div class="card">
-        <strong>Open documentation</strong>
-        <p>All roadmap, structure, and ecosystem details are public.</p>
+        <div class="card-icon">
+          <i data-lucide="file-text"></i>
+        </div>
+        <h4>Open Documentation</h4>
+        <p>All roadmap, structure, and ecosystem details are publicly accessible and transparent.</p>
       </div>
 
       <div class="card">
-        <strong>Built in public</strong>
-        <p>TSPILL evolves with community visibility and accountability.</p>
+        <div class="card-icon">
+          <i data-lucide="eye"></i>
+        </div>
+        <h4>Built in Public</h4>
+        <p>TSPILL evolves with full community visibility and accountability at every step.</p>
       </div>
     </div>
   </section>
@@ -236,8 +715,28 @@
 </main>
 
 <footer>
-  © TSPILL — Built in public
+  <div class="footer-content">
+    <div class="footer-logo">
+      <span>TSPILL</span>
+    </div>
+    <p class="footer-tagline">The currency for creators, innovators, and designers.</p>
+    
+    <div class="footer-links">
+      <a href="#about">About</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#documentation">Docs</a>
+      <a href="#community">Community</a>
+      <a href="#trust">Trust</a>
+    </div>
+    
+    <p class="footer-copyright">© 2026 TSPILL — Built in public with 💛</p>
+  </div>
 </footer>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+</script>
 
 </body>
 </html>
