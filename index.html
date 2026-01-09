@@ -21,7 +21,6 @@
   --text-muted:#8fa0c8;
   --text-dim:#5b6a92;
   --gold:#d4a055;
-  --gold-soft:rgba(212,160,85,.25);
   --gold-grad:linear-gradient(135deg,#d4a055,#f0c87a,#a67c3d);
 }
 
@@ -35,10 +34,9 @@ body{
     radial-gradient(1000px 600px at 80% 30%,rgba(212,160,85,.08),transparent 60%),
     linear-gradient(180deg,var(--bg-core),var(--bg-deep));
   color:var(--text-main);
-  overflow-x:hidden;
 }
 
-#quantum-bg{
+#network-bg{
   position:fixed;
   inset:0;
   z-index:-1;
@@ -49,10 +47,10 @@ a{text-decoration:none;color:inherit}
 header{
   position:sticky;
   top:0;
-  z-index:50;
   background:rgba(5,7,12,.85);
   backdrop-filter:blur(18px);
   border-bottom:1px solid var(--border);
+  z-index:50;
 }
 
 .nav{
@@ -60,19 +58,19 @@ header{
   margin:auto;
   padding:18px 24px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
 }
 
 .brand{
   display:flex;
-  align-items:center;
   gap:14px;
+  align-items:center;
 }
 
 .brand img{
-  width:54px;
-  height:54px;
+  width:52px;
+  height:52px;
   border-radius:14px;
 }
 
@@ -118,27 +116,21 @@ section{margin-bottom:140px}
 }
 
 .cta{
-  display:inline-block;
-  padding:15px 30px;
+  padding:15px 32px;
   border-radius:16px;
+  font-weight:600;
   background:var(--gold-grad);
   color:#02040a;
-  font-weight:600;
-  box-shadow:0 0 40px rgba(212,160,85,.35);
+  box-shadow:0 0 40px rgba(212,160,85,.4);
+  display:inline-block;
 }
 
-/* FIXED SECOND BUTTON */
+/* Secondary button — fixed */
 .cta.secondary{
-  margin-left:14px;
-  background:linear-gradient(180deg,rgba(212,160,85,.18),rgba(212,160,85,.08));
+  margin-left:16px;
+  background:#121826;
   color:var(--gold);
-  border:1px solid var(--gold-soft);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.03),
-    0 8px 28px rgba(0,0,0,.45);
-}
-.cta.secondary:hover{
-  background:linear-gradient(180deg,rgba(212,160,85,.28),rgba(212,160,85,.12));
+  border:1px solid var(--gold);
 }
 
 .section-head{
@@ -156,7 +148,7 @@ section{margin-bottom:140px}
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:24px;
 }
 
@@ -173,24 +165,18 @@ footer{
   text-align:center;
   color:var(--text-dim);
 }
-
 footer strong{
   font-family:"Space Grotesk",sans-serif;
   background:var(--gold-grad);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-
-@media(max-width:760px){
-  nav{display:none}
-  .cta.secondary{margin-left:0;margin-top:14px}
-}
 </style>
 </head>
 
 <body>
 
-<canvas id="quantum-bg"></canvas>
+<canvas id="network-bg"></canvas>
 
 <header>
   <div class="nav">
@@ -210,6 +196,7 @@ footer strong{
 
 <main>
 
+<!-- HERO -->
 <section class="hero">
   <h1>Where Ideas Become Products.<br>Where Creators Own the Outcome.</h1>
   <p>
@@ -220,31 +207,58 @@ footer strong{
   <a class="cta" href="#records">View Public Records</a>
 </section>
 
+<!-- PHILOSOPHY -->
 <section id="philosophy">
   <div class="section-head">
     <h2>Built on Judgment, Not Hype</h2>
-    <p>Most ideas fail silently or are pushed prematurely into promotion.</p>
+    <p>Ideas are documented, evaluated, and preserved — whether accepted or rejected.</p>
+  </div>
+  <div class="grid">
+    <div class="panel">Validation before promotion</div>
+    <div class="panel">Permanent attribution</div>
+    <div class="panel">Public decision records</div>
   </div>
 </section>
 
+<!-- ECOSYSTEM -->
 <section id="ecosystem">
   <div class="section-head">
     <h2>A Complete Production Network</h2>
+    <p>From concept to manufacturing, execution follows proof.</p>
+  </div>
+  <div class="grid">
+    <div class="panel">Concept review & scoring</div>
+    <div class="panel">Manufacturing partnerships</div>
+    <div class="panel">Royalty distribution</div>
   </div>
 </section>
 
+<!-- VALIDATION -->
 <section id="validation">
   <div class="section-head">
     <h2>The Proof Engine</h2>
+    <p>The public system where every idea is evaluated.</p>
   </div>
+  <a class="cta"
+     href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
+     target="_blank">
+     View Concept Validation Board
+  </a>
 </section>
 
+<!-- ROADMAP -->
 <section id="roadmap">
   <div class="section-head">
     <h2>Each Phase Earns the Next</h2>
   </div>
+  <div class="grid">
+    <div class="panel">Foundation — Active</div>
+    <div class="panel">Self-Production — Near term</div>
+    <div class="panel">Scale — Conditional</div>
+  </div>
 </section>
 
+<!-- RECORDS -->
 <section id="records">
   <div class="section-head">
     <h2>Public Records & Documentation</h2>
@@ -254,13 +268,13 @@ footer strong{
   <a class="cta"
      href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
      target="_blank">
-    Concept Validation Board
+     Concept Validation Board
   </a>
 
   <a class="cta secondary"
      href="https://chartreuse-cast-b86.notion.site/2e38ce11cac880aaa17fffdc7f5efffe"
      target="_blank">
-    Internal Production Experiments
+     Internal Production Experiments
   </a>
 </section>
 
@@ -272,51 +286,44 @@ footer strong{
 </footer>
 
 <script>
-lucide.createIcons();
-
-/* background animation */
-const c=document.getElementById("quantum-bg"),ctx=c.getContext("2d");
+const c=document.getElementById("network-bg"),ctx=c.getContext("2d");
 function resize(){c.width=innerWidth;c.height=innerHeight}
 window.addEventListener("resize",resize);resize();
 
-const nodes=[...Array(80)].map(()=>({
+const pts=[...Array(80)].map(()=>({
   x:Math.random()*c.width,
   y:Math.random()*c.height,
   vx:(Math.random()-.5)*.3,
   vy:(Math.random()-.5)*.3
 }));
 
-function draw(){
+function animate(){
   ctx.clearRect(0,0,c.width,c.height);
-  nodes.forEach(n=>{
-    n.x+=n.vx;n.y+=n.vy;
-    if(n.x<0||n.x>c.width)n.vx*=-1;
-    if(n.y<0||n.y>c.height)n.vy*=-1;
-  });
+  for(let i=0;i<pts.length;i++){
+    const p=pts[i];
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>c.width)p.vx*=-1;
+    if(p.y<0||p.y>c.height)p.vy*=-1;
 
-  for(let i=0;i<nodes.length;i++){
-    for(let j=i+1;j<nodes.length;j++){
-      let dx=nodes[i].x-nodes[j].x;
-      let dy=nodes[i].y-nodes[j].y;
-      let d=Math.sqrt(dx*dx+dy*dy);
+    for(let j=i+1;j<pts.length;j++){
+      const q=pts[j];
+      const d=Math.hypot(p.x-q.x,p.y-q.y);
       if(d<140){
         ctx.strokeStyle=`rgba(94,231,255,${1-d/140})`;
         ctx.beginPath();
-        ctx.moveTo(nodes[i].x,nodes[i].y);
-        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.moveTo(p.x,p.y);
+        ctx.lineTo(q.x,q.y);
         ctx.stroke();
       }
     }
-  }
-  nodes.forEach(n=>{
     ctx.fillStyle="#5ee7ff";
     ctx.beginPath();
-    ctx.arc(n.x,n.y,1.6,0,Math.PI*2);
+    ctx.arc(p.x,p.y,1.6,0,Math.PI*2);
     ctx.fill();
-  });
-  requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(animate);
 }
-draw();
+animate();
 </script>
 
 </body>
