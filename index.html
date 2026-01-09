@@ -41,6 +41,7 @@
       overflow-x: hidden;
     }
 
+    /* animated background */
     canvas#bg {
       position: fixed;
       inset: 0;
@@ -131,15 +132,6 @@
       color: #0a0d12;
       font-weight: 600;
       box-shadow: 0 10px 40px rgba(212,160,85,.35);
-      margin-right: 14px;
-    }
-
-    /* secondary button – FIXED FILL */
-    .cta.secondary {
-      background: #121826;
-      color: var(--gold);
-      border: 1px solid var(--gold);
-      box-shadow: 0 12px 32px rgba(0,0,0,.55);
     }
 
     .section-head {
@@ -174,6 +166,21 @@
       transform: translateY(-6px);
       box-shadow: 0 25px 60px rgba(0,0,0,.35);
       border-color: var(--gold-soft);
+    }
+
+    .panel i {
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+
+    .panel h3 {
+      font-family: "Space Grotesk", sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .panel p {
+      color: var(--text-muted);
+      font-size: .95rem;
     }
 
     .status {
@@ -233,24 +240,116 @@
 
 <main>
 
-  <!-- ALL CONTENT ABOVE UNCHANGED -->
+  <section class="hero">
+    <h1>Where Ideas Become Products.<br>Where Creators Own the Outcome.</h1>
+    <p>
+      TSPILL is a production-linked creative ecosystem connecting designers,
+      innovators, and manufacturers — transforming validated concepts into
+      real-world products with transparent attribution and royalties.
+    </p>
+    <a href="#records" class="cta">View Public Records</a>
+  </section>
+
+  <section id="philosophy">
+    <div class="section-head">
+      <h2>Built on Judgment, Not Hype</h2>
+      <p>Most ideas fail silently or are pushed prematurely into promotion.  
+      TSPILL exists to document, validate, and execute — in public.</p>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <i data-lucide="check-circle"></i>
+        <h3>Validation Before Promotion</h3>
+        <p>Ideas are evaluated for clarity and feasibility before marketing begins.</p>
+      </div>
+      <div class="panel">
+        <i data-lucide="file-text"></i>
+        <h3>Public Decision Records</h3>
+        <p>Rejected concepts are documented — not deleted. Learning is preserved.</p>
+      </div>
+      <div class="panel">
+        <i data-lucide="award"></i>
+        <h3>Permanent Attribution</h3>
+        <p>Creators retain credit and earn royalties from real product outcomes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="ecosystem">
+    <div class="section-head">
+      <h2>A Complete Production Network</h2>
+      <p>From concept to manufacturing, every step is structured and accountable.</p>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <i data-lucide="layers"></i>
+        <h3>Concept Validation Board</h3>
+        <p>Our public operating system for evaluating ideas.</p>
+      </div>
+      <div class="panel">
+        <i data-lucide="factory"></i>
+        <h3>Production Pipeline</h3>
+        <p>Validated designs move directly to vetted manufacturers.</p>
+      </div>
+      <div class="panel">
+        <i data-lucide="coins"></i>
+        <h3>Transparent Royalties</h3>
+        <p>Royalties tracked, distributed, and documented.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="validation">
+    <div class="section-head">
+      <h2>The Proof Engine</h2>
+      <p>The Concept Validation Board is not a feature — it is the record.</p>
+    </div>
+    <div class="panel">
+      <p>
+        Every submission is reviewed, categorized, and assigned a status:
+        Evaluating, Paused, Rejected, or Validated.  
+        Decisions include reasoning and remain publicly accessible.
+      </p>
+      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
+         target="_blank"
+         class="status active">
+        View Full Validation Board →
+      </a>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="section-head">
+      <h2>Each Phase Earns the Next</h2>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h3>Phase 1 — Foundation</h3>
+        <p>Public philosophy. Validation system live.</p>
+        <span class="status active">ACTIVE</span>
+      </div>
+      <div class="panel">
+        <h3>Phase 2 — Self-Production</h3>
+        <p>TSPILL Originals proving execution.</p>
+        <span class="status">Near-Term</span>
+      </div>
+      <div class="panel">
+        <h3>Future Phases</h3>
+        <p>Competitions, marketplace, and scale — only if validated.</p>
+        <span class="status">Conditional</span>
+      </div>
+    </div>
+  </section>
 
   <section id="records">
     <div class="section-head">
       <h2>Public Records & Documentation</h2>
       <p>No presales. No paid promotion. No roadmap promises tied to price.</p>
     </div>
-
     <a class="cta"
        href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
        target="_blank">
-      Concept Validation Board
-    </a>
-
-    <a class="cta secondary"
-       href="https://chartreuse-cast-b86.notion.site/2e38ce11cac880aaa17fffdc7f5efffe"
-       target="_blank">
-      Internal Production Experiments
+      Open Notion Workspace
     </a>
   </section>
 
@@ -264,6 +363,7 @@
 <script>
   lucide.createIcons();
 
+  /* background animation */
   const c=document.getElementById("bg"),ctx=c.getContext("2d");
   function resize(){c.width=innerWidth;c.height=innerHeight}
   window.addEventListener("resize",resize);resize();
