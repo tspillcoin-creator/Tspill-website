@@ -6,12 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="TSPILL is a production-linked creative ecosystem where validated ideas become real products with permanent attribution and transparent royalties." />
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
-  <!-- Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <style>
@@ -132,6 +130,12 @@
       color: #0a0d12;
       font-weight: 600;
       box-shadow: 0 10px 40px rgba(212,160,85,.35);
+      margin: 10px;
+      transition: transform 0.2s;
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
     }
 
     .section-head {
@@ -214,6 +218,7 @@
 
     @media(max-width:720px){
       nav { display:none; }
+      .cta { width: 100%; margin: 10px 0; }
     }
   </style>
 </head>
@@ -253,7 +258,7 @@
   <section id="philosophy">
     <div class="section-head">
       <h2>Built on Judgment, Not Hype</h2>
-      <p>Most ideas fail silently or are pushed prematurely into promotion.  
+      <p>Most ideas fail silently or are pushed prematurely into promotion.
       TSPILL exists to document, validate, and execute — in public.</p>
     </div>
     <div class="grid">
@@ -307,7 +312,7 @@
     <div class="panel">
       <p>
         Every submission is reviewed, categorized, and assigned a status:
-        Evaluating, Paused, Rejected, or Validated.  
+        Evaluating, Paused, Rejected, or Validated.
         Decisions include reasoning and remain publicly accessible.
       </p>
       <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
@@ -346,11 +351,18 @@
       <h2>Public Records & Documentation</h2>
       <p>No presales. No paid promotion. No roadmap promises tied to price.</p>
     </div>
-    <a class="cta"
-       href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
-       target="_blank">
-      Open Notion Workspace
-    </a>
+    <div style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
+      <a class="cta"
+         href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60"
+         target="_blank">
+        Concept Validation Board
+      </a>
+      <a class="cta"
+         href="https://chartreuse-cast-b86.notion.site/ebd//2e38ce11cac880aaa17fffdc7f5efffe"
+         target="_blank">
+        Internal Production Experiments
+      </a>
+    </div>
   </section>
 
 </main>
