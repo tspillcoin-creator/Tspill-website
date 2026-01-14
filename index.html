@@ -21,7 +21,6 @@
       --text-muted: #8b9dc3;
       --text-dim: #5a6b8a;
       --gold: #d4a055;
-      --gold-soft: rgba(212,160,85,0.15);
       --gradient-gold: linear-gradient(135deg,#d4a055,#f0c87a,#a67c3d);
     }
 
@@ -77,7 +76,7 @@
       -webkit-text-fill-color: transparent;
     }
 
-    nav a { margin-left: 20px; font-size: .9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    nav a { margin-left: 20px; font-size: .9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; }
     nav a:hover { color: var(--gold); }
 
     main { max-width: 1100px; margin: auto; padding: 100px 24px; }
@@ -87,27 +86,31 @@
     .hero h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(2.4rem, 6vw, 3.8rem); line-height: 1.1; margin-bottom: 28px; }
     .hero p { color: var(--text-muted); font-size: 1.25rem; margin-bottom: 40px; }
 
+    /* Standardized Gold Button */
     .cta {
       display: inline-block; padding: 16px 32px; border-radius: 12px;
       background: var(--gradient-gold); color: #0a0d12;
       font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
       box-shadow: 0 10px 40px rgba(212,160,85,.35); transition: 0.2s;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
     }
-    .cta:hover { transform: translateY(-2px); }
+    .cta:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
     .panel {
       background: var(--bg-panel); border: 1px solid var(--border);
       padding: 40px; border-radius: 22px; backdrop-filter: blur(10px);
       transition: 0.3s;
     }
-    .panel:hover { border-color: var(--gold-soft); transform: translateY(-4px); }
     .panel h3 { font-family: "Space Grotesk", sans-serif; margin-bottom: 12px; }
-    .panel p { color: var(--text-muted); font-size: 0.95rem; }
+    .panel p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
 
     .status {
       display: inline-block; font-size: 0.75rem; font-weight: 700;
-      padding: 6px 14px; border-radius: 999px; margin-top: 20px;
+      padding: 6px 14px; border-radius: 999px;
       background: rgba(255,255,255,0.06); color: var(--text-muted);
+      text-transform: uppercase;
     }
     .active { background: rgba(34,197,94,0.15); color: #4ade80; }
 
@@ -164,7 +167,7 @@
     </div>
     <div class="panel">
       <p>Every submission is processed through our internal logic gates: Evaluating, Paused, Rejected, or Validated. Decisions are evidence-based and publicly accessible.</p>
-      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="status active">Access Validation Board &rarr;</a>
+      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px;">Access Validation Board &rarr;</a>
     </div>
   </section>
 
@@ -180,8 +183,16 @@
   <section id="records">
     <div style="margin-bottom: 40px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2rem;">Public Records (Live)</h2><p>This site tracks ideas, experiments, and outcomes as they actually happen. Records are updated manually and only when something earns documentation.</p></div>
     <div class="grid">
-      <a class="panel" href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank"><h3>Concept Validation Board</h3><p>A public log of ideas under institutional evaluation.</p></a>
-      <a class="panel" href="https://chartreuse-cast-b86.notion.site/ebd//2e38ce11cac880aaa17fffdc7f5efffe" target="_blank"><h3>Internal Production Experiments</h3><p>These records document early execution tests. Not products or promises.</p></a>
+      <div class="panel">
+        <h3>Concept Validation Board</h3>
+        <p>A public log of ideas under institutional evaluation.</p>
+        <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px;">View Validation Board</a>
+      </div>
+      <div class="panel">
+        <h3>Internal Production Experiments</h3>
+        <p>These records document early execution tests. Not products or promises.</p>
+        <a href="https://chartreuse-cast-b86.notion.site/ebd//2e38ce11cac880aaa17fffdc7f5efffe" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px;">Review Experiments</a>
+      </div>
     </div>
   </section>
 </main>
