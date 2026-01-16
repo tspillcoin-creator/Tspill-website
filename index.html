@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>TSPILL — Creative Operating System</title>
+  <title>TSPILL — Public Record of Creative Execution</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="A high-performance hub where ideas are de-risked and transformed into tangible products." />
+  <meta name="description" content="A documentation-first system tracking the movement of ideas from thought to validation and production." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,13 +14,14 @@
 
   <style>
     :root {
+      /* PROFESSIONAL THEME: WHITE & CHARCOAL */
       --bg-main: #ffffff; 
       --bg-panel: #fcfcfd; 
       --border: rgba(0, 0, 0, 0.08); 
-      --text-main: #1a1c20; 
-      --text-muted: #4a5568; 
+      --text-main: #1a1c20; /* Deep Charcoal for a premium look */
+      --text-muted: #4a5568; /* Slate Gray for secondary text */
       --text-dim: #718096; 
-      --gold: #d4a055; 
+      --gold: #d4a055; /* TSPILL Signature Gold */
       --gradient-gold: linear-gradient(135deg,#d4a055,#f0c87a,#a67c3d);
     }
 
@@ -62,7 +63,7 @@
 
     .brand { display: flex; gap: 14px; align-items: center; }
     .brand img {
-      width: 48px; height: 48px; border-radius: 12px;
+      width: 52px; height: 52px; border-radius: 14px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
@@ -75,59 +76,53 @@
     }
 
     nav a { 
-      margin-left: 24px; font-size: 0.85rem; font-weight: 500;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; 
-      text-decoration: none; transition: 0.2s;
+      margin-left: 20px; font-size: .9rem; 
+      color: var(--text-muted); text-transform: uppercase; 
+      letter-spacing: 0.05em; text-decoration: none; 
+      transition: color 0.2s;
     }
     nav a:hover { color: var(--gold); }
 
     main { max-width: 1100px; margin: auto; padding: 100px 24px; }
     section { margin-bottom: 140px; }
 
-    .hero { text-align: left; max-width: 850px; }
+    .hero { text-align: left; max-width: 900px; }
     .hero h1 { 
-      font-family: "Space Grotesk", sans-serif; font-size: clamp(2.5rem, 6vw, 4rem); 
-      line-height: 1.05; margin-bottom: 32px; color: var(--text-main);
+      font-family: "Space Grotesk", sans-serif; font-size: clamp(2.4rem, 6vw, 3.8rem); 
+      line-height: 1.1; margin-bottom: 28px; color: var(--text-main);
     }
-    .hero p { color: var(--text-muted); font-size: 1.4rem; margin-bottom: 48px; font-weight: 300; }
+    .hero p { color: var(--text-muted); font-size: 1.25rem; margin-bottom: 40px; }
 
     .cta {
-      display: inline-block; padding: 18px 36px; border-radius: 10px;
-      background: var(--text-main); color: #ffffff;
-      font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: 0.3s;
+      display: inline-block; padding: 16px 32px; border-radius: 12px;
+      background: var(--text-main); color: #ffffff; /* Contrast button */
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      box-shadow: 0 10px 40px rgba(0,0,0,.1); transition: 0.2s;
       text-decoration: none; border: none; cursor: pointer;
     }
-    .cta:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+    .cta:hover { transform: translateY(-2px); box-shadow: 0 15px 45px rgba(0,0,0,.15); }
 
     .panel {
       background: var(--bg-panel); border: 1px solid var(--border);
-      padding: 40px; border-radius: 24px; transition: all 0.4s ease;
+      padding: 40px; border-radius: 22px; transition: 0.3s;
     }
-    .panel h3 { font-family: "Space Grotesk", sans-serif; font-size: 1.5rem; margin-bottom: 16px; color: var(--text-main); }
-    .panel p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
-
-    .grid { display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .panel h3 { font-family: "Space Grotesk", sans-serif; margin-bottom: 12px; color: var(--text-main); }
+    .panel p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
 
     .status {
-      display: inline-block; font-size: 0.7rem; font-weight: 700;
-      padding: 5px 12px; border-radius: 6px;
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      padding: 6px 14px; border-radius: 999px;
       background: #f1f3f5; color: var(--text-dim);
-      text-transform: uppercase; margin-top: 15px;
+      text-transform: uppercase;
     }
     .active { background: #e6fcf5; color: #099268; }
 
-    footer { 
-      border-top: 1px solid var(--border); padding: 100px 24px; 
-      text-align: center; background: #fafafa; 
-    }
-    
-    .token-address {
-      font-family: monospace; font-size: 0.8rem; color: var(--text-dim);
-      background: #f1f3f5; padding: 10px; border-radius: 8px; word-break: break-all; margin-top: 10px;
-    }
+    .grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 
-    @media(max-width:720px){ nav { display:none; } .hero h1 { font-size: 2.5rem; } }
+    footer { border-top: 1px solid var(--border); padding: 80px 24px; text-align: center; background: #fafafa; }
+    footer strong { font-family: "Space Grotesk", sans-serif; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    @media(max-width:720px){ nav { display:none; } .hero h1 { font-size: 2.2rem; } }
   </style>
 </head>
 
@@ -141,146 +136,105 @@
       <strong>TSPILL</strong>
     </div>
     <nav>
-      <a href="#philosophy">Vision</a>
+      <a href="#philosophy">Philosophy</a>
       <a href="#validation">Validation</a>
-      <a href="#pipeline">Pipeline</a>
-      <a href="#challenges">Challenges</a>
       <a href="#roadmap">Roadmap</a>
+      <a href="#records">Records</a>
     </nav>
   </div>
 </header>
 
 <main>
   <section class="hero">
-    <h1>Where Ideas Become Products. Where Creators Own the Outcome.</h1>
-    <p>A "Creative Operating System" that prioritizes documentation and execution over speculative hype. [cite: 1, 4]</p>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <a href="#validation" class="cta">Explore the Ledger</a>
-        <div style="color: var(--text-dim); font-size: 0.9rem; padding-top: 10px;">Built on Judgment, Not Hype. [cite: 9]</div>
+    <h1>TSPILL is a public record of creative work in progress.</h1>
+    <p>We document how ideas move from thought &rarr; validation &rarr; production. No roadmaps, presales, or shortcuts. Just execution.</p>
+    <a href="#records" class="cta">Review Live Records</a>
+  </section>
+
+  <section id="philosophy">
+    <div style="margin-bottom: 40px;">
+      <h2 style="font-family: 'Space Grotesk'; font-size: 2rem; margin-bottom: 16px;">System Restraint</h2>
+      <p style="color: var(--text-muted);">TSPILL is not a marketplace or a funding platform. It is a documentation-first system where creative work is recorded publicly before it is scaled, sold, or monetized.</p>
+    </div>
+    <div class="grid">
+      <div class="panel"><h3>Validation Before Promotion</h3><p>Ideas are evaluated for technical feasibility and clarity before any public positioning begins.</p></div>
+      <div class="panel"><h3>Institutional Memory</h3><p>Rejected concepts and failed experiments are documented permanently. Learning is preserved as institutional value.</p></div>
+      <div class="panel"><h3>Permanent Attribution</h3><p>Validated outcomes maintain a clear record of origin and execution logic for future scaling.</p></div>
     </div>
   </section>
 
   <section id="validation">
-    <div style="margin-bottom: 50px;">
-      <h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; margin-bottom: 16px;">The Concept Validation Board (The Neutral Anchor)</h2>
-      <p style="color: var(--text-muted);">A public operating system to evaluate ideas before they are marketed. [cite: 11] Every concept is reviewed against Clarity, Execution Path, Creative Value, and Constraints Awareness. [cite: 12]</p>
+    <div style="margin-bottom: 40px;">
+      <h2 style="font-family: 'Space Grotesk'; font-size: 2rem; margin-bottom: 16px;">The Proof Engine</h2>
+      <p style="color: var(--text-muted);">A public log of ideas under evaluation. Approval is not guaranteed. Rejection and inactivity are also recorded.</p>
     </div>
-    <div class="grid">
-      <div class="panel"><h3>Evaluating</h3><p>Active review. [cite: 14]</p><span class="status">GATE 1</span></div>
-      <div class="panel"><h3>Paused</h3><p>Requires more clarity. [cite: 15]</p><span class="status">GATE 2</span></div>
-      <div class="panel"><h3>Rejected</h3><p>Not moving forward; reasons preserved to prevent repeated mistakes. [cite: 16]</p><span class="status">ARCHIVED</span></div>
-      <div class="panel"><h3>Validated</h3><p>Ready for the production pipeline. [cite: 17]</p><span class="status active">READY</span></div>
-    </div>
-    <div style="margin-top: 40px; text-align: center;">
-      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="background: var(--gold); font-size: 0.8rem;">Access Full Live Ledger &rarr;</a>
-    </div>
-  </section>
-
-  <section id="pipeline">
-    <div style="margin-bottom: 50px;">
-      <h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; margin-bottom: 16px;">Product Creation Pipeline & Marketplace</h2>
-      <p style="color: var(--text-muted);">Proving that ideas don’t stop at concepts—they ship. [cite: 19]</p>
-    </div>
-    <div class="grid">
-      <div class="panel">
-        <h3>TSPILL Originals</h3>
-        <p>Showcase of apparel, objects, and digital assets proving production capability. [cite: 20]</p>
-      </div>
-      <div class="panel">
-        <h3>The Marketplace</h3>
-        <p>A hub where every product carries the "Powered by TSPILL" mark of quality and fair attribution. </p>
-      </div>
-    </div>
-    <div class="panel" style="margin-top: 32px; background: white; border: 2px solid var(--border);">
-      <h3>Economic Activation</h3>
-      <p>Payments and royalties powered by the TSPILL token and stablecoins. [cite: 22]</p>
-      <div class="token-address">Solana: 2whGdeMMm1E8JJ6cANoNARLNFbayfV2Mixh3WSQUUSbK</div>
-    </div>
-  </section>
-
-  <section id="challenges">
-    <div style="margin-bottom: 50px;">
-      <h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; margin-bottom: 16px;">Global Creative Challenges</h2>
-      <p style="color: var(--text-muted);">Open competitions in fashion, film, design, and digital media. [cite: 24]</p>
-    </div>
-    <div class="grid">
-      <div class="panel"><h3>Selection Model</h3><p>Hybrid community voting and expert judge curation for real-world viability. [cite: 25]</p></div>
-      <div class="panel"><h3>Rewards</h3><p>Winners receive TSPILL rewards and permanent royalty streams. [cite: 26]</p></div>
-    </div>
-  </section>
-
-  <section>
-    <div style="margin-bottom: 50px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem;">Transparent Royalties & Attribution</h2></div>
-    <div class="grid">
-      <div class="panel"><h3>Automated Splits</h3><p>On-chain rails for fair, auditable payment splits to creators. [cite: 29]</p></div>
-      <div class="panel"><h3>Permanent Attribution</h3><p>Verifiable records ensuring creators retain credit for life. [cite: 30]</p></div>
+    <div class="panel">
+      <p>Every submission is processed through our internal logic gates: Evaluating, Paused, Rejected, or Validated. Decisions are evidence-based and publicly accessible.</p>
+      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px; background: var(--gold); color: #fff;">Access Validation Board &rarr;</a>
     </div>
   </section>
 
   <section id="roadmap">
-    <div style="margin-bottom: 50px;">
-      <h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; margin-bottom: 16px;">Execution Roadmap & Governance</h2>
-      <p style="color: var(--text-muted);">Liquidity is an outcome of execution, not a prerequisite. [cite: 34]</p>
-    </div>
+    <div style="margin-bottom: 40px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2rem;">Roadmap (Evidence-Driven)</h2><p style="color: var(--text-muted);">Each phase unlocks only after the previous phase produces verifiable records. Timelines are intentionally undefined.</p></div>
     <div class="grid">
-      <div class="panel"><h3>6-Phase Roadmap</h3><p>Tracking progression from Phase 1 (Foundation) to Phase 6 (Global Scale). </p></div>
-      <div class="panel"><h3>Curatorial Governance</h3><p>Holders vote on competition themes focused on quality, not speculation. [cite: 35]</p></div>
+      <div class="panel"><h3>Phase 1 &mdash; Foundation</h3><p>Public philosophy and validation system live.</p><span class="status active">DOCUMENTED</span></div>
+      <div class="panel"><h3>Phase 2 &mdash; Self-Production</h3><p>Internal experiments proving physical execution.</p><span class="status">IN PROGRESS</span></div>
+      <div class="panel"><h3>Phase 3 &mdash; Scale</h3><p>Industry participation and production hub expansion.</p><span class="status">CONDITIONAL</span></div>
     </div>
   </section>
 
-  <section>
-    <div style="margin-bottom: 50px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem;">Stakeholder Value Portals</h2></div>
+  <section id="records">
+    <div style="margin-bottom: 40px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2rem;">Public Records (Live)</h2><p style="color: var(--text-muted);">This site tracks ideas, experiments, and outcomes as they actually happen. Records are updated manually and only when something earns documentation.</p></div>
     <div class="grid">
-      <div class="panel"><h3>For Creators</h3><p>Vetted manufacturers, predictable terms, and downstream royalty participation. [cite: 38]</p></div>
-      <div class="panel"><h3>For Manufacturers</h3><p>Access to pre-qualified creative briefs and validated concepts. [cite: 39]</p></div>
+      <div class="panel">
+        <h3>Concept Validation Board</h3>
+        <p>A public log of ideas under institutional evaluation.</p>
+        <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px; background: var(--gold); color: #fff;">View Validation Board</a>
+      </div>
+      <div class="panel">
+        <h3>Internal Production Experiments</h3>
+        <p>These records document early execution tests. Not products or promises.</p>
+        <a href="https://chartreuse-cast-b86.notion.site/ebd//2e38ce11cac880aaa17fffdc7f5efffe" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px; background: var(--gold); color: #fff;">Review Experiments</a>
+      </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <div style="max-width: 800px; margin: auto;">
-    <p><strong>INTEGRITY COMMITMENT</strong></p>
-    <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.95rem;">
-      <strong>The "No-Hype" Pledge:</strong> No presale marketing, no paid promotions, and no roadmap promises tied to token price. [cite: 42] 
-      Validation is not a promise of funding. [cite: 41]
-    </p>
-    <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 40px; text-transform: uppercase; letter-spacing: 0.1em;">
-      © 2026 TSPILL SYSTEM — CREATIVE OPERATING SYSTEM
-    </p>
-  </div>
+  <p><strong>TSPILL</strong></p>
+  <p style="margin-top: 15px; color: var(--text-muted);">TSPILL is built quietly and updated only when there is something to show.</p>
+  <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 8px;">No announcements. No speculation. Just records.</p>
 </footer>
 
 <script>
   lucide.createIcons();
-  const c = document.getElementById("bg"), ctx = c.getContext("2d");
-  function resize() { c.width = innerWidth; c.height = innerHeight; }
-  window.addEventListener("resize", resize); resize();
+  const c=document.getElementById("bg"),ctx=c.getContext("2d");
+  function resize(){c.width=innerWidth;c.height=innerHeight}
+  window.addEventListener("resize",resize);resize();
 
-  // HIGH-VISIBILITY GOLD ANIMATION
-  const pts = [...Array(85)].map(() => ({
-    x: Math.random() * c.width,
-    y: Math.random() * c.height,
-    vx: (Math.random() - 0.5) * 0.35,
-    vy: (Math.random() - 0.5) * 0.35
+  /* HIGH-VISIBILITY GOLD ANIMATION SCRIPT */
+  const pts=[...Array(90)].map(()=>({
+    x:Math.random()*c.width, y:Math.random()*c.height,
+    vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35
   }));
 
-  function animate() {
-    ctx.clearRect(0, 0, c.width, c.height);
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i]; p.x += p.vx; p.y += p.vy;
-      if (p.x < 0 || p.x > c.width) p.vx *= -1;
-      if (p.y < 0 || p.y > c.height) p.vy *= -1;
-
-      for (let j = i + 1; j < pts.length; j++) {
-        const q = pts[j]; const d = Math.hypot(p.x - q.x, p.y - q.y);
-        if (d < 195) {
-          ctx.strokeStyle = `rgba(212, 160, 85, ${(1 - d / 195) * 0.75})`;
-          ctx.lineWidth = 1.4;
-          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+  function animate(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i]; p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>c.width)p.vx*=-1; if(p.y<0||p.y>c.height)p.vy*=-1;
+      for(let j=i+1;j<pts.length;j++){
+        const q=pts[j]; const d=Math.hypot(p.x-q.x,p.y-q.y);
+        if(d<190){
+          /* Increased saturation and line weight for visibility on white */
+          ctx.strokeStyle=`rgba(212, 160, 85, ${(1-d/190)*0.7})`;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
         }
       }
-      ctx.fillStyle = "rgba(212, 160, 85, 0.9)";
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, Math.PI * 2); ctx.fill();
+      /* Increased node size for "Liquid Gold" effect */
+      ctx.fillStyle="rgba(212, 160, 85, 0.9)"; 
+      ctx.beginPath(); ctx.arc(p.x,p.y,2.5,0,Math.PI*2); ctx.fill();
     }
     requestAnimationFrame(animate);
   }
