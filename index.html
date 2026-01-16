@@ -14,13 +14,12 @@
 
   <style>
     :root {
-      /* INSTITUTIONAL COLOR PALETTE */
-      --bg-main: #ffffff; 
-      --bg-panel: #fcfcfd; /* Very subtle off-white for depth */
-      --border: rgba(0, 0, 0, 0.05); /* Softer borders */
-      --text-main: #1a1c20; /* Deep Charcoal (more professional than black) */
-      --text-muted: #4a5568; /* Slate Gray for secondary info */
-      --text-dim: #718096; /* Light slate for small details */
+      --bg-main: #05070c;
+      --bg-panel: rgba(18, 26, 48, 0.65);
+      --border: rgba(255,255,255,0.08);
+      --text-main: #f0f6ff;
+      --text-muted: #8b9dc3;
+      --text-dim: #5a6b8a;
       --gold: #d4a055;
       --gradient-gold: linear-gradient(135deg,#d4a055,#f0c87a,#a67c3d);
     }
@@ -30,11 +29,13 @@
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg-main);
+      background: 
+        radial-gradient(1200px 600px at 15% 10%, rgba(120,180,255,0.08), transparent 60%),
+        radial-gradient(1000px 600px at 85% 30%, rgba(212,160,85,0.08), transparent 60%),
+        linear-gradient(180deg,#0a0f1e,#05070c);
       color: var(--text-main);
       line-height: 1.7;
       overflow-x: hidden;
-      -webkit-font-smoothing: antialiased; /* Makes fonts look sharper */
     }
 
     canvas#bg {
@@ -47,8 +48,8 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
+      background: rgba(7,10,15,0.85);
+      backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
     }
 
@@ -63,87 +64,62 @@
 
     .brand { display: flex; gap: 14px; align-items: center; }
     .brand img {
-      width: 48px; height: 48px; border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      width: 52px; height: 52px; border-radius: 14px;
+      box-shadow: 0 0 40px rgba(120,180,255,.35);
     }
 
     .brand strong {
       font-family: "Space Grotesk", sans-serif;
-      font-size: 1.3rem;
-      letter-spacing: -0.02em;
+      font-size: 1.4rem;
       background: var(--gradient-gold);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    nav a { 
-      margin-left: 24px; 
-      font-size: 0.85rem; 
-      font-weight: 500;
-      color: var(--text-muted); 
-      text-transform: uppercase; 
-      letter-spacing: 0.08em; 
-      text-decoration: none; 
-      transition: color 0.2s;
-    }
+    nav a { margin-left: 20px; font-size: .9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; }
     nav a:hover { color: var(--gold); }
 
     main { max-width: 1100px; margin: auto; padding: 100px 24px; }
-    section { margin-bottom: 150px; }
+    section { margin-bottom: 140px; }
 
-    .hero { text-align: left; max-width: 850px; }
-    .hero h1 { 
-      font-family: "Space Grotesk", sans-serif; 
-      font-size: clamp(2.5rem, 6vw, 4rem); 
-      line-height: 1.05; 
-      margin-bottom: 32px; 
-      color: var(--text-main);
-      letter-spacing: -0.03em;
-    }
-    .hero p { color: var(--text-muted); font-size: 1.35rem; margin-bottom: 48px; font-weight: 300; }
+    .hero { text-align: left; max-width: 900px; }
+    .hero h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(2.4rem, 6vw, 3.8rem); line-height: 1.1; margin-bottom: 28px; }
+    .hero p { color: var(--text-muted); font-size: 1.25rem; margin-bottom: 40px; }
 
+    /* Standardized Gold Button */
     .cta {
-      display: inline-block; padding: 18px 36px; border-radius: 10px;
-      background: var(--text-main); color: #ffffff; /* Black button for high-end look */
-      font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-decoration: none; border: none; cursor: pointer;
+      display: inline-block; padding: 16px 32px; border-radius: 12px;
+      background: var(--gradient-gold); color: #0a0d12;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      box-shadow: 0 10px 40px rgba(212,160,85,.35); transition: 0.2s;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
     }
-    .cta:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+    .cta:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
     .panel {
-      background: var(--bg-panel); 
-      border: 1px solid var(--border);
-      padding: 48px; border-radius: 24px; 
-      transition: all 0.4s ease;
+      background: var(--bg-panel); border: 1px solid var(--border);
+      padding: 40px; border-radius: 22px; backdrop-filter: blur(10px);
+      transition: 0.3s;
     }
-    .panel:hover { border-color: var(--gold); transform: translateY(-4px); }
-    .panel h3 { font-family: "Space Grotesk", sans-serif; font-size: 1.4rem; margin-bottom: 16px; color: var(--text-main); }
-    .panel p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 28px; }
+    .panel h3 { font-family: "Space Grotesk", sans-serif; margin-bottom: 12px; }
+    .panel p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
 
     .status {
-      display: inline-block; font-size: 0.7rem; font-weight: 700;
-      padding: 5px 12px; border-radius: 6px;
-      background: #f1f3f5; color: var(--text-dim);
-      text-transform: uppercase; letter-spacing: 0.05em;
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.06); color: var(--text-muted);
+      text-transform: uppercase;
     }
-    .active { background: #e6fcf5; color: #099268; }
+    .active { background: rgba(34,197,94,0.15); color: #4ade80; }
 
-    .grid { display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 
-    footer { 
-      border-top: 1px solid var(--border); 
-      padding: 100px 24px; 
-      text-align: center; 
-      background: #fafafa; 
-    }
-    footer strong { font-family: "Space Grotesk", sans-serif; color: var(--text-main); letter-spacing: 0.1em; }
+    footer { border-top: 1px solid var(--border); padding: 80px 24px; text-align: center; }
+    footer strong { font-family: "Space Grotesk", sans-serif; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    @media(max-width:720px){ 
-      nav { display:none; } 
-      .hero h1 { font-size: 2.5rem; } 
-      .panel { padding: 32px; }
-    }
+    @media(max-width:720px){ nav { display:none; } .hero h1 { font-size: 2.2rem; } .cta { width: 100%; text-align: center; } }
   </style>
 </head>
 
@@ -168,63 +144,63 @@
 <main>
   <section class="hero">
     <h1>TSPILL is a public record of creative work in progress.</h1>
-    <p>We document how ideas move from thought &rarr; validation &rarr; production. No speculative roadmaps. Just execution.</p>
+    <p>We document how ideas move from thought &rarr; validation &rarr; production. No roadmaps, presales, or shortcuts. Just execution.</p>
     <a href="#records" class="cta">Review Live Records</a>
   </section>
 
   <section id="philosophy">
-    <div style="margin-bottom: 50px;">
-      <h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; margin-bottom: 16px; letter-spacing: -0.02em;">System Restraint</h2>
-      <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 700px;">TSPILL is not a marketplace. It is a documentation-first system where creative work is recorded publicly before it is scaled.</p>
+    <div style="margin-bottom: 40px;">
+      <h2 style="font-family: 'Space Grotesk'; font-size: 2rem; margin-bottom: 16px;">System Restraint</h2>
+      <p>TSPILL is not a marketplace or a funding platform. It is a documentation-first system where creative work is recorded publicly before it is scaled, sold, or monetized.</p>
     </div>
     <div class="grid">
-      <div class="panel"><h3>Validation First</h3><p>Concepts are evaluated for technical feasibility and structural clarity before any public positioning begins.</p></div>
-      <div class="panel"><h3>Institutional Memory</h3><p>Failed experiments and rejected concepts are permanently archived to preserve technical knowledge.</p></div>
-      <div class="panel"><h3>Permanent Attribution</h3><p>Every validated outcome maintains a cryptographic record of origin and execution logic.</p></div>
+      <div class="panel"><h3>Validation Before Promotion</h3><p>Ideas are evaluated for technical feasibility and clarity before any public positioning begins.</p></div>
+      <div class="panel"><h3>Institutional Memory</h3><p>Rejected concepts and failed experiments are documented permanently. Learning is preserved as institutional value.</p></div>
+      <div class="panel"><h3>Permanent Attribution</h3><p>Validated outcomes maintain a clear record of origin and execution logic for future scaling.</p></div>
     </div>
   </section>
 
   <section id="validation">
-    <div style="margin-bottom: 50px;">
-      <h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; margin-bottom: 16px; letter-spacing: -0.02em;">The Proof Engine</h2>
-      <p style="color: var(--text-muted); font-size: 1.1rem;">A public log of intellectual property under evaluation. Decisions are evidence-based and immutable.</p>
+    <div style="margin-bottom: 40px;">
+      <h2 style="font-family: 'Space Grotesk'; font-size: 2rem; margin-bottom: 16px;">The Proof Engine</h2>
+      <p>A public log of ideas under evaluation. Approval is not guaranteed. Rejection and inactivity are also recorded.</p>
     </div>
-    <div class="panel" style="background: white; border: 2px solid var(--border);">
-      <p style="font-size: 1.1rem;">Our validation board tracks concepts through four strictly defined logic gates.</p>
-      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="background: var(--gold);">Open Validation Board &rarr;</a>
+    <div class="panel">
+      <p>Every submission is processed through our internal logic gates: Evaluating, Paused, Rejected, or Validated. Decisions are evidence-based and publicly accessible.</p>
+      <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px;">Access Validation Board &rarr;</a>
     </div>
   </section>
 
   <section id="roadmap">
-    <div style="margin-bottom: 50px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; letter-spacing: -0.02em;">Roadmap</h2></div>
+    <div style="margin-bottom: 40px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2rem;">Roadmap (Evidence-Driven)</h2><p>Each phase unlocks only after the previous phase produces verifiable records. Timelines are intentionally undefined.</p></div>
     <div class="grid">
       <div class="panel"><h3>Phase 1 &mdash; Foundation</h3><p>Public philosophy and validation system live.</p><span class="status active">DOCUMENTED</span></div>
-      <div class="panel"><h3>Phase 2 &mdash; Alpha Execution</h3><p>Internal production experiments proving physical output.</p><span class="status">IN PROGRESS</span></div>
-      <div class="panel"><h3>Phase 3 &mdash; Scale</h3><p>Manufacturer bridge and creator-led production hub.</p><span class="status">SCHEDULED</span></div>
+      <div class="panel"><h3>Phase 2 &mdash; Self-Production</h3><p>Internal experiments proving physical execution.</p><span class="status">IN PROGRESS</span></div>
+      <div class="panel"><h3>Phase 3 &mdash; Scale</h3><p>Industry participation and production hub expansion.</p><span class="status">CONDITIONAL</span></div>
     </div>
   </section>
 
   <section id="records">
-    <div style="margin-bottom: 50px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2.2rem; letter-spacing: -0.02em;">Public Records</h2></div>
+    <div style="margin-bottom: 40px;"><h2 style="font-family: 'Space Grotesk'; font-size: 2rem;">Public Records (Live)</h2><p>This site tracks ideas, experiments, and outcomes as they actually happen. Records are updated manually and only when something earns documentation.</p></div>
     <div class="grid">
       <div class="panel">
-        <h3>Concept Board</h3>
-        <p>Real-time tracking of creative intelligence in our pipeline.</p>
-        <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" style="color: var(--gold); text-decoration: none; font-weight: 600;">View Ledger &rarr;</a>
+        <h3>Concept Validation Board</h3>
+        <p>A public log of ideas under institutional evaluation.</p>
+        <a href="https://chartreuse-cast-b86.notion.site/2698ce11cac880c5935afa5c3ac84f60" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px;">View Validation Board</a>
       </div>
       <div class="panel">
-        <h3>Production Experiments</h3>
-        <p>Technical documentation of digital-to-physical translations.</p>
-        <a href="https://chartreuse-cast-b86.notion.site/ebd//2e38ce11cac880aaa17fffdc7f5efffe" target="_blank" style="color: var(--gold); text-decoration: none; font-weight: 600;">Review Experiments &rarr;</a>
+        <h3>Internal Production Experiments</h3>
+        <p>These records document early execution tests. Not products or promises.</p>
+        <a href="https://chartreuse-cast-b86.notion.site/ebd//2e38ce11cac880aaa17fffdc7f5efffe" target="_blank" class="cta" style="font-size: 0.8rem; padding: 12px 24px;">Review Experiments</a>
       </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <p><strong>TSPILL SYSTEM</strong></p>
-  <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.95rem;">TSPILL is built quietly and updated only when there is verifiable data to share.</p>
-  <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 12px; letter-spacing: 0.1em; text-transform: uppercase;">No announcements. No speculation. Just records.</p>
+  <p><strong>TSPILL</strong></p>
+  <p style="margin-top: 15px;">TSPILL is built quietly and updated only when there is something to show.</p>
+  <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 8px;">No announcements. No speculation. Just records.</p>
 </footer>
 
 <script>
@@ -233,9 +209,9 @@
   function resize(){c.width=innerWidth;c.height=innerHeight}
   window.addEventListener("resize",resize);resize();
 
-  const pts=[...Array(85)].map(()=>({
+  const pts=[...Array(95)].map(()=>({
     x:Math.random()*c.width, y:Math.random()*c.height,
-    vx:(Math.random()-.5)*.2, vy:(Math.random()-.5)*.2
+    vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25
   }));
 
   function animate(){
@@ -245,13 +221,12 @@
       if(p.x<0||p.x>c.width)p.vx*=-1; if(p.y<0||p.y>c.height)p.vy*=-1;
       for(let j=i+1;j<pts.length;j++){
         const q=pts[j]; const d=Math.hypot(p.x-q.x,p.y-q.y);
-        if(d<160){
-          ctx.strokeStyle=`rgba(212, 160, 85, ${(1-d/160)*0.25})`;
-          ctx.lineWidth = 0.8;
+        if(d<150){
+          ctx.strokeStyle=`rgba(120,180,255,${(1-d/150)*0.2})`;
           ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
         }
       }
-      ctx.fillStyle="rgba(212, 160, 85, 0.4)"; ctx.beginPath(); ctx.arc(p.x,p.y,1.2,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="rgba(120,180,255,0.4)"; ctx.beginPath(); ctx.arc(p.x,p.y,1.4,0,Math.PI*2); ctx.fill();
     }
     requestAnimationFrame(animate);
   }
