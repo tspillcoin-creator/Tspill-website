@@ -11,9 +11,9 @@
       --bg-deep: #000000; 
       --card-bg: #ffffff; 
       --text-main: #1a1c20;
-      --text-muted: #4a5568;
+      --text-muted: #666;
       --gold: #d4a055;
-      --border: rgba(0, 0, 0, 0.08);
+      --border: rgba(0, 0, 0, 0.1);
       --gradient-gold: linear-gradient(135deg,#d4a055,#f0c87a,#a67c3d);
     }
 
@@ -22,12 +22,11 @@
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg-deep);
-      color: var(--text-main);
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center; /* Center the card vertically */
+      justify-content: center;
       overflow: hidden;
       padding: 20px;
     }
@@ -36,47 +35,51 @@
 
     .portal-box {
       background: var(--card-bg);
-      border-radius: 28px;
+      border-radius: 24px;
       width: 100%;
-      max-width: 420px;
-      padding: 60px 40px;
+      max-width: 380px; /* Slimmer card */
+      padding: 40px 30px; /* Reduced padding */
       text-align: center;
-      box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8);
       z-index: 10;
       position: relative;
     }
 
-    .logo-container img { width: 85px; height: 85px; border-radius: 20px; margin-bottom: 24px; }
+    .logo-container img { 
+      width: 70px; height: 70px; border-radius: 16px; margin-bottom: 15px; 
+    }
+    
     h1.brand-title { 
-      font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; margin-bottom: 8px; 
-      background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;
-    }
-    p.tagline { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 35px; text-transform: uppercase; letter-spacing: 0.1em; }
-
-    input[type="email"] {
-      width: 100%; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border);
-      background: #f8f9fa; font-size: 1rem; margin-bottom: 15px; outline: none;
+      font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; margin-bottom: 4px; 
+      background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+      font-weight: 700; letter-spacing: 0.05em;
     }
 
-    .btn {
-      width: 100%; padding: 16px; border-radius: 12px; border: none; 
-      font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s;
-      font-size: 0.8rem; margin-bottom: 12px;
+    p.tagline { 
+      color: var(--text-muted); font-size: 0.75rem; margin-bottom: 25px; 
+      text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; 
     }
-    .btn-email { background: var(--text-main); color: #fff; }
-    .btn-wallet { background: transparent; border: 1.5px solid var(--gold); color: var(--gold); }
 
-    /* FIXED FOOTER */
+    /* Single Smart Input */
+    input {
+      width: 100%; padding: 14px 16px; border-radius: 10px; border: 1.5px solid var(--border);
+      background: #f9f9f9; font-size: 0.9rem; margin-bottom: 12px; outline: none; transition: 0.3s;
+      font-family: 'Inter', sans-serif; text-align: center;
+    }
+    input:focus { border-color: var(--gold); background: #fff; box-shadow: 0 0 0 4px rgba(212,160,85,0.05); }
+
+    .btn-enter {
+      width: 100%; padding: 14px; border-radius: 10px; border: none; 
+      background: var(--text-main); color: #fff; font-weight: 700; 
+      text-transform: uppercase; cursor: pointer; transition: 0.3s;
+      font-size: 0.8rem; letter-spacing: 0.1em;
+    }
+    .btn-enter:hover { transform: translateY(-1px); background: #000; }
+
     footer { 
-      position: fixed; 
-      bottom: 30px; 
-      left: 0; 
-      right: 0; 
-      text-align: center;
-      font-size: 0.8rem; 
-      color: rgba(255,255,255,0.4); 
-      letter-spacing: 0.5em; 
-      z-index: 20; 
+      position: fixed; bottom: 30px; width: 100%; text-align: center;
+      font-size: 0.8rem; color: rgba(255,255,255,0.3); letter-spacing: 0.5em; z-index: 20; 
+      text-transform: uppercase;
     }
   </style>
 </head>
@@ -85,13 +88,16 @@
 <canvas id="bg"></canvas>
 
 <div class="portal-box">
-  <div class="logo-container"><img src="./Tea_spill_logo.png" alt="TSPILL Logo"></div>
+  <div class="logo-container">
+    <img src="./Tea_spill_logo.png" alt="TSPILL Logo">
+  </div>
+  
   <h1 class="brand-title">TSPILL</h1>
-  <p class="tagline">Production-Linked Creative Ecosystem</p>
+  <p class="tagline">Production-Linked Ecosystem</p>
+
   <div class="input-group">
-    <input type="email" id="emailInput" placeholder="ENTER CREATOR EMAIL">
-    <button class="btn btn-email" onclick="enterWithEmail()">Enter System</button>
-    <button class="btn btn-wallet" id="walletButton" onclick="connectWallet()">Connect Wallet</button>
+    <input type="text" id="userInput" placeholder="EMAIL OR WALLET ADDRESS">
+    <button class="btn btn-enter" onclick="enterSystem()">Enter System</button>
   </div>
 </div>
 
@@ -102,7 +108,7 @@
   const c = document.getElementById("bg"), ctx = c.getContext("2d");
   function resize() { c.width = innerWidth; c.height = innerHeight; }
   window.addEventListener("resize", resize); resize();
-  const pts = [...Array(100)].map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3 }));
+  const pts = [...Array(100)].map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25 }));
   function animate() {
     ctx.clearRect(0, 0, c.width, c.height);
     for (let i = 0; i < pts.length; i++) {
@@ -110,61 +116,24 @@
       if (p.x < 0 || p.x > c.width) p.vx *= -1; if (p.y < 0 || p.y > c.height) p.vy *= -1;
       for (let j = i+1; j < pts.length; j++) {
         const q = pts[j]; const d = Math.hypot(p.x - q.x, p.y - q.y);
-        if (d < 180) { ctx.strokeStyle = `rgba(212, 160, 85, ${(1 - d/180)*0.75})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
+        if (d < 180) { ctx.strokeStyle = `rgba(212, 160, 85, ${(1 - d/180)*0.7})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
       }
-      ctx.fillStyle = "rgba(212, 160, 85, 0.9)"; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "rgba(212, 160, 85, 0.85)"; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI * 2); ctx.fill();
     }
     requestAnimationFrame(animate);
   }
   animate();
 
-  function enterWithEmail() {
-    const email = document.getElementById("emailInput").value;
-    if (!email) { alert("Please enter an email"); return; }
-    localStorage.setItem("tspill_user_id", email);
+  function enterSystem() {
+    const input = document.getElementById("userInput").value.trim();
+    if (!input) { alert("Please enter your identity to proceed."); return; }
+
+    localStorage.setItem("tspill_user_id", input);
+    // Simple logic to tag the type for the home page
+    localStorage.setItem("tspill_login_type", input.includes('@') ? "email" : "wallet");
+    
     window.location.href = "home.html";
   }
-
-  // WALLET CONNECTION WITH AUTO-DETECTION
-  async function connectWallet() {
-    // 1. Check if Phantom is already available
-    const provider = window?.phantom?.solana || window?.solana;
-
-    if (provider?.isPhantom) {
-      try {
-        const resp = await provider.connect();
-        localStorage.setItem("tspill_user_id", resp.publicKey.toString());
-        window.location.href = "home.html";
-      } catch (err) {
-        console.log("Connection closed by user.");
-      }
-    } else {
-      // 2. Handling Missing Wallet
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        // Force-open this site inside the Phantom App's internal browser
-        const currentUrl = window.location.href.split('?')[0];
-        const phantomBrowserUrl = `https://phantom.app/ul/browse/${encodeURIComponent(currentUrl)}`;
-        window.location.href = phantomBrowserUrl;
-      } else {
-        // Desktop: Extension missing
-        window.open("https://phantom.app/", "_blank");
-        alert("Phantom extension not found. Please install it or use a compatible browser.");
-      }
-    }
-  }
-
-  // AUTO-CONNECT if site reloads inside Phantom Browser
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const provider = window?.phantom?.solana || window?.solana;
-      if (provider?.isPhantom && provider.isConnected) {
-        // Already connected (returning from wallet app)
-        console.log("Wallet already connected");
-      }
-    }, 500);
-  });
 </script>
 </body>
 </html>
