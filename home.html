@@ -9,7 +9,8 @@
         :root {
             --gold: #d4af37;
             --dark-bg: #000000;
-            --card-bg: rgba(20, 20, 20, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(212, 175, 55, 0.3);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,6 +21,7 @@
             font-family: 'Inter', sans-serif;
             display: flex;
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
         }
 
@@ -38,14 +40,14 @@
         .sidebar {
             width: 30%;
             min-width: 380px;
-            max-width: 480px;
             height: 100vh;
             position: relative;
             z-index: 10;
-            border-right: 1px solid rgba(212, 175, 55, 0.2);
-            /* Important: Ensure this filename matches your GitHub upload exactly */
-            background: url('tspill-sidebar-anatomy.png') no-repeat top center;
-            background-size: cover;
+            border-right: 1px solid var(--border);
+            /* Updated to contain to prevent cutting */
+            background: url('tspill-sidebar-anatomy.png') no-repeat center center;
+            background-size: contain; 
+            background-color: #000;
         }
 
         .sidebar-btn {
@@ -53,7 +55,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 30px;
+            padding: 25px;
             background: rgba(0, 0, 0, 0.9);
             border: none;
             border-top: 1px solid var(--gold);
@@ -72,72 +74,56 @@
         /* --- RIGHT CONTENT AREA --- */
         .content-area {
             flex: 1;
-            padding: 60px;
+            padding: 40px;
             overflow-y: auto;
             z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 30px;
-        }
-
-        .header-mantra {
-            margin-bottom: 20px;
-        }
-
-        .header-mantra h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: var(--gold);
-            margin-bottom: 5px;
-        }
-
-        .header-mantra p {
-            font-size: 0.8rem;
-            letter-spacing: 4px;
-            opacity: 0.6;
-            text-transform: uppercase;
+            gap: 25px;
+            justify-content: flex-start;
         }
 
         .card {
             background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 40px;
-            border-radius: 4px;
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 60px 40px;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
         }
 
         .card h2 {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 5px;
             color: var(--gold);
-            margin-bottom: 15px;
+            margin-bottom: 30px;
+            opacity: 0.7;
         }
 
-        .card-title {
-            font-size: 1.6rem;
-            font-weight: 300;
+        .mantra-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            line-height: 1.2;
         }
 
-        .hub-scroll {
-            height: 300px;
-            overflow-y: auto;
-            margin-top: 20px;
-            padding-right: 15px;
-        }
-
-        .faq-row {
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.9rem;
-            color: #ccc;
+        .mantra-sub {
+            color: var(--gold);
+            display: block;
+            margin-top: 10px;
         }
 
         /* Scrollbar */
-        .hub-scroll::-webkit-scrollbar { width: 2px; }
-        .hub-scroll::-webkit-scrollbar-thumb { background: var(--gold); }
+        .content-area::-webkit-scrollbar { width: 3px; }
+        .content-area::-webkit-scrollbar-thumb { background: var(--gold); }
     </style>
 </head>
 <body>
@@ -152,37 +138,33 @@
 
     <div class="content-area">
         
-        <div class="header-mantra">
-            <h1>Built Slowly.</h1>
-            <p>Built in Public.</p>
-        </div>
-
         <div class="card">
             <h2>01 / Philosophy</h2>
-            <p class="card-title">Execution over Persuasion.</p>
+            <div class="mantra-text">
+                Built slowly.
+                <span class="mantra-sub">Built in public.</span>
+            </div>
         </div>
 
         <div class="card">
-            <h2>02 / System States</h2>
-            <p class="card-title">Archive — Artifact — Validation — Participation — Activation — Scale</p>
+            <h2>02 / System Roadmap</h2>
+            <div class="mantra-text">
+                Built slowly.
+                <span class="mantra-sub">Built in public.</span>
+            </div>
         </div>
 
         <div class="card">
             <h2>03 / Knowledge Hub</h2>
-            <div class="hub-scroll">
-                <div class="faq-row">The "Bubble" to "Liquid Gold" Pipeline</div>
-                <div class="faq-row">Permanent Documentation vs. Speculation</div>
-                <div class="faq-row">Tamper-Proof Attribution Protocols</div>
-                <div class="faq-row">Creative Integrity & External Review</div>
-                <div class="faq-row">Economic Activation Milestones</div>
-                <div class="faq-row">Authorship Rights & Framework Agreements</div>
+            <div class="mantra-text">
+                Built slowly.
+                <span class="mantra-sub">Built in public.</span>
             </div>
         </div>
 
     </div>
 
 <script>
-    // GOLDEN SHUTTLE ANIMATION
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let pts = [];
@@ -191,12 +173,12 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         pts = [];
-        for(let i=0; i<80; i++) {
+        for(let i=0; i<60; i++) {
             pts.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.4,
-                vy: (Math.random() - 0.5) * 0.4
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3
             });
         }
     }
@@ -211,8 +193,8 @@
             for(let j=i+1; j<pts.length; j++) {
                 let q = pts[j];
                 let dist = Math.hypot(p.x-q.x, p.y-q.y);
-                if(dist < 200) {
-                    ctx.strokeStyle = `rgba(212, 175, 55, ${1 - dist/200})`;
+                if(dist < 180) {
+                    ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 * (1 - dist/180)})`;
                     ctx.lineWidth = 0.5;
                     ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
                 }
