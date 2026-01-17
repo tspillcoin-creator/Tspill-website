@@ -1,28 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>TSPILL — Home</title>
-  <style>
-    body {
-      margin: 0;
-      background: #0f0f0f;
-      color: #ffffff;
-      font-family: Arial, Helvetica, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSPILL — System Intelligence</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- LEFT SIDEBAR (FIXED) --- */
+        .sidebar {
+            width: 30%;
+            min-width: 350px;
+            max-width: 480px;
+            height: 100vh;
+            position: relative;
+            border-right: 1px solid #333;
+            background: url('tspill-sidebar-anatomy.jpg') no-repeat top center;
+            background-size: cover;
+        }
+
+        .sidebar-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px;
+            background: linear-gradient(transparent, #000);
+            border: none;
+            border-top: 1px solid var(--gold);
+            color: var(--gold);
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+
+        .sidebar-btn:hover {
+            background: var(--gold);
+            color: black;
+        }
+
+        /* --- RIGHT TERMINAL (SCROLLABLE) --- */
+        .terminal {
+            flex: 1;
+            padding: 60px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 40px;
+        }
+
+        .hub-scroll-area {
+            height: 400px; /* Fixed height for the FAQ card */
+            overflow-y: scroll;
+            padding-right: 20px;
+            border-top: 1px solid #333;
+            margin-top: 20px;
+        }
+
+        h1, h2 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .gold-text { color: var(--gold); }
+        
+        /* Custom Scrollbar for the Knowledge Hub */
+        .hub-scroll-area::-webkit-scrollbar { width: 4px; }
+        .hub-scroll-area::-webkit-scrollbar-thumb { background: var(--gold); }
+    </style>
 </head>
 <body>
 
-  <div>
-    <h2>Built slowly.</h2>
-    <h2>Built in public.</h2>
-  </div>
+    <div class="sidebar">
+        <button class="sidebar-btn" onclick="window.location.href='ledger.html'">
+            ACCESS PUBLIC LEDGER >>
+        </button>
+    </div>
+
+    <div class="terminal">
+        
+        <div class="section-card">
+            <h2 class="gold-text">System Philosophy</h2>
+            <p>[TITLES ONLY: Execution Layer / Documentation-First / Attribution Protocol]</p>
+        </div>
+
+        <div class="section-card">
+            <h2 class="gold-text">System States (Roadmap)</h2>
+            <p>[TITLES ONLY: Archive -> Artifact -> Validation -> Participation -> Activation -> Scale]</p>
+        </div>
+
+        <div class="section-card">
+            <h2>Knowledge Hub (FAQ)</h2>
+            <div class="hub-scroll-area">
+                <p><strong>[SYSTEM RULE 01]</strong>: Ownership & Attribution</p>
+                <p><strong>[SYSTEM RULE 02]</strong>: The Validation Process</p>
+                <p><strong>[SYSTEM RULE 03]</strong>: Economic Mechanism</p>
+                <p><strong>[SYSTEM RULE 04]</strong>: Failure Documentation</p>
+                <p><strong>[SYSTEM RULE 05]</strong>: Participation Limits</p>
+                </div>
+        </div>
+
+    </div>
 
 </body>
 </html>
