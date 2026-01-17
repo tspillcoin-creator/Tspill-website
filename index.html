@@ -2,140 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TSPILL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
-      padding: 0;
+      background: #000;
+      color: #fff;
       font-family: Arial, Helvetica, sans-serif;
-      background-color: #0f0f0f;
-      color: #ffffff;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
+      height: 100vh;
       text-align: center;
     }
 
-    .container {
-      width: 100%;
-      max-width: 1200px;
-      padding: 40px 20px;
-    }
-
     .tagline {
-      font-size: 1.4rem;
-      margin-bottom: 40px;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
       opacity: 0.9;
     }
 
-    .hero-image {
-      width: 100%;
+    img {
+      max-width: 90%;
       height: auto;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
     }
 
     .buttons {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
+      gap: 16px;
+      margin-bottom: 20px;
     }
 
-    input[type="email"] {
-      padding: 14px;
-      font-size: 1rem;
-      width: 260px;
+    button {
+      background: #fff;
+      color: #000;
       border: none;
-      outline: none;
-    }
-
-    .btn {
-      padding: 14px 28px;
-      border: 1px solid #ffffff;
-      background: transparent;
-      color: #ffffff;
-      font-size: 1rem;
+      padding: 14px 26px;
+      font-size: 16px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      width: 260px;
+      border-radius: 4px;
     }
 
-    .btn:hover {
-      background-color: #ffffff;
-      color: #000000;
+    button:hover {
+      opacity: 0.85;
     }
 
-    footer {
-      font-size: 0.9rem;
+    input {
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 4px;
+      border: none;
+      margin-right: 8px;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 12px;
       opacity: 0.6;
-      padding: 20px 0;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
-    <div class="tagline">
-      TSPILL: Production-Linked Creative Ecosystem
-    </div>
-
-    <img 
-      src="landing_center_graphics.png" 
-      alt="TSPILL Ecosystem Graphic" 
-      class="hero-image"
-    />
-
-    <div class="buttons">
-      <input 
-        type="email" 
-        id="emailInput" 
-        placeholder="Enter your email"
-      />
-
-      <button class="btn" onclick="enterWithEmail()">
-        Enter with Email
-      </button>
-
-      <button class="btn" onclick="connectWallet()">
-        Connect Wallet
-      </button>
-    </div>
+  <div class="tagline">
+    TSPILL — Production-Linked Creative Ecosystem
   </div>
 
-  <footer>
+  <img src="landing_center_graphics.png" alt="TSPILL Visual System" />
+
+  <!-- Email Entry -->
+  <div style="margin-bottom: 16px;">
+    <input type="email" id="emailInput" placeholder="Enter email" />
+    <button onclick="enterWithEmail()">Enter</button>
+  </div>
+
+  <!-- Wallet Entry -->
+  <div class="buttons">
+    <button onclick="connectWallet()">Enter with Wallet</button>
+  </div>
+
+  <div class="footer">
     TSPILL™
-  </footer>
+  </div>
 
   <script>
     function enterWithEmail() {
       const email = document.getElementById("emailInput").value;
 
       if (!email) {
-        alert("Please enter an email");
+        alert("Please enter an email address.");
         return;
       }
 
-      localStorage.setItem("tspill_entry_type", "email");
+      // Store email locally (soft identity)
       localStorage.setItem("tspill_email", email);
-      localStorage.setItem("tspill_entry_time", new Date().toISOString());
 
+      // Redirect to home
       window.location.href = "home.html";
     }
 
-    function connectWallet() {
-      // Simulated wallet connection (Phase-1)
-      alert("Wallet connected (simulation)");
+    async function connectWallet() {
+      if (!window.solana || !window.solana.isPhantom) {
+        alert("Phantom Wallet not found. Please install Phantom.");
+        return;
+      }
 
-      localStorage.setItem("tspill_entry_type", "wallet");
-      localStorage.setItem("tspill_wallet_status", "connected");
-      localStorage.setItem("tspill_entry_time", new Date().toISOString());
+      try {
+        const response = await window.solana.connect();
+        const walletAddress = response.publicKey.toString();
 
-      window.location.href = "home.html";
+        // Store wallet address locally
+        localStorage.setItem("tspill_wallet", walletAddress);
+
+        // Redirect to home
+        window.location.href = "home.html";
+
+      } catch (err) {
+        console.error(err);
+        alert("Wallet connection cancelled.");
+      }
     }
   </script>
 
