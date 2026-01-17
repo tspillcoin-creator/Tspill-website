@@ -81,7 +81,7 @@
 
   <div class="container">
     <div class="tagline">
-      TSPILL — A Productive Linked Creative Ecosystem
+      TSPILL: Production-Linked Creative Ecosystem
     </div>
 
     <img 
@@ -94,14 +94,14 @@
       <input 
         type="email" 
         id="emailInput" 
-        placeholder="Enter email (non-crypto)"
+        placeholder="Enter your email"
       />
 
       <button class="btn" onclick="enterWithEmail()">
-        Enter (Non-Crypto)
+        Enter with Email
       </button>
 
-      <button class="btn" onclick="enterWithWallet()">
+      <button class="btn" onclick="connectWallet()">
         Connect Wallet
       </button>
     </div>
@@ -127,9 +127,12 @@
       window.location.href = "home.html";
     }
 
-    function enterWithWallet() {
+    function connectWallet() {
+      // Simulated wallet connection (Phase-1)
+      alert("Wallet connected (simulation)");
+
       localStorage.setItem("tspill_entry_type", "wallet");
-      localStorage.setItem("tspill_wallet", "connected");
+      localStorage.setItem("tspill_wallet_status", "connected");
       localStorage.setItem("tspill_entry_time", new Date().toISOString());
 
       window.location.href = "home.html";
