@@ -4,198 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSPILL — Ecosystem Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark-bg: #050505;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(212, 175, 55, 0.2);
-        }
-
+        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--dark-bg); color: #fff; font-family: 'Inter', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; overflow: hidden; }
 
-        /* --- BACKGROUND & WATERMARK --- */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
-        .bg-watermark { position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%); font-family: 'Space Grotesk', sans-serif; font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.03); letter-spacing: 20px; text-transform: uppercase; pointer-events: none; z-index: 0; white-space: nowrap; }
+        /* Zones */
+        .zones-bar { position: fixed; top: 80px; width: 100%; display: flex; border-bottom: 1px solid rgba(212, 175, 55, 0.1); z-index: 50; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        .zone { flex: 1; text-align: center; padding: 15px; font-size: 0.65rem; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
 
-        /* --- TOP HEADER --- */
-        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; background: linear-gradient(to bottom, #000 60%, transparent); }
-        .user-meta { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: var(--gold); background: rgba(212, 175, 55, 0.08); padding: 8px 18px; border: 1px solid var(--border); text-transform: uppercase; }
+        /* Bubbles */
+        #field { position: absolute; inset: 0; z-index: 10; }
+        .bubble { position: absolute; border-radius: 50%; border: 1px solid rgba(212, 175, 55, 0.2); background: var(--glass); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer; text-align: center; padding: 10px; pointer-events: auto; }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        .b-title { font-size: 0.7rem; font-weight: 700; margin-bottom: 4px; }
+        .b-author { font-size: 0.5rem; color: var(--gold); opacity: 0.8; }
 
-        /* --- ZONE LABELS --- */
-        .zones-header-bar { position: fixed; top: 85px; width: 100%; display: flex; z-index: 50; border-bottom: 1px solid rgba(212, 175, 55, 0.1); background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
-        .zone-title { flex: 1; text-align: center; padding: 12px 0; font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; letter-spacing: 4px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
+        /* Expansion Card */
+        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .card { width: 500px; padding: 40px; border: 1px solid var(--gold); background: #000; position: relative; }
+        .card-header { font-size: 0.6rem; color: var(--gold); letter-spacing: 3px; margin-bottom: 20px; }
+        .card-title { font-size: 1.4rem; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .card-body { font-size: 0.9rem; line-height: 1.6; color: #aaa; margin-bottom: 30px; }
+        .claim-btn { width: 100%; padding: 15px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 2px; }
 
-        /* --- BUBBLE FIELD --- */
-        #bubble-field { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
-        .bubble { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); backdrop-filter: blur(12px); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; pointer-events: auto; text-align: center; padding: 15px; }
-        .bubble:hover { transform: scale(1.08); box-shadow: 0 0 30px rgba(212, 175, 55, 0.25); border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
-        .bubble-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin-bottom: 4px; }
-        .bubble-id { font-size: 0.55rem; color: var(--gold); opacity: 0.7; font-family: 'Space Grotesk'; }
+        /* Form Modal */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; align-items: center; justify-content: center; }
+        .modal-box { width: 400px; padding: 40px; background: #0a0a0a; border: 1px solid #333; }
+        input, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 20px; font-family: inherit; }
 
-        /* --- INSTITUTIONAL DETAIL VIEW (THE NEW CARD) --- */
-        #detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
-        .detail-card { width: 550px; background: #0a0a0a; border: 1px solid var(--gold); padding: 50px; position: relative; box-shadow: 0 0 50px rgba(0,0,0,1); }
-        .detail-tag { color: var(--gold); font-family: 'Space Grotesk'; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .detail-title { font-family: 'Space Grotesk'; font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
-        .detail-desc { font-size: 0.95rem; line-height: 1.8; color: #ccc; margin-bottom: 30px; white-space: pre-wrap; }
-        .detail-meta { border-top: 1px solid #222; padding-top: 20px; display: flex; justify-content: space-between; font-size: 0.7rem; font-family: 'Space Grotesk'; color: #666; }
-
-        /* --- ACTION BUTTON --- */
-        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
-        .action-btn { width: 75px; height: 75px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; font-weight: 300; cursor: pointer; z-index: 2; box-shadow: 0 0 40px rgba(212, 175, 55, 0.4); transition: 0.3s; }
-        .action-btn:hover { background: #fff; transform: scale(1.05); }
-        .rotating-text { position: absolute; width: 150px; height: 150px; animation: rotateText 20s linear infinite; pointer-events: none; }
-        @keyframes rotateText { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* --- MODAL FORM --- */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .modal-content { width: 450px; padding: 50px; background: #0a0a0a; border: 1px solid var(--gold); text-align: center; }
-        input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: white; margin-bottom: 20px; outline: none; font-family: 'Inter'; }
+        .add-btn { position: fixed; bottom: 40px; right: 40px; width: 60px; height: 60px; border-radius: 50%; background: var(--gold); border: none; font-size: 2rem; cursor: pointer; z-index: 100; }
     </style>
 </head>
-<body onload="initHub()">
+<body onload="render()">
 
-    <canvas id="bg-canvas"></canvas>
-    <div class="bg-watermark">PUBLIC LEDGER</div>
-
-    <header>
-        <div class="user-meta" id="displayID">ID: AUTHENTICATING...</div>
-        <div class="user-meta" id="displayRole">ROLE: UNKNOWN</div>
-    </header>
-
-    <div class="zones-header-bar">
-        <div class="zone-title">01 / Intent</div>
-        <div class="zone-title">02 / Validation</div>
-        <div class="zone-title">03 / Execution</div>
+    <div class="zones-bar">
+        <div class="zone">01 / Intent</div>
+        <div class="zone">02 / Validation</div>
+        <div class="zone">03 / Execution</div>
     </div>
 
-    <div id="bubble-field"></div>
+    <div id="field"></div>
 
-    <div id="detail-overlay" onclick="closeDetail()">
-        <div class="detail-card" onclick="event.stopPropagation()">
-            <span class="detail-tag" id="cardZone">ZONE 01 / INTENT</span>
-            <h2 class="detail-title" id="cardTitle">TITLE</h2>
-            <p class="detail-desc" id="cardDesc">Description goes here...</p>
-            <div class="detail-meta">
-                <span id="cardAuthor">ORIGIN: TSPILL-ID</span>
-                <span id="cardDate">RECORDED: 18.01.2026</span>
-            </div>
-            <button onclick="closeDetail()" style="margin-top:40px; background:var(--gold); border:none; padding:12px 25px; cursor:pointer; font-weight:700; font-family:'Space Grotesk';">CLOSE RECORD</button>
+    <button class="add-btn" onclick="openModal()">+</button>
+
+    <div id="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px; font-size:0.8rem; letter-spacing:3px;">NEW INTENT</h3>
+            <input type="text" id="inTitle" placeholder="TITLE">
+            <textarea id="inDesc" rows="4" placeholder="DESCRIPTION"></textarea>
+            <button class="claim-btn" onclick="saveNew()">SPILL TO LEDGER</button>
+            <button onclick="closeModal()" style="margin-top:10px; background:none; color:#555; border:none; cursor:pointer; font-size:0.6rem; width:100%;">CANCEL</button>
         </div>
     </div>
 
-    <div class="action-container" id="actionWrapper" style="display:none;">
-        <svg class="rotating-text" viewBox="0 0 100 100">
-            <path id="circlePath" d="M 50, 50 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent"/>
-            <text fill="#d4af37" style="font-family:'Space Grotesk'; font-size:6.5px; letter-spacing:3px;"><textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath></text>
-        </svg>
-        <button class="action-btn" onclick="showAddForm()">+</button>
-    </div>
-
-    <div id="modal">
-        <div class="modal-content">
-            <h2 style="color:var(--gold); font-family:'Space Grotesk'; letter-spacing:4px; margin-bottom:30px;">SPILL NEW INTENT</h2>
-            <input type="text" id="newTitle" placeholder="IDEA TITLE">
-            <textarea id="newDesc" placeholder="Describe the execution intent and technical requirements..."></textarea>
-            <button onclick="createBubble()" style="width:100%; padding:18px; background:var(--gold); font-weight:700; border:none; cursor:pointer; letter-spacing:2px;">SUBMIT TO LEDGER</button>
-            <button onclick="closeModal()" style="margin-top:20px; background:none; color:#555; border:none; cursor:pointer; font-size:0.7rem;">CANCEL</button>
+    <div id="overlay" onclick="this.style.display='none'">
+        <div class="card" onclick="event.stopPropagation()">
+            <div class="card-header" id="cZone">ZONE 01</div>
+            <h2 class="card-title" id="cTitle">TITLE</h2>
+            <p class="card-body" id="cBody">Description...</p>
+            <button class="claim-btn" id="claimAction">CLAIM FOR VALIDATION</button>
         </div>
     </div>
 
     <script>
-        const user = { id: sessionStorage.getItem('currentID') || 'TSPILL-GUEST', role: sessionStorage.getItem('currentRole') || 'Explorer' };
-        let bubbles = JSON.parse(localStorage.getItem('tspill_bubbles')) || [];
+        let items = JSON.parse(localStorage.getItem('tspill_items')) || [];
+        let activeID = null;
 
-        function initHub() {
-            document.getElementById('displayID').innerText = `ID: ${user.id}`;
-            document.getElementById('displayRole').innerText = `ROLE: ${user.role}`;
-            if(user.role !== 'Explorer') document.getElementById('actionWrapper').style.display = 'flex';
+        function render() {
+            const field = document.getElementById('field');
+            field.innerHTML = '';
+            items.forEach(item => {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                const size = 120;
+                
+                // Position based on zone
+                const zoneW = window.innerWidth / 3;
+                const xBase = (item.zone - 1) * zoneW;
+                b.style.left = `${xBase + item.xOffset}px`;
+                b.style.top = `${item.y}px`;
+                b.style.width = b.style.height = `${size}px`;
+
+                b.innerHTML = `<span class="b-title">${item.title}</span><span class="b-author">${item.author}</span>`;
+                b.onclick = () => openDetail(item);
+                field.appendChild(b);
+            });
+        }
+
+        function openDetail(item) {
+            activeID = item.id;
+            document.getElementById('cTitle').innerText = item.title;
+            document.getElementById('cBody').innerText = item.desc;
+            document.getElementById('cZone').innerText = `ZONE 0${item.zone}`;
             
-            loadBubbles();
+            const btn = document.getElementById('claimAction');
+            if(item.zone === 1) {
+                btn.innerText = "CLAIM FOR VALIDATION";
+                btn.style.display = "block";
+                btn.onclick = () => moveZone(2);
+            } else if(item.zone === 2) {
+                btn.innerText = "FINALIZE FOR EXECUTION";
+                btn.style.display = "block";
+                btn.onclick = () => moveZone(3);
+            } else {
+                btn.style.display = "none";
+            }
+
+            document.getElementById('overlay').style.display = 'flex';
         }
 
-        function loadBubbles() {
-            document.getElementById('bubble-field').innerHTML = '';
-            bubbles.forEach(b => spawnBubbleElement(b));
+        function moveZone(newZone) {
+            items = items.map(i => i.id === activeID ? {...i, zone: newZone} : i);
+            localStorage.setItem('tspill_items', JSON.stringify(items));
+            document.getElementById('overlay').style.display = 'none';
+            render();
         }
 
-        function spawnBubbleElement(data) {
-            const field = document.getElementById('bubble-field');
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            
-            const size = 120;
-            bubble.style.width = `${size}px`;
-            bubble.style.height = `${size}px`;
-            bubble.style.left = `${data.x}px`;
-            bubble.style.top = `${data.y}px`;
+        function saveNew() {
+            const t = document.getElementById('inTitle').value;
+            const d = document.getElementById('inDesc').value;
+            if(!t || !d) return;
 
-            bubble.innerHTML = `<span class="bubble-title">${data.title}</span><span class="bubble-id">${data.author}</span>`;
-            bubble.onclick = () => openDetail(data);
-            field.appendChild(bubble);
-        }
-
-        function openDetail(data) {
-            document.getElementById('cardTitle').innerText = data.title;
-            document.getElementById('cardDesc').innerText = data.desc;
-            document.getElementById('cardAuthor').innerText = `ORIGIN: ${data.author}`;
-            document.getElementById('cardZone').innerText = `ZONE 0${data.zone} / ${getZoneName(data.zone)}`;
-            document.getElementById('detail-overlay').style.display = 'flex';
-        }
-
-        function getZoneName(num) { const names = ["INTENT", "VALIDATION", "EXECUTION"]; return names[num-1]; }
-        function closeDetail() { document.getElementById('detail-overlay').style.display = 'none'; }
-        function showAddForm() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-        function createBubble() {
-            const title = document.getElementById('newTitle').value.toUpperCase();
-            const desc = document.getElementById('newDesc').value;
-            if(!title || !desc) return;
-
-            const zoneWidth = window.innerWidth / 3;
-            const newBubble = {
+            const newItem = {
                 id: Date.now(),
-                title: title,
-                desc: desc,
-                author: user.id,
+                title: t,
+                desc: d,
+                author: sessionStorage.getItem('currentID') || 'CREATOR',
                 zone: 1,
-                x: (Math.random() * (zoneWidth - 150)) + 50,
-                y: 180 + Math.random() * (window.innerHeight - 350)
+                xOffset: Math.random() * (window.innerWidth/3 - 150) + 20,
+                y: Math.random() * (window.innerHeight - 300) + 150
             };
 
-            bubbles.push(newBubble);
-            localStorage.setItem('tspill_bubbles', JSON.stringify(bubbles));
-            spawnBubbleElement(newBubble);
+            items.push(newItem);
+            localStorage.setItem('tspill_items', JSON.stringify(items));
             closeModal();
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newDesc').value = '';
+            render();
         }
 
-        // Background Animation
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        function init() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            pts = []; for(let i=0; i<60; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3});
-        }
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pts.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                for(let j=i+1; j<pts.length; j++) {
-                    let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
-                    if(d < 180) { ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 * (1 - d/180)})`; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
-                }
-            });
-            requestAnimationFrame(draw);
-        }
-        window.addEventListener('resize', init); init(); draw();
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
 </html>
