@@ -14,174 +14,51 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background-color: var(--dark-bg);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
+        body { background-color: var(--dark-bg); color: #fff; font-family: 'Inter', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
         /* --- BACKGROUND & WATERMARK --- */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
+        .bg-watermark { position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%); font-family: 'Space Grotesk', sans-serif; font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.03); letter-spacing: 20px; text-transform: uppercase; pointer-events: none; z-index: 0; white-space: nowrap; }
 
-        .bg-watermark {
-            position: fixed;
-            top: 55%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 10vw;
-            font-weight: 700;
-            color: rgba(212, 175, 55, 0.03);
-            letter-spacing: 20px;
-            text-transform: uppercase;
-            pointer-events: none;
-            z-index: 0;
-            white-space: nowrap;
-        }
-
-        /* --- TOP HEADER (ID & ROLE) --- */
-        header {
-            position: fixed;
-            top: 0; width: 100%;
-            padding: 25px 50px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 100;
-            background: linear-gradient(to bottom, #000 60%, transparent);
-        }
-
-        .user-meta {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: var(--gold);
-            background: rgba(212, 175, 55, 0.08);
-            padding: 8px 18px;
-            border: 1px solid var(--border);
-            text-transform: uppercase;
-        }
+        /* --- TOP HEADER --- */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; background: linear-gradient(to bottom, #000 60%, transparent); }
+        .user-meta { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: var(--gold); background: rgba(212, 175, 55, 0.08); padding: 8px 18px; border: 1px solid var(--border); text-transform: uppercase; }
 
         /* --- ZONE LABELS --- */
-        .zones-header-bar {
-            position: fixed;
-            top: 85px;
-            width: 100%;
-            display: flex;
-            z-index: 50;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
-        }
+        .zones-header-bar { position: fixed; top: 85px; width: 100%; display: flex; z-index: 50; border-bottom: 1px solid rgba(212, 175, 55, 0.1); background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
+        .zone-title { flex: 1; text-align: center; padding: 12px 0; font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; letter-spacing: 4px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
 
-        .zone-title {
-            flex: 1;
-            text-align: center;
-            padding: 12px 0;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 4px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-        }
-
-        /* --- BUBBLE FIELD & PHYSICS --- */
+        /* --- BUBBLE FIELD --- */
         #bubble-field { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
-
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-            pointer-events: auto;
-            text-align: center;
-            padding: 15px;
-        }
-
-        .bubble:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
-            border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.05);
-        }
-
+        .bubble { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); backdrop-filter: blur(12px); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; pointer-events: auto; text-align: center; padding: 15px; }
+        .bubble:hover { transform: scale(1.08); box-shadow: 0 0 30px rgba(212, 175, 55, 0.25); border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
         .bubble-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin-bottom: 4px; }
         .bubble-id { font-size: 0.55rem; color: var(--gold); opacity: 0.7; font-family: 'Space Grotesk'; }
 
-        /* --- HIGHLIGHTED PLUS BUTTON --- */
-        .action-container {
-            position: fixed;
-            bottom: 60px;
-            right: 60px;
-            z-index: 200;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        /* --- INSTITUTIONAL DETAIL VIEW (THE NEW CARD) --- */
+        #detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
+        .detail-card { width: 550px; background: #0a0a0a; border: 1px solid var(--gold); padding: 50px; position: relative; box-shadow: 0 0 50px rgba(0,0,0,1); }
+        .detail-tag { color: var(--gold); font-family: 'Space Grotesk'; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .detail-title { font-family: 'Space Grotesk'; font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
+        .detail-desc { font-size: 0.95rem; line-height: 1.8; color: #ccc; margin-bottom: 30px; white-space: pre-wrap; }
+        .detail-meta { border-top: 1px solid #222; padding-top: 20px; display: flex; justify-content: space-between; font-size: 0.7rem; font-family: 'Space Grotesk'; color: #666; }
 
-        .action-btn {
-            width: 75px; height: 75px;
-            border-radius: 50%;
-            background: var(--gold);
-            color: #000;
-            border: none;
-            font-size: 2.5rem;
-            font-weight: 300;
-            cursor: pointer;
-            z-index: 2;
-            box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
-            transition: 0.3s;
-        }
-
+        /* --- ACTION BUTTON --- */
+        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
+        .action-btn { width: 75px; height: 75px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; font-weight: 300; cursor: pointer; z-index: 2; box-shadow: 0 0 40px rgba(212, 175, 55, 0.4); transition: 0.3s; }
         .action-btn:hover { background: #fff; transform: scale(1.05); }
-
-        .rotating-text {
-            position: absolute;
-            width: 150px; height: 150px;
-            animation: rotateText 20s linear infinite;
-            pointer-events: none;
-        }
-
+        .rotating-text { position: absolute; width: 150px; height: 150px; animation: rotateText 20s linear infinite; pointer-events: none; }
         @keyframes rotateText { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- MODAL (SPILL FORM) --- */
-        #modal {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.92);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-content {
-            width: 450px;
-            padding: 50px;
-            background: #0a0a0a;
-            border: 1px solid var(--gold);
-            text-align: center;
-        }
-
-        .modal-content h2 { font-family: 'Space Grotesk'; font-size: 0.8rem; letter-spacing: 5px; color: var(--gold); margin-bottom: 30px; }
+        /* --- MODAL FORM --- */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-content { width: 450px; padding: 50px; background: #0a0a0a; border: 1px solid var(--gold); text-align: center; }
         input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: white; margin-bottom: 20px; outline: none; font-family: 'Inter'; }
-        input:focus { border-color: var(--gold); }
     </style>
 </head>
 <body onload="initHub()">
 
     <canvas id="bg-canvas"></canvas>
-    
     <div class="bg-watermark">PUBLIC LEDGER</div>
 
     <header>
@@ -197,90 +74,108 @@
 
     <div id="bubble-field"></div>
 
+    <div id="detail-overlay" onclick="closeDetail()">
+        <div class="detail-card" onclick="event.stopPropagation()">
+            <span class="detail-tag" id="cardZone">ZONE 01 / INTENT</span>
+            <h2 class="detail-title" id="cardTitle">TITLE</h2>
+            <p class="detail-desc" id="cardDesc">Description goes here...</p>
+            <div class="detail-meta">
+                <span id="cardAuthor">ORIGIN: TSPILL-ID</span>
+                <span id="cardDate">RECORDED: 18.01.2026</span>
+            </div>
+            <button onclick="closeDetail()" style="margin-top:40px; background:var(--gold); border:none; padding:12px 25px; cursor:pointer; font-weight:700; font-family:'Space Grotesk';">CLOSE RECORD</button>
+        </div>
+    </div>
+
     <div class="action-container" id="actionWrapper" style="display:none;">
         <svg class="rotating-text" viewBox="0 0 100 100">
             <path id="circlePath" d="M 50, 50 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent"/>
-            <text fill="#d4af37" style="font-family:'Space Grotesk'; font-size:6.5px; letter-spacing:3px;">
-                <textPath xlink:href="#circlePath">
-                    SPILL NEW INTENT • CREATE RECORD • 
-                </textPath>
-            </text>
+            <text fill="#d4af37" style="font-family:'Space Grotesk'; font-size:6.5px; letter-spacing:3px;"><textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath></text>
         </svg>
         <button class="action-btn" onclick="showAddForm()">+</button>
     </div>
 
     <div id="modal">
         <div class="modal-content">
-            <h2>SPILL NEW INTENT</h2>
+            <h2 style="color:var(--gold); font-family:'Space Grotesk'; letter-spacing:4px; margin-bottom:30px;">SPILL NEW INTENT</h2>
             <input type="text" id="newTitle" placeholder="IDEA TITLE">
             <textarea id="newDesc" placeholder="Describe the execution intent and technical requirements..."></textarea>
             <button onclick="createBubble()" style="width:100%; padding:18px; background:var(--gold); font-weight:700; border:none; cursor:pointer; letter-spacing:2px;">SUBMIT TO LEDGER</button>
-            <button onclick="closeModal()" style="margin-top:20px; background:none; color:#555; border:none; cursor:pointer; font-size:0.7rem; letter-spacing:2px;">CANCEL</button>
+            <button onclick="closeModal()" style="margin-top:20px; background:none; color:#555; border:none; cursor:pointer; font-size:0.7rem;">CANCEL</button>
         </div>
     </div>
 
     <script>
-        // 1. Identity Verification from Session
-        const user = {
-            id: sessionStorage.getItem('currentID') || 'TSPILL-GUEST',
-            role: sessionStorage.getItem('currentRole') || 'Explorer'
-        };
+        const user = { id: sessionStorage.getItem('currentID') || 'TSPILL-GUEST', role: sessionStorage.getItem('currentRole') || 'Explorer' };
+        let bubbles = JSON.parse(localStorage.getItem('tspill_bubbles')) || [];
 
         function initHub() {
             document.getElementById('displayID').innerText = `ID: ${user.id}`;
             document.getElementById('displayRole').innerText = `ROLE: ${user.role}`;
+            if(user.role !== 'Explorer') document.getElementById('actionWrapper').style.display = 'flex';
             
-            // Only non-explorers can see the spill button
-            if(user.role !== 'Explorer') {
-                document.getElementById('actionWrapper').style.display = 'flex';
-            }
-
-            // Mock Data Spawns
-            spawnBubble("Digital Twin Protocol", "TSPILL-ID-001", 1);
-            spawnBubble("Liquid Alloy Fab", "TSPILL-ID-082", 2);
-            spawnBubble("Retail Rail Alpha", "TSPILL-ID-104", 3);
+            loadBubbles();
         }
 
-        // 2. Bubble Physics Engine (Visual Spawn)
-        function spawnBubble(title, author, zoneNum) {
+        function loadBubbles() {
+            document.getElementById('bubble-field').innerHTML = '';
+            bubbles.forEach(b => spawnBubbleElement(b));
+        }
+
+        function spawnBubbleElement(data) {
             const field = document.getElementById('bubble-field');
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
             
-            const size = 110 + (Math.random() * 30);
-            const zoneWidth = window.innerWidth / 3;
-            // Ensure bubbles stay within their respective zone columns
-            const x = (zoneNum - 1) * zoneWidth + (Math.random() * (zoneWidth - size - 40)) + 20;
-            const y = 180 + Math.random() * (window.innerHeight - 350);
-
+            const size = 120;
             bubble.style.width = `${size}px`;
             bubble.style.height = `${size}px`;
-            bubble.style.left = `${x}px`;
-            bubble.style.top = `${y}px`;
+            bubble.style.left = `${data.x}px`;
+            bubble.style.top = `${data.y}px`;
 
-            bubble.innerHTML = `
-                <span class="bubble-title">${title}</span>
-                <span class="bubble-id">${author}</span>
-            `;
-            
-            bubble.onclick = () => alert(`INTENT RECORD: ${title}\nOWNER: ${author}\nSTATUS: Zone ${zoneNum}`);
+            bubble.innerHTML = `<span class="bubble-title">${data.title}</span><span class="bubble-id">${data.author}</span>`;
+            bubble.onclick = () => openDetail(data);
             field.appendChild(bubble);
         }
 
-        // 3. Action Logic
+        function openDetail(data) {
+            document.getElementById('cardTitle').innerText = data.title;
+            document.getElementById('cardDesc').innerText = data.desc;
+            document.getElementById('cardAuthor').innerText = `ORIGIN: ${data.author}`;
+            document.getElementById('cardZone').innerText = `ZONE 0${data.zone} / ${getZoneName(data.zone)}`;
+            document.getElementById('detail-overlay').style.display = 'flex';
+        }
+
+        function getZoneName(num) { const names = ["INTENT", "VALIDATION", "EXECUTION"]; return names[num-1]; }
+        function closeDetail() { document.getElementById('detail-overlay').style.display = 'none'; }
         function showAddForm() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
         function createBubble() {
             const title = document.getElementById('newTitle').value.toUpperCase();
-            if(!title) return;
-            spawnBubble(title, user.id, 1);
+            const desc = document.getElementById('newDesc').value;
+            if(!title || !desc) return;
+
+            const zoneWidth = window.innerWidth / 3;
+            const newBubble = {
+                id: Date.now(),
+                title: title,
+                desc: desc,
+                author: user.id,
+                zone: 1,
+                x: (Math.random() * (zoneWidth - 150)) + 50,
+                y: 180 + Math.random() * (window.innerHeight - 350)
+            };
+
+            bubbles.push(newBubble);
+            localStorage.setItem('tspill_bubbles', JSON.stringify(bubbles));
+            spawnBubbleElement(newBubble);
             closeModal();
             document.getElementById('newTitle').value = '';
             document.getElementById('newDesc').value = '';
         }
 
-        // 4. Background Canvas Animation
+        // Background Animation
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let pts = [];
