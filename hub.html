@@ -6,38 +6,51 @@
     <title>TSPILL — Ecosystem Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); }
+        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(212, 175, 55, 0.2); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* Zones */
-        .zones-bar { position: fixed; top: 80px; width: 100%; display: flex; border-bottom: 1px solid rgba(212, 175, 55, 0.1); z-index: 50; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
-        .zone { flex: 1; text-align: center; padding: 15px; font-size: 0.65rem; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+        /* --- KINETIC BACKGROUND --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.3; }
+        .watermark { position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.03); letter-spacing: 20px; text-transform: uppercase; pointer-events: none; z-index: 0; white-space: nowrap; }
 
-        /* Bubbles */
+        /* --- HEADER & META --- */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; background: linear-gradient(to bottom, #000 60%, transparent); }
+        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(212, 175, 55, 0.08); padding: 8px 18px; border: 1px solid var(--border); text-transform: uppercase; }
+
+        /* --- ZONES --- */
+        .zones-bar { position: fixed; top: 85px; width: 100%; display: flex; border-bottom: 1px solid rgba(212, 175, 55, 0.1); z-index: 50; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
+        .zone { flex: 1; text-align: center; padding: 12px; font-size: 0.65rem; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+
+        /* --- BUBBLES --- */
         #field { position: absolute; inset: 0; z-index: 10; }
-        .bubble { position: absolute; border-radius: 50%; border: 1px solid rgba(212, 175, 55, 0.2); background: var(--glass); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer; text-align: center; padding: 10px; pointer-events: auto; }
+        .bubble { position: absolute; border-radius: 50%; border: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer; text-align: center; padding: 10px; pointer-events: auto; }
         .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
-        .b-title { font-size: 0.7rem; font-weight: 700; margin-bottom: 4px; }
-        .b-author { font-size: 0.5rem; color: var(--gold); opacity: 0.8; }
+        .b-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .b-author { font-size: 0.5rem; color: var(--gold); margin-top: 4px; }
 
-        /* Expansion Card */
-        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .card { width: 500px; padding: 40px; border: 1px solid var(--gold); background: #000; position: relative; }
-        .card-header { font-size: 0.6rem; color: var(--gold); letter-spacing: 3px; margin-bottom: 20px; }
-        .card-title { font-size: 1.4rem; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 10px; }
-        .card-body { font-size: 0.9rem; line-height: 1.6; color: #aaa; margin-bottom: 30px; }
-        .claim-btn { width: 100%; padding: 15px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 2px; }
+        /* --- ROTATING ACTION BUTTON --- */
+        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2rem; cursor: pointer; z-index: 2; transition: 0.3s; }
+        .rotating-svg { position: absolute; width: 140px; height: 140px; animation: rotate 15s linear infinite; pointer-events: none; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Form Modal */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; align-items: center; justify-content: center; }
-        .modal-box { width: 400px; padding: 40px; background: #0a0a0a; border: 1px solid #333; }
-        input, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 20px; font-family: inherit; }
-
-        .add-btn { position: fixed; bottom: 40px; right: 40px; width: 60px; height: 60px; border-radius: 50%; background: var(--gold); border: none; font-size: 2rem; cursor: pointer; z-index: 100; }
+        /* --- OVERLAYS --- */
+        #overlay, #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+        .card { width: 500px; padding: 45px; border: 1px solid var(--gold); background: #0a0a0a; }
+        input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 20px; font-family: inherit; }
+        .claim-btn { width: 100%; padding: 16px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 2px; }
     </style>
 </head>
-<body onload="render()">
+<body onload="init()">
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="watermark">PUBLIC LEDGER</div>
+
+    <header>
+        <div class="user-meta" id="displayID">ID: --</div>
+        <div class="user-meta" id="displayRole">ROLE: --</div>
+    </header>
 
     <div class="zones-bar">
         <div class="zone">01 / Intent</div>
@@ -47,24 +60,32 @@
 
     <div id="field"></div>
 
-    <button class="add-btn" onclick="openModal()">+</button>
+    <div class="action-container">
+        <svg class="rotating-svg" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="transparent"/>
+            <text fill="#d4af37" style="font-size:5.5px; letter-spacing:2.5px; text-transform: uppercase;">
+                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
+            </text>
+        </svg>
+        <button class="action-btn" onclick="openModal()">+</button>
+    </div>
 
     <div id="modal">
-        <div class="modal-box">
-            <h3 style="margin-bottom:20px; font-size:0.8rem; letter-spacing:3px;">NEW INTENT</h3>
+        <div class="card">
+            <h3 style="letter-spacing:3px; margin-bottom:20px;">NEW RECORD</h3>
             <input type="text" id="inTitle" placeholder="TITLE">
-            <textarea id="inDesc" rows="4" placeholder="DESCRIPTION"></textarea>
-            <button class="claim-btn" onclick="saveNew()">SPILL TO LEDGER</button>
-            <button onclick="closeModal()" style="margin-top:10px; background:none; color:#555; border:none; cursor:pointer; font-size:0.6rem; width:100%;">CANCEL</button>
+            <textarea id="inDesc" rows="4" placeholder="TECHNICAL DESCRIPTION"></textarea>
+            <button class="claim-btn" onclick="saveNew()">SUBMIT TO HUB</button>
+            <button onclick="closeModal()" style="margin-top:15px; background:none; color:#444; border:none; width:100%; cursor:pointer;">CANCEL</button>
         </div>
     </div>
 
     <div id="overlay" onclick="this.style.display='none'">
         <div class="card" onclick="event.stopPropagation()">
-            <div class="card-header" id="cZone">ZONE 01</div>
-            <h2 class="card-title" id="cTitle">TITLE</h2>
-            <p class="card-body" id="cBody">Description...</p>
-            <button class="claim-btn" id="claimAction">CLAIM FOR VALIDATION</button>
+            <div id="cZone" style="color:var(--gold); font-size:0.6rem; margin-bottom:10px;">ZONE 01</div>
+            <h2 id="cTitle" style="margin-bottom:20px;">TITLE</h2>
+            <p id="cBody" style="color:#888; margin-bottom:30px; line-height:1.6;"></p>
+            <button class="claim-btn" id="claimAction" onclick="moveZone()">CLAIM FOR VALIDATION</button>
         </div>
     </div>
 
@@ -72,21 +93,27 @@
         let items = JSON.parse(localStorage.getItem('tspill_items')) || [];
         let activeID = null;
 
+        function init() {
+            // Restore ID and Role
+            const id = sessionStorage.getItem('currentID') || 'GUEST-ID';
+            const role = sessionStorage.getItem('currentRole') || 'EXPLORER';
+            document.getElementById('displayID').innerText = `ID: ${id}`;
+            document.getElementById('displayRole').innerText = `ROLE: ${role}`;
+            
+            initCanvas();
+            render();
+        }
+
         function render() {
             const field = document.getElementById('field');
             field.innerHTML = '';
             items.forEach(item => {
                 const b = document.createElement('div');
                 b.className = 'bubble';
-                const size = 120;
-                
-                // Position based on zone
                 const zoneW = window.innerWidth / 3;
-                const xBase = (item.zone - 1) * zoneW;
-                b.style.left = `${xBase + item.xOffset}px`;
+                b.style.left = `${((item.zone-1) * zoneW) + item.xOffset}px`;
                 b.style.top = `${item.y}px`;
-                b.style.width = b.style.height = `${size}px`;
-
+                b.style.width = b.style.height = `120px`;
                 b.innerHTML = `<span class="b-title">${item.title}</span><span class="b-author">${item.author}</span>`;
                 b.onclick = () => openDetail(item);
                 field.appendChild(b);
@@ -98,25 +125,11 @@
             document.getElementById('cTitle').innerText = item.title;
             document.getElementById('cBody').innerText = item.desc;
             document.getElementById('cZone').innerText = `ZONE 0${item.zone}`;
-            
-            const btn = document.getElementById('claimAction');
-            if(item.zone === 1) {
-                btn.innerText = "CLAIM FOR VALIDATION";
-                btn.style.display = "block";
-                btn.onclick = () => moveZone(2);
-            } else if(item.zone === 2) {
-                btn.innerText = "FINALIZE FOR EXECUTION";
-                btn.style.display = "block";
-                btn.onclick = () => moveZone(3);
-            } else {
-                btn.style.display = "none";
-            }
-
             document.getElementById('overlay').style.display = 'flex';
         }
 
-        function moveZone(newZone) {
-            items = items.map(i => i.id === activeID ? {...i, zone: newZone} : i);
+        function moveZone() {
+            items = items.map(i => i.id === activeID ? {...i, zone: Math.min(i.zone + 1, 3)} : i);
             localStorage.setItem('tspill_items', JSON.stringify(items));
             document.getElementById('overlay').style.display = 'none';
             render();
@@ -126,18 +139,11 @@
             const t = document.getElementById('inTitle').value;
             const d = document.getElementById('inDesc').value;
             if(!t || !d) return;
-
-            const newItem = {
-                id: Date.now(),
-                title: t,
-                desc: d,
+            items.push({
+                id: Date.now(), title: t, desc: d,
                 author: sessionStorage.getItem('currentID') || 'CREATOR',
-                zone: 1,
-                xOffset: Math.random() * (window.innerWidth/3 - 150) + 20,
-                y: Math.random() * (window.innerHeight - 300) + 150
-            };
-
-            items.push(newItem);
+                zone: 1, xOffset: 50 + Math.random() * 100, y: 200 + Math.random() * 300
+            });
             localStorage.setItem('tspill_items', JSON.stringify(items));
             closeModal();
             render();
@@ -145,6 +151,28 @@
 
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        // --- BACKGROUND ANIMATION ---
+        function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let nodes = [];
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            for(let i=0; i<50; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
+            function animate() {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                nodes.forEach(n => {
+                    n.x += n.vx; n.y += n.vy;
+                    if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
+                    nodes.forEach(m => {
+                        let d = Math.hypot(n.x-m.x, n.y-m.y);
+                        if(d<200) { ctx.strokeStyle=`rgba(212,175,55,${0.2*(1-d/200)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
+                    });
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
     </script>
 </body>
 </html>
