@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Home</title>
+    <title>TSPILL — System Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #d4af37;
             --dark-bg: #000000;
             --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(212, 175, 55, 0.3);
+            --border: rgba(212, 175, 55, 0.2);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,18 +25,10 @@
             overflow: hidden;
         }
 
-        /* --- BACKGROUND ANIMATION LAYER --- */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
+        /* --- BACKGROUND ANIMATION --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 
-        /* --- LEFT SIDEBAR (FIXED) --- */
+        /* --- LEFT SIDEBAR --- */
         .sidebar {
             width: 30%;
             min-width: 380px;
@@ -44,8 +36,7 @@
             position: relative;
             z-index: 10;
             border-right: 1px solid var(--border);
-            /* Updated to contain to prevent cutting */
-            background: url('tspill-sidebar-anatomy (1).png') no-repeat center center;
+            background: url('tspill-sidebar-anatomy.png') no-repeat center center;
             background-size: contain; 
             background-color: #000;
         }
@@ -55,7 +46,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 25px;
+            height: 80px; /* Fixed height for alignment */
             background: rgba(0, 0, 0, 0.9);
             border: none;
             border-top: 1px solid var(--gold);
@@ -68,62 +59,99 @@
             letter-spacing: 4px;
             transition: 0.4s;
         }
-
         .sidebar-btn:hover { background: var(--gold); color: #000; }
 
         /* --- RIGHT CONTENT AREA --- */
         .content-area {
             flex: 1;
-            padding: 40px;
-            overflow-y: auto;
             z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            justify-content: flex-start;
+            padding: 40px 60px;
+            height: 100vh;
         }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 60px 40px;
-            text-align: center;
-            backdrop-filter: blur(15px);
+        /* 1. THE QUOTE */
+        .quote-header {
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        .quote-header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            line-height: 1.2;
+            font-weight: 500;
+            color: #fff;
+        }
+        .quote-header span { color: var(--gold); }
+
+        /* 2. THE THREE BOXES */
+        .grid-container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 250px;
+            gap: 20px;
+            flex: 1;
+            margin-bottom: 40px;
         }
 
-        .card h2 {
+        .box {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .box h2 {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
+            letter-spacing: 4px;
             color: var(--gold);
-            margin-bottom: 30px;
-            opacity: 0.7;
+            margin-bottom: 20px;
+            opacity: 0.8;
         }
 
-        .mantra-text {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
+        /* Box 1: Philosophy Content */
+        .phil-text { font-size: 1.1rem; line-height: 1.6; font-weight: 300; }
+        .highlight { color: var(--gold); font-weight: 600; }
+
+        /* Box 2: Roadmap Content */
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+        }
+        .phase { border-left: 1px solid rgba(212, 175, 55, 0.2); padding-left: 10px; }
+        .phase-num { font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 5px; }
+        .phase-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .phase-desc { font-size: 0.7rem; color: #aaa; line-height: 1.4; }
+
+        /* Box 3: FAQ Content (Scrollable) */
+        .hub-scroll {
+            height: 200px; /* Fixed height for internal scroll */
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+        .faq-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .faq-q { color: var(--gold); font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; display: block; }
+        .faq-a { font-size: 0.85rem; color: #ccc; line-height: 1.5; }
+
+        .hub-scroll::-webkit-scrollbar { width: 2px; }
+        .hub-scroll::-webkit-scrollbar-thumb { background: var(--gold); }
+
+        /* 3. FOOTER MESSAGE */
+        .system-footer {
+            height: 80px; /* Aligns with sidebar button */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            line-height: 1.2;
+            color: #666;
+            text-align: center;
         }
-
-        .mantra-sub {
-            color: var(--gold);
-            display: block;
-            margin-top: 10px;
-        }
-
-        /* Scrollbar */
-        .content-area::-webkit-scrollbar { width: 3px; }
-        .content-area::-webkit-scrollbar-thumb { background: var(--gold); }
     </style>
 </head>
 <body>
@@ -137,76 +165,105 @@
     </div>
 
     <div class="content-area">
-        
-        <div class="card">
-            <h2>01 / Philosophy</h2>
-            <div class="mantra-text">
-                Built slowly.
-                <span class="mantra-sub">Built in public.</span>
+        <div class="quote-header">
+            <h1>Where Ideas Become <span>Products.</span><br>Where Creators Own the <span>Outcome.</span></h1>
+        </div>
+
+        <div class="grid-container">
+            
+            <div class="box">
+                <h2>01 / The Core</h2>
+                <p class="phil-text">
+                    TSPILL is a <span class="highlight">production-linked creative operating system</span> built as the <span class="highlight">neutral anchor</span> for <span class="highlight">validated intent</span>, where every idea earns its path from <span class="highlight">public record</span> to <span class="highlight">global production</span>.
+                </p>
+            </div>
+
+            <div class="box">
+                <h2>02 / The Way (Roadmap)</h2>
+                <div class="roadmap-grid">
+                    <div class="phase">
+                        <span class="phase-num">PHASE 1</span>
+                        <span class="phase-title">Foundation</span>
+                        <p class="phase-desc">Establishing transparency and public records.</p>
+                    </div>
+                    <div class="phase">
+                        <span class="phase-num">PHASE 2</span>
+                        <span class="phase-title">Artifact</span>
+                        <p class="phase-desc">Proving pipeline via tangible outputs.</p>
+                    </div>
+                    <div class="phase">
+                        <span class="phase-num">PHASE 3</span>
+                        <span class="phase-title">Validation</span>
+                        <p class="phase-desc">Industry experts vet creative processes.</p>
+                    </div>
+                    <div class="phase">
+                        <span class="phase-num">PHASE 4</span>
+                        <span class="phase-title">Community</span>
+                        <p class="phase-desc">Launching global creative challenges.</p>
+                    </div>
+                    <div class="phase">
+                        <span class="phase-num">PHASE 5</span>
+                        <span class="phase-title">Activation</span>
+                        <p class="phase-desc">Marketplace and royalty rails.</p>
+                    </div>
+                    <div class="phase">
+                        <span class="phase-num">PHASE 6</span>
+                        <span class="phase-title">Expansion</span>
+                        <p class="phase-desc">Scaling a global creative network.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <h2>03 / System Intelligence</h2>
+                <div class="hub-scroll">
+                    <div class="faq-item">
+                        <span class="faq-q">What kind of ideas belong here?</span>
+                        <p class="faq-a">Any idea with "execution intent" that can eventually become a physical product, film, or digital tool.</p>
+                    </div>
+                    <div class="faq-item">
+                        <span class="faq-q">Who owns the idea?</span>
+                        <p class="faq-a">Creators retain authorship and attribution. TSPILL acts as the execution framework with transparently defined ownership terms.</p>
+                    </div>
+                    <div class="faq-item">
+                        <span class="faq-q">Is this a competition?</span>
+                        <p class="faq-a">No. It is an "External Review." We prioritize technical feasibility and quality over popularity.</p>
+                    </div>
+                    <div class="faq-item">
+                        <span class="faq-q">How do royalties work?</span>
+                        <p class="faq-a">Revenue is distributed transparently to the original creator using stablecoins or tokens based on validated design audit trails.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>02 / System Roadmap</h2>
-            <div class="mantra-text">
-                Built slowly.
-                <span class="mantra-sub">Built in public.</span>
-            </div>
+        <div class="system-footer">
+            TSPILL moves from validation → production → participation → scale. <br>
+            Each stage earns the right to exist.
         </div>
-
-        <div class="card">
-            <h2>03 / Knowledge Hub</h2>
-            <div class="mantra-text">
-                Built slowly.
-                <span class="mantra-sub">Built in public.</span>
-            </div>
-        </div>
-
     </div>
 
 <script>
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let pts = [];
-
     function init() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        pts = [];
-        for(let i=0; i<60; i++) {
-            pts.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() - 0.5) * 0.3
-            });
-        }
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        pts = []; for(let i=0; i<60; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3});
     }
-
     function draw() {
         ctx.clearRect(0,0,canvas.width, canvas.height);
         pts.forEach((p, i) => {
             p.x += p.vx; p.y += p.vy;
-            if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-            if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-
+            if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
             for(let j=i+1; j<pts.length; j++) {
-                let q = pts[j];
-                let dist = Math.hypot(p.x-q.x, p.y-q.y);
-                if(dist < 180) {
-                    ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 * (1 - dist/180)})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-                }
+                let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
+                if(d < 180) { ctx.strokeStyle = `rgba(212, 175, 55, ${0.3 * (1 - d/180)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
             }
         });
         requestAnimationFrame(draw);
     }
-
-    window.addEventListener('resize', init);
-    init();
-    draw();
+    window.addEventListener('resize', init); init(); draw();
 </script>
-
 </body>
 </html>
