@@ -1,116 +1,191 @@
-<style>
-    /* ... (previous roots stay the same) ... */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSPILL — Ecosystem Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(212, 175, 55, 0.2);
+        }
 
-    /* 1. WATERMARK TITLE */
-    .bg-watermark {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 12vw;
-        font-weight: 700;
-        color: rgba(255, 255, 255, 0.02);
-        letter-spacing: 20px;
-        text-transform: uppercase;
-        pointer-events: none;
-        z-index: 0;
-        white-space: nowrap;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* 2. HEADER ALIGNMENT */
-    header {
-        position: fixed;
-        top: 0; width: 100%;
-        padding: 30px 50px;
-        display: flex;
-        justify-content: space-between;
-        z-index: 100;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-    }
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
 
-    .user-meta {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.7rem;
-        letter-spacing: 2px;
-        color: var(--gold);
-        background: rgba(212, 175, 55, 0.1);
-        padding: 8px 15px;
-        border-radius: 2px;
-        border-left: 2px solid var(--gold);
-    }
+        /* --- BACKGROUND & WATERMARK --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
 
-    /* 3. VISIBLE ZONE LABELS */
-    .zones-header-bar {
-        position: fixed;
-        top: 90px; /* Below the main header */
-        width: 100%;
-        display: flex;
-        z-index: 50;
-        border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-        background: rgba(0,0,0,0.3);
-    }
+        .bg-watermark {
+            position: fixed;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10vw;
+            font-weight: 700;
+            color: rgba(212, 175, 55, 0.03);
+            letter-spacing: 20px;
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+        }
 
-    .zone-title {
-        flex: 1;
-        text-align: center;
-        padding: 15px 0;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.75rem;
-        letter-spacing: 5px;
-        color: rgba(255, 255, 255, 0.6);
-        text-transform: uppercase;
-    }
+        /* --- TOP HEADER (ID & ROLE) --- */
+        header {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 25px 50px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            background: linear-gradient(to bottom, #000 60%, transparent);
+        }
 
-    /* 4. HIGHLIGHTED PLUS BUTTON WITH ROTATING TEXT */
-    .action-container {
-        position: fixed;
-        bottom: 50px;
-        right: 50px;
-        z-index: 200;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+        .user-meta {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            text-transform: uppercase;
+        }
 
-    .action-btn {
-        width: 70px; height: 70px;
-        border-radius: 50%;
-        background: var(--gold);
-        color: #000;
-        border: none;
-        font-size: 2rem;
-        cursor: pointer;
-        z-index: 2;
-        box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
-    }
+        /* --- ZONE LABELS --- */
+        .zones-header-bar {
+            position: fixed;
+            top: 85px;
+            width: 100%;
+            display: flex;
+            z-index: 50;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+        }
 
-    .rotating-text {
-        position: absolute;
-        width: 130px;
-        height: 130px;
-        animation: rotateText 15s linear infinite;
-        color: var(--gold);
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.6rem;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        pointer-events: none;
-    }
+        .zone-title {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
 
-    @keyframes rotateText {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-</style>
+        /* --- BUBBLE FIELD & PHYSICS --- */
+        #bubble-field { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
 
-<body>
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            pointer-events: auto;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .bubble:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .bubble-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin-bottom: 4px; }
+        .bubble-id { font-size: 0.55rem; color: var(--gold); opacity: 0.7; font-family: 'Space Grotesk'; }
+
+        /* --- HIGHLIGHTED PLUS BUTTON --- */
+        .action-container {
+            position: fixed;
+            bottom: 60px;
+            right: 60px;
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 75px; height: 75px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            font-size: 2.5rem;
+            font-weight: 300;
+            cursor: pointer;
+            z-index: 2;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+            transition: 0.3s;
+        }
+
+        .action-btn:hover { background: #fff; transform: scale(1.05); }
+
+        .rotating-text {
+            position: absolute;
+            width: 150px; height: 150px;
+            animation: rotateText 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateText { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- MODAL (SPILL FORM) --- */
+        #modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            width: 450px;
+            padding: 50px;
+            background: #0a0a0a;
+            border: 1px solid var(--gold);
+            text-align: center;
+        }
+
+        .modal-content h2 { font-family: 'Space Grotesk'; font-size: 0.8rem; letter-spacing: 5px; color: var(--gold); margin-bottom: 30px; }
+        input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: white; margin-bottom: 20px; outline: none; font-family: 'Inter'; }
+        input:focus { border-color: var(--gold); }
+    </style>
+</head>
+<body onload="initHub()">
+
     <canvas id="bg-canvas"></canvas>
     
-    <div class="bg-watermark">Public Ledger</div>
+    <div class="bg-watermark">PUBLIC LEDGER</div>
 
     <header>
-        <div class="user-meta" id="displayID">ID: UNKNOWN</div>
+        <div class="user-meta" id="displayID">ID: AUTHENTICATING...</div>
         <div class="user-meta" id="displayRole">ROLE: UNKNOWN</div>
     </header>
 
@@ -120,18 +195,12 @@
         <div class="zone-title">03 / Execution</div>
     </div>
 
-    <div class="zones-container">
-        <div class="zone"></div>
-        <div class="zone"></div>
-        <div class="zone"></div>
-    </div>
-
     <div id="bubble-field"></div>
 
     <div class="action-container" id="actionWrapper" style="display:none;">
         <svg class="rotating-text" viewBox="0 0 100 100">
-            <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent"/>
-            <text>
+            <path id="circlePath" d="M 50, 50 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent"/>
+            <text fill="#d4af37" style="font-family:'Space Grotesk'; font-size:6.5px; letter-spacing:3px;">
                 <textPath xlink:href="#circlePath">
                     SPILL NEW INTENT • CREATE RECORD • 
                 </textPath>
@@ -139,3 +208,99 @@
         </svg>
         <button class="action-btn" onclick="showAddForm()">+</button>
     </div>
+
+    <div id="modal">
+        <div class="modal-content">
+            <h2>SPILL NEW INTENT</h2>
+            <input type="text" id="newTitle" placeholder="IDEA TITLE">
+            <textarea id="newDesc" placeholder="Describe the execution intent and technical requirements..."></textarea>
+            <button onclick="createBubble()" style="width:100%; padding:18px; background:var(--gold); font-weight:700; border:none; cursor:pointer; letter-spacing:2px;">SUBMIT TO LEDGER</button>
+            <button onclick="closeModal()" style="margin-top:20px; background:none; color:#555; border:none; cursor:pointer; font-size:0.7rem; letter-spacing:2px;">CANCEL</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Identity Verification from Session
+        const user = {
+            id: sessionStorage.getItem('currentID') || 'TSPILL-GUEST',
+            role: sessionStorage.getItem('currentRole') || 'Explorer'
+        };
+
+        function initHub() {
+            document.getElementById('displayID').innerText = `ID: ${user.id}`;
+            document.getElementById('displayRole').innerText = `ROLE: ${user.role}`;
+            
+            // Only non-explorers can see the spill button
+            if(user.role !== 'Explorer') {
+                document.getElementById('actionWrapper').style.display = 'flex';
+            }
+
+            // Mock Data Spawns
+            spawnBubble("Digital Twin Protocol", "TSPILL-ID-001", 1);
+            spawnBubble("Liquid Alloy Fab", "TSPILL-ID-082", 2);
+            spawnBubble("Retail Rail Alpha", "TSPILL-ID-104", 3);
+        }
+
+        // 2. Bubble Physics Engine (Visual Spawn)
+        function spawnBubble(title, author, zoneNum) {
+            const field = document.getElementById('bubble-field');
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            const size = 110 + (Math.random() * 30);
+            const zoneWidth = window.innerWidth / 3;
+            // Ensure bubbles stay within their respective zone columns
+            const x = (zoneNum - 1) * zoneWidth + (Math.random() * (zoneWidth - size - 40)) + 20;
+            const y = 180 + Math.random() * (window.innerHeight - 350);
+
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+
+            bubble.innerHTML = `
+                <span class="bubble-title">${title}</span>
+                <span class="bubble-id">${author}</span>
+            `;
+            
+            bubble.onclick = () => alert(`INTENT RECORD: ${title}\nOWNER: ${author}\nSTATUS: Zone ${zoneNum}`);
+            field.appendChild(bubble);
+        }
+
+        // 3. Action Logic
+        function showAddForm() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        function createBubble() {
+            const title = document.getElementById('newTitle').value.toUpperCase();
+            if(!title) return;
+            spawnBubble(title, user.id, 1);
+            closeModal();
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newDesc').value = '';
+        }
+
+        // 4. Background Canvas Animation
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let pts = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            pts = []; for(let i=0; i<60; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3});
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            pts.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                for(let j=i+1; j<pts.length; j++) {
+                    let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
+                    if(d < 180) { ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 * (1 - d/180)})`; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
+                }
+            });
+            requestAnimationFrame(draw);
+        }
+        window.addEventListener('resize', init); init(); draw();
+    </script>
+</body>
+</html>
