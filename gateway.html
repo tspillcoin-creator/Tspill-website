@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Identity Verification</title>
+    <title>TSPILL — Identity Gateway</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #d4af37;
             --dark-bg: #000;
-            --glass: rgba(255, 255, 255, 0.03);
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body {
@@ -24,17 +24,19 @@
             overflow: hidden;
         }
 
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+        /* --- BACKGROUND ANIMATION (INCREASED VISIBILITY) --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.8; }
 
         .gateway-card {
             z-index: 10;
             width: 450px;
-            padding: 60px;
+            padding: 50px;
             background: var(--glass);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(25px);
             text-align: center;
-            border-radius: 4px;
+            border-radius: 2px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
         }
 
         .gateway-card h1 {
@@ -47,36 +49,46 @@
         }
 
         .input-group {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             text-align: left;
         }
 
         label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: #888;
+            color: var(--gold);
             margin-bottom: 10px;
             display: block;
+            opacity: 0.8;
         }
 
-        input {
+        /* DROPDOWN & INPUT FIX */
+        input, select {
             width: 100%;
-            background: rgba(255,255,255,0.05);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid #333;
             padding: 15px;
             color: #fff;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1rem;
+            font-size: 0.9rem;
             outline: none;
             transition: 0.3s;
+            appearance: none; /* Removes default arrow to style our own */
         }
 
-        input:focus { border-color: var(--gold); }
+        /* Fixing the "White Text on White Background" in Dropdown */
+        select option {
+            background-color: #111;
+            color: #fff;
+            padding: 10px;
+        }
+
+        input:focus, select:focus { border-color: var(--gold); }
 
         .btn-verify {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             background: var(--gold);
             color: #000;
             border: none;
@@ -86,7 +98,7 @@
             letter-spacing: 3px;
             cursor: pointer;
             transition: 0.4s;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         .btn-verify:hover {
@@ -97,9 +109,19 @@
         .status-msg {
             margin-top: 30px;
             font-size: 0.75rem;
-            color: #555;
+            color: #777;
             letter-spacing: 1px;
             line-height: 1.6;
+        }
+
+        .id-display {
+            color: #fff;
+            font-weight: 700;
+            border: 1px dashed var(--gold);
+            padding: 10px;
+            display: inline-block;
+            margin-top: 15px;
+            background: rgba(212, 175, 55, 0.1);
         }
     </style>
 </head>
@@ -112,23 +134,23 @@
     
     <div class="input-group">
         <label>System Access Role</label>
-        <select style="width:100%; background:rgba(255,255,255,0.05); border:1px solid #333; color:white; padding:15px; outline:none;">
-            <option>Explorer (Observer)</option>
-            <option>Creator (Innovation Lead)</option>
-            <option>Manufacturer (Execution Partner)</option>
+        <select id="userRole">
+            <option value="Explorer">Explorer (Observer)</option>
+            <option value="Creator">Creator (Innovation Lead)</option>
+            <option value="Manufacturer">Manufacturer (Execution Partner)</option>
         </select>
     </div>
 
     <div class="input-group">
         <label>Institutional Email</label>
-        <input type="email" placeholder="name@domain.com" id="userEmail">
+        <input type="email" placeholder="Verification required" id="userEmail">
     </div>
 
     <button class="btn-verify" onclick="verifyIdentity()">Verify Identity</button>
 
     <div class="status-msg" id="statusBox">
         Entry restricted to validated participants. <br>
-        New users will be assigned a TSPLUS identity record.
+        New records will be assigned a TSPILL identity.
     </div>
 </div>
 
@@ -138,20 +160,28 @@
         const statusBox = document.getElementById('statusBox');
         
         if(email.includes('@')) {
-            // This is where the TSPLUS ID generation logic happens
-            statusBox.innerHTML = `<span style="color:var(--gold)">IDENTITY GENERATED: TSPLUS-072</span><br>Access link dispatched to ${email}.<br><br><a href="hub.html" style="color:white; text-decoration:none; border-bottom:1px solid white;">ENTER HUB >></a>`;
+            // Generating the unique TSPILL ID based on a random factor for the prototype
+            const randomNum = Math.floor(Math.random() * 900) + 100;
+            const tspillID = "TSPILL-ID-" + randomNum;
+
+            statusBox.innerHTML = `
+                <div class="id-display">IDENTITY GENERATED: ${tspillID}</div><br>
+                <p style="margin-top:15px; color:#aaa;">Credential dispatched to ${email}.</p>
+                <br>
+                <a href="ledger.html" style="color:var(--gold); text-decoration:none; font-weight:bold; letter-spacing:2px; border-bottom:1px solid var(--gold); padding-bottom:5px;">ENTER SYSTEM HUB >></a>
+            `;
         } else {
-            alert("Please enter a valid institutional email.");
+            alert("Identification failed. Please enter a valid email.");
         }
     }
 
-    // Animation Script (Same as Home)
+    // Animation Script with Higher Visibility
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let pts = [];
     function init() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        pts = []; for(let i=0; i<40; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2});
+        pts = []; for(let i=0; i<70; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4});
     }
     function draw() {
         ctx.clearRect(0,0,canvas.width, canvas.height);
@@ -160,7 +190,7 @@
             if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
             for(let j=i+1; j<pts.length; j++) {
                 let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
-                if(d < 200) { ctx.strokeStyle = `rgba(212, 175, 55, ${0.2 * (1 - d/200)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
+                if(d < 180) { ctx.strokeStyle = `rgba(212, 175, 55, ${0.5 * (1 - d/180)})`; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
             }
         });
         requestAnimationFrame(draw);
