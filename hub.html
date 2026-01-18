@@ -1,254 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Ecosystem Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --gold: #d4af37;
-            --dark-bg: #050505;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(212, 175, 55, 0.2);
-        }
+<style>
+    /* ... (previous roots stay the same) ... */
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* 1. WATERMARK TITLE */
+    .bg-watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 12vw;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.02);
+        letter-spacing: 20px;
+        text-transform: uppercase;
+        pointer-events: none;
+        z-index: 0;
+        white-space: nowrap;
+    }
 
-        body {
-            background-color: var(--dark-bg);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
+    /* 2. HEADER ALIGNMENT */
+    header {
+        position: fixed;
+        top: 0; width: 100%;
+        padding: 30px 50px;
+        display: flex;
+        justify-content: space-between;
+        z-index: 100;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    }
 
-        /* --- BACKGROUND LAYER --- */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
+    .user-meta {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.1);
+        padding: 8px 15px;
+        border-radius: 2px;
+        border-left: 2px solid var(--gold);
+    }
 
-        /* --- THE ZONES LAYER --- */
-        .zones-container {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            z-index: 2;
-            pointer-events: none;
-        }
+    /* 3. VISIBLE ZONE LABELS */
+    .zones-header-bar {
+        position: fixed;
+        top: 90px; /* Below the main header */
+        width: 100%;
+        display: flex;
+        z-index: 50;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        background: rgba(0,0,0,0.3);
+    }
 
-        .zone {
-            flex: 1;
-            border-right: 1px dashed rgba(212, 175, 55, 0.1);
-            position: relative;
-            display: flex;
-            justify-content: center;
-            padding-top: 20px;
-        }
+    .zone-title {
+        flex: 1;
+        text-align: center;
+        padding: 15px 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 5px;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+    }
 
-        .zone-label {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 4px;
-            color: #444;
-            text-transform: uppercase;
-        }
+    /* 4. HIGHLIGHTED PLUS BUTTON WITH ROTATING TEXT */
+    .action-container {
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        z-index: 200;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-        /* --- TOP NAV --- */
-        header {
-            position: fixed;
-            top: 0; width: 100%;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            background: linear-gradient(to bottom, #000, transparent);
-        }
+    .action-btn {
+        width: 70px; height: 70px;
+        border-radius: 50%;
+        background: var(--gold);
+        color: #000;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 2;
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+    }
 
-        .user-meta {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            color: var(--gold);
-        }
+    .rotating-text {
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        animation: rotateText 15s linear infinite;
+        color: var(--gold);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.6rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        pointer-events: none;
+    }
 
-        /* --- BUBBLE STYLING --- */
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            z-index: 10;
-            pointer-events: auto;
-            text-align: center;
-            padding: 10px;
-        }
+    @keyframes rotateText {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
 
-        .bubble:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-            border-color: var(--gold);
-        }
-
-        .bubble-title { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .bubble-id { font-size: 0.5rem; color: #666; }
-
-        /* --- ACTIONS --- */
-        .action-btn {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: var(--gold);
-            color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            cursor: pointer;
-            z-index: 200;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-            border: none;
-            transition: 0.3s;
-        }
-
-        .action-btn:hover { transform: rotate(90deg) scale(1.1); background: #fff; }
-
-        /* --- OVERLAY MODAL --- */
-        #modal {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            width: 500px;
-            padding: 40px;
-            background: #111;
-            border: 1px solid var(--gold);
-            position: relative;
-        }
-    </style>
-</head>
-<body onload="initHub()">
-
+<body>
     <canvas id="bg-canvas"></canvas>
+    
+    <div class="bg-watermark">Public Ledger</div>
 
     <header>
-        <div class="user-meta" id="displayID">AUTHENTICATING...</div>
+        <div class="user-meta" id="displayID">ID: UNKNOWN</div>
         <div class="user-meta" id="displayRole">ROLE: UNKNOWN</div>
     </header>
 
+    <div class="zones-header-bar">
+        <div class="zone-title">01 / Intent</div>
+        <div class="zone-title">02 / Validation</div>
+        <div class="zone-title">03 / Execution</div>
+    </div>
+
     <div class="zones-container">
-        <div class="zone"><span class="zone-label">Zone 01: Intent</span></div>
-        <div class="zone"><span class="zone-label">Zone 02: Validation</span></div>
-        <div class="zone"><span class="zone-label">Zone 03: Execution</span></div>
+        <div class="zone"></div>
+        <div class="zone"></div>
+        <div class="zone"></div>
     </div>
 
     <div id="bubble-field"></div>
 
-    <button id="addBtn" class="action-btn" style="display:none;" onclick="showAddForm()">+</button>
-
-    <div id="modal">
-        <div class="modal-content">
-            <h2 style="font-family:'Space Grotesk'; font-size: 0.8rem; letter-spacing: 4px; color: var(--gold); margin-bottom: 20px;">SPILL NEW INTENT</h2>
-            <input type="text" id="newTitle" placeholder="Idea Title" style="width:100%; padding:15px; background:#000; border:1px solid #333; color:white; margin-bottom:15px;">
-            <textarea id="newDesc" placeholder="Describe the execution intent..." style="width:100%; padding:15px; background:#000; border:1px solid #333; color:white; height:100px; margin-bottom:20px;"></textarea>
-            <button onclick="createBubble()" style="width:100%; padding:15px; background:var(--gold); font-weight:bold; cursor:pointer; border:none;">SUBMIT TO LEDGER</button>
-            <button onclick="closeModal()" style="margin-top:10px; background:none; color:#555; border:none; cursor:pointer; width:100%;">Cancel</button>
-        </div>
+    <div class="action-container" id="actionWrapper" style="display:none;">
+        <svg class="rotating-text" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent"/>
+            <text>
+                <textPath xlink:href="#circlePath">
+                    SPILL NEW INTENT • CREATE RECORD • 
+                </textPath>
+            </text>
+        </svg>
+        <button class="action-btn" onclick="showAddForm()">+</button>
     </div>
-
-    <script>
-        const user = {
-            id: sessionStorage.getItem('currentID') || 'GUEST',
-            role: sessionStorage.getItem('currentRole') || 'Explorer'
-        };
-
-        function initHub() {
-            document.getElementById('displayID').innerText = `ID: ${user.id}`;
-            document.getElementById('displayRole').innerText = `ROLE: ${user.role}`;
-            
-            // Only Creators and Manufacturers can add ideas
-            if(user.role !== 'Explorer') {
-                document.getElementById('addBtn').style.display = 'flex';
-            }
-
-            // Generate some Initial Mock Bubbles
-            spawnBubble("Digital Twin Protocol", "TSPILL-ID-001", 1);
-            spawnBubble("Alloy Framework", "TSPILL-ID-042", 2);
-            spawnBubble("Global Distribution", "TSPILL-ID-099", 3);
-        }
-
-        function spawnBubble(title, author, zoneNum) {
-            const field = document.getElementById('bubble-field');
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            
-            // Random size & position within zone
-            const size = Math.random() * 40 + 80;
-            const zoneWidth = window.innerWidth / 3;
-            const x = (zoneNum - 1) * zoneWidth + Math.random() * (zoneWidth - 150) + 50;
-            const y = Math.random() * (window.innerHeight - 200) + 100;
-
-            bubble.style.width = `${size}px`;
-            bubble.style.height = `${size}px`;
-            bubble.style.left = `${x}px`;
-            bubble.style.top = `${y}px`;
-
-            bubble.innerHTML = `
-                <span class="bubble-title">${title}</span>
-                <span class="bubble-id">${author}</span>
-            `;
-            
-            bubble.onclick = () => alert(`Viewing Intent: ${title}\nAuthor: ${author}\nStatus: Zone ${zoneNum}`);
-            field.appendChild(bubble);
-        }
-
-        function showAddForm() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-        function createBubble() {
-            const title = document.getElementById('newTitle').value;
-            if(!title) return;
-            spawnBubble(title, user.id, 1); // New spills always go to Zone 1
-            closeModal();
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newDesc').value = '';
-        }
-
-        // Animation Background
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        function init() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            pts = []; for(let i=0; i<50; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2});
-        }
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pts.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                for(let j=i+1; j<pts.length; j++) {
-                    let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
-                    if(d < 180) { ctx.strokeStyle = `rgba(212, 175, 55, ${0.2 * (1 - d/180)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
-                }
-            });
-            requestAnimationFrame(draw);
-        }
-        window.addEventListener('resize', init); init(); draw();
-    </script>
-</body>
-</html>
