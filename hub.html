@@ -10,25 +10,24 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- WATERMARK FIX: GUARANTEED NO CUTOFF --- */
+        /* --- WATERMARK: ABSOLUTE CENTER & NO CUTOFF --- */
         .watermark-layer {
             position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-            z-index: 0; pointer-events: none; padding: 0 5vw; /* Keeps text away from edges */
+            z-index: 0; pointer-events: none; padding: 0 50px;
         }
         .watermark { 
-            font-size: 9.5vw; font-weight: 700; color: rgba(212, 175, 55, 0.02); 
-            letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap;
-            text-align: center; width: 100%;
+            font-size: clamp(2rem, 9.5vw, 12rem); font-weight: 700; color: rgba(212, 175, 55, 0.02); 
+            letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; text-align: center;
         }
 
-        /* --- KINETIC BACKGROUND --- */
+        /* --- KINETIC BG --- */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
 
         /* --- HEADER --- */
         header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
         .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
 
-        /* --- BUBBLE FIELD --- */
+        /* --- INTERACTIVE FIELD --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
         .bubble { 
             position: absolute; border-radius: 50%; border: 1px solid var(--border); 
@@ -36,45 +35,41 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: center; 
         }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
         .b-id { font-size: 0.5rem; color: var(--gold); letter-spacing: 1px; margin-bottom: 5px; opacity: 0.6; }
         .b-title { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 0 10px; color: #eee; }
 
-        /* --- RADIANT "+" BUTTON & TEXT RING --- */
+        /* --- ACTION BUTTON: RADIANT & PERFECTED --- */
         .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
-            50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.8); }
             100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
         }
         .action-btn { 
-            width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; 
-            font-size: 2rem; cursor: pointer; z-index: 5; animation: pulseGlow 3s infinite ease-in-out; font-weight: bold;
+            width: 75px; height: 75px; border-radius: 50%; background: var(--gold); color: #000; border: none; 
+            font-size: 2.2rem; cursor: pointer; z-index: 5; animation: pulseGlow 3s infinite ease-in-out; font-weight: bold;
         }
         .rotating-svg { 
-            position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; pointer-events: none; 
-            filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.3));
+            position: absolute; width: 160px; height: 160px; animation: rotate 20s linear infinite; pointer-events: none; 
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.4));
         }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- OVERLAYS & PANELS --- */
+        /* --- PANELS --- */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
         .panel { width: 520px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 60px rgba(0,0,0,1); }
         .state-tag { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 4px 12px; letter-spacing: 3px; display: inline-block; margin-bottom: 25px; text-transform: uppercase; }
-        h2 { font-size: 1.6rem; letter-spacing: 4px; margin-bottom: 25px; text-transform: uppercase; font-weight: 700; }
+        h2 { font-size: 1.6rem; letter-spacing: 4px; margin-bottom: 25px; text-transform: uppercase; }
         p { color: #888; line-height: 1.8; margin-bottom: 35px; font-size: 0.9rem; }
-        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; transition: 0.4s; }
-        .btn:hover { background: #fff; transform: translateY(-3px); }
-        input, textarea { width: 100%; padding: 18px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 25px; font-family: inherit; font-size: 0.85rem; outline: none; }
-        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; opacity: 0.8; }
+        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; }
+        input, textarea { width: 100%; padding: 18px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 25px; font-family: inherit; font-size: 0.85rem; }
+        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
     </style>
 </head>
 <body onload="init()">
 
-    <div class="watermark-layer">
-        <div class="watermark">PUBLIC LEDGER</div>
-    </div>
-
+    <div class="watermark-layer"><div class="watermark">PUBLIC LEDGER</div></div>
     <canvas id="bg-canvas"></canvas>
 
     <header>
@@ -87,7 +82,7 @@
     <div class="action-container">
         <svg class="rotating-svg" viewBox="0 0 100 100">
             <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
-            <text fill="#d4af37" style="font-size:5.1px; font-weight: 600; letter-spacing:3.4px; text-transform: uppercase;">
+            <text fill="#d4af37" style="font-size:5px; font-weight: 600; letter-spacing:3.5px; text-transform: uppercase;">
                 <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
             </text>
         </svg>
@@ -99,19 +94,19 @@
             <span class="state-tag" id="cState">PROPOSED</span>
             <h2 id="cTitle">--</h2>
             <p id="cDesc">--</p>
-            <div id="cAuthor" style="font-size: 0.55rem; color: #444; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase;">MAPPED ORIGIN: --</div>
-            <button class="btn" onclick="openValidation()">Contribute Validation</button>
+            <div id="cAuthor" style="font-size: 0.55rem; color: #444; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase;">--</div>
+            <button class="btn" onclick="openValidation()">Contribute Signal</button>
         </div>
     </div>
 
     <div id="validation-overlay" class="overlay" onclick="closeAll()">
         <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="letter-spacing: 4px; font-size: 0.75rem; margin-bottom: 40px; text-align: center; color: var(--gold);">VALIDATION SIGNAL</h3>
-            <label>Primary Execution Risk?</label>
+            <h3 style="letter-spacing: 4px; font-size: 0.75rem; margin-bottom: 40px; text-align: center; color: var(--gold);">VALIDATION RECORD</h3>
+            <label>Execution Risk Signal</label>
             <textarea id="vRisk" rows="2"></textarea>
-            <label>Who could build this?</label>
-            <input type="text" id="vBuilder">
-            <button class="btn" onclick="submitSignal()">Record Signal</button>
+            <label>Technical Attributes (Weight/Logic)</label>
+            <input type="text" id="vMaterial">
+            <button class="btn" onclick="submitSignal()">Record to Ledger</button>
         </div>
     </div>
 
@@ -119,7 +114,7 @@
         <div class="panel" onclick="event.stopPropagation()">
             <h3 style="letter-spacing:4px; margin-bottom:35px; font-size:0.75rem; color:var(--gold); text-align: center;">NEW INTENT SPILL</h3>
             <label>Intent Title</label>
-            <input type="text" id="inTitle" placeholder="SHORT & TECHNICAL">
+            <input type="text" id="inTitle" placeholder="TITLE">
             <label>Core Description</label>
             <textarea id="inDesc" rows="4"></textarea>
             <button class="btn" onclick="saveNew()">Commit to Ledger</button>
@@ -127,14 +122,16 @@
     </div>
 
     <script>
+        // Data storage linking author IDs
         let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [
-            {id: 4021, title: 'THERMAL CORE', desc: 'Core housing for liquid gold processing.', author: 'TS-901', state: 'PROPOSED', x: 200, y: 300},
-            {id: 7729, title: 'FLUID LOGIC', desc: 'Non-electric signaling for pressure gates.', author: 'TS-442', state: 'PROPOSED', x: 600, y: 150}
+            {id: 4021, title: 'THERMAL CORE', desc: 'Liquid gold processing hull.', author: 'TS-901', state: 'VALIDATED', x: 250, y: 350},
+            {id: 7729, title: 'KINETIC VALVE', desc: 'Pressure-gate logic system.', author: 'TS-442', state: 'PROPOSED', x: 650, y: 200}
         ];
         let activeID = null;
 
         function init() {
-            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
+            const currentID = sessionStorage.getItem('currentID') || 'GUEST-ID';
+            document.getElementById('displayID').innerText = `ID: ${currentID}`;
             initCanvas();
             render();
         }
@@ -147,7 +144,7 @@
                 b.className = 'bubble';
                 b.style.left = `${item.x}px`; b.style.top = `${item.y}px`;
                 b.style.width = b.style.height = `140px`;
-                b.innerHTML = `<span class="b-id">SIGNAL-${item.id}</span><span class="b-title">${item.title}</span>`;
+                b.innerHTML = `<span class="b-id">ORIGIN: ${item.author}</span><span class="b-title">${item.title}</span>`;
                 b.onclick = () => openDetail(item);
                 field.appendChild(b);
             });
@@ -157,8 +154,8 @@
             activeID = item.id;
             document.getElementById('cTitle').innerText = item.title;
             document.getElementById('cDesc').innerText = item.desc;
-            document.getElementById('cState').innerText = item.state || 'PROPOSED';
-            document.getElementById('cAuthor').innerText = `MAPPED ORIGIN: ${item.author}`;
+            document.getElementById('cState').innerText = item.state;
+            document.getElementById('cAuthor').innerText = `MAPPED BY: ${item.author} | SIGNAL: ${item.id}`;
             document.getElementById('detail-overlay').style.display = 'flex';
         }
 
@@ -168,7 +165,7 @@
         }
 
         function submitSignal() {
-            items = items.map(i => i.id === activeID ? {...i, state: 'UNDER VALIDATION'} : i);
+            items = items.map(i => i.id === activeID ? {...i, state: 'VALIDATING'} : i);
             localStorage.setItem('tspill_ledger', JSON.stringify(items));
             closeAll(); render();
         }
@@ -176,12 +173,15 @@
         function saveNew() {
             const t = document.getElementById('inTitle').value.toUpperCase();
             const d = document.getElementById('inDesc').value;
+            const currentID = sessionStorage.getItem('currentID') || 'ANON';
             if(!t || !d) return;
             items.push({
-                id: Math.floor(1000 + Math.random() * 9000), title: t, desc: d,
-                author: sessionStorage.getItem('currentID') || 'ANON',
+                id: Math.floor(1000 + Math.random() * 9000), 
+                title: t, 
+                desc: d,
+                author: currentID,
                 state: 'PROPOSED',
-                x: Math.random() * (window.innerWidth - 180), y: Math.random() * (window.innerHeight - 180)
+                x: Math.random() * (window.innerWidth - 200), y: Math.random() * (window.innerHeight - 200)
             });
             localStorage.setItem('tspill_ledger', JSON.stringify(items));
             closeAll(); render();
@@ -203,7 +203,7 @@
                     if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
                     nodes.forEach(m => {
                         let d = Math.hypot(n.x-m.x, n.y-m.y);
-                        if(d<180) { ctx.strokeStyle=`rgba(212,175,55,${0.25*(1-d/180)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
+                        if(d<180) { ctx.strokeStyle=`rgba(212,175,55,${0.2*(1-d/180)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
                     });
                 });
                 requestAnimationFrame(animate);
