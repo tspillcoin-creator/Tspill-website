@@ -4,74 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSPILL — Public Ledger Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --gold: #d4af37; 
-            --bg: #050505; 
-            --border: rgba(212, 175, 55, 0.3);
-        }
+        :root { --gold: #d4af37; --bg: #050505; --border: rgba(212, 175, 55, 0.3); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
-
-        /* --- THE PERMANENT WATERMARK FIX --- */
-        .watermark-layer {
-            position: fixed;
-            inset: 0;
+        
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* --- BACKGROUND KINETIC (FIXED SIZE) --- */
+        #bg-canvas { 
+            position: fixed; 
+            inset: 0; 
+            z-index: 1; 
+            pointer-events: none; 
+            opacity: 0.5; 
+        }
+
+        /* --- THE WATERMARK (FIXED VISIBILITY) --- */
+        .watermark-container {
+            position: fixed;
+            width: 100%;
             z-index: 0;
             pointer-events: none;
-            padding: 0 5%; /* Forces 5% gap on both left and right sides */
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px; /* Physical space for P and R */
         }
 
         .watermark { 
-            /* Clamp ensures it stays big but never exceeds the screen width */
-            font-size: clamp(2rem, 10vw, 15rem); 
+            /* Fixed font size so it doesn't shrink the rest of the UI */
+            font-size: 8.5rem; 
             font-weight: 700; 
             color: var(--gold);
             opacity: 0.02;
             text-transform: uppercase; 
-            /* Reduced spacing to ensure 'GER' stays on screen */
-            letter-spacing: 1.5vw; 
+            letter-spacing: 20px; 
             white-space: nowrap;
-            text-align: center;
-            width: 100%;
-            display: block;
         }
 
-        /* --- BACKGROUND & FIELD --- */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
-        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; }
+        /* --- HEADER --- */
+        header { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; z-index: 100; }
+        .user-meta { font-size: 0.7rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 12px 24px; border: 1px solid var(--border); text-transform: uppercase; }
 
+        /* --- CONSTELLATION --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
         .bubble { 
             position: absolute; border-radius: 50%; border: 1px solid var(--border); 
-            background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); 
+            background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            transition: all 0.6s ease; cursor: pointer; text-align: center; 
+            transition: transform 0.4s ease; cursor: pointer; text-align: center; 
         }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.1); }
-        .b-id { font-size: 0.5rem; color: var(--gold); opacity: 0.6; }
-        .b-title { font-size: 0.65rem; text-transform: uppercase; color: #eee; padding: 0 10px; }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212,175,55,0.2); }
+        .b-id { font-size: 0.55rem; color: var(--gold); opacity: 0.7; margin-bottom: 4px;}
+        .b-title { font-size: 0.7rem; text-transform: uppercase; color: #fff; padding: 0 10px; letter-spacing: 1px; }
 
-        /* --- ACTION BUTTON --- */
-        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; align-items: center; justify-content: center; }
-        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2rem; cursor: pointer; z-index: 2; }
-        .rotating-svg { position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; }
+        /* --- ACTION BUTTON (FIXED SCALE) --- */
+        .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2rem; cursor: pointer; z-index: 5; font-weight: bold; }
+        
+        .rotating-svg { 
+            position: absolute; 
+            width: 150px; 
+            height: 150px; 
+            animation: rotate 20s linear infinite; 
+        }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* --- OVERLAYS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(30px); }
-        .panel { width: 500px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); }
-        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 20px; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .panel { width: 500px; padding: 60px; background: #000; border: 1px solid var(--gold); position: relative; }
+        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 20px; letter-spacing: 2px; }
     </style>
 </head>
 <body onload="init()">
 
-    <div class="watermark-layer">
+    <div class="watermark-container">
         <h1 class="watermark">PUBLIC LEDGER</h1>
     </div>
 
@@ -85,43 +103,48 @@
     <div id="field"></div>
 
     <div class="action-container">
-        <svg class="rotating-svg" viewBox="0 0 100 100"><path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/><text fill="#d4af37" style="font-size:5px; text-transform: uppercase;"><textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath></text></svg>
+        <svg class="rotating-svg" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent"/>
+            <text fill="#d4af37" style="font-size:4.8px; font-weight: 500; text-transform: uppercase; letter-spacing: 3.5px;">
+                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
+            </text>
+        </svg>
         <button class="action-btn" onclick="document.getElementById('modal').style.display='flex'">+</button>
     </div>
 
     <div id="detail-overlay" class="overlay" onclick="this.style.display='none'">
         <div class="panel" onclick="event.stopPropagation()">
-            <h2 id="cTitle" style="letter-spacing:3px; margin-bottom:20px;">TITLE</h2>
-            <p id="cDesc" style="color:#888; margin-bottom:30px;">Description...</p>
+            <h2 id="cTitle" style="letter-spacing:4px; margin-bottom:20px; text-transform: uppercase;">TITLE</h2>
+            <p id="cDesc" style="color:#aaa; line-height:1.6; margin-bottom:30px;">Description...</p>
             <button class="btn" onclick="openValidation()">Participate in Validation</button>
         </div>
     </div>
 
     <div id="validation-overlay" class="overlay" onclick="this.style.display='none'">
         <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-bottom:20px;">SIGNAL CONTRIBUTION</h3>
-            <textarea style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:15px;" rows="4" placeholder="Enter technical risk signal..."></textarea>
-            <button class="btn" onclick="location.reload()">Submit Signal</button>
+            <h3 style="color:var(--gold); margin-bottom:25px; letter-spacing:2px;">VALIDATION SIGNAL</h3>
+            <textarea style="width:100%; background:#111; color:#fff; border:1px solid #333; padding:15px; font-family:inherit;" rows="4" placeholder="Enter technical risk signal..."></textarea>
+            <button class="btn" onclick="location.reload()">Log Signal</button>
         </div>
     </div>
 
     <div id="modal" class="overlay" onclick="this.style.display='none'">
         <div class="panel" onclick="event.stopPropagation()">
             <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
-            <input type="text" id="inTitle" placeholder="Title" style="width:100%; padding:15px; background:#000; border:1px solid #333; color:#fff; margin-bottom:10px;">
-            <textarea id="inDesc" placeholder="Description" style="width:100%; padding:15px; background:#000; border:1px solid #333; color:#fff;" rows="4"></textarea>
+            <input type="text" id="inTitle" placeholder="Title" style="width:100%; padding:15px; background:#111; border:1px solid #333; color:#fff; margin-bottom:15px;">
+            <textarea id="inDesc" placeholder="Description" style="width:100%; padding:15px; background:#111; border:1px solid #333; color:#fff;" rows="4"></textarea>
             <button class="btn" onclick="saveNew()">Commit to Ledger</button>
         </div>
     </div>
 
     <script>
         let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [
-            {id: 1024, title: 'QUANTUM CASING', desc: 'Carbon fiber structural hull for high-temp production.', author: 'TS-8821', x: 200, y: 300},
-            {id: 5502, title: 'KINETIC VALVE', desc: 'Self-regulating pressure system for liquid gold.', author: 'TS-1092', x: 600, y: 150}
+            {id: 4021, title: 'THERMAL CORE', desc: 'Core housing for liquid gold processing.', author: 'TS-901', x: 300, y: 400},
+            {id: 7729, title: 'FLUID LOGIC', desc: 'Non-electric signaling for pressure gates.', author: 'TS-442', x: 800, y: 200}
         ];
 
         function init() {
-            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'UNVERIFIED'}`;
+            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
             initCanvas();
             render();
         }
@@ -167,7 +190,7 @@
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             let nodes = [];
-            for(let i=0; i<50; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
+            for(let i=0; i<60; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
             function animate() {
                 ctx.clearRect(0,0,canvas.width, canvas.height);
                 nodes.forEach(n => {
@@ -175,7 +198,7 @@
                     if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
                     nodes.forEach(m => {
                         let d = Math.hypot(n.x-m.x, n.y-m.y);
-                        if(d<150) { ctx.strokeStyle=`rgba(212,175,55,${0.2*(1-d/150)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
+                        if(d<180) { ctx.strokeStyle=`rgba(212,175,55,${0.25*(1-d/180)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
                     });
                 });
                 requestAnimationFrame(animate);
