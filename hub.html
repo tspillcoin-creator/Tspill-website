@@ -6,77 +6,76 @@
     <title>TSPILL — Public Ledger Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --border: rgba(212, 175, 55, 0.3); }
+        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(212, 175, 55, 0.3); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- WATERMARK & BACKGROUND --- */
-        /* Fixed centering logic to prevent 'GER' cutoff */
-        .watermark-layer {
-            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-            z-index: 0; pointer-events: none; padding: 0 50px;
+        /* --- BACKGROUND & WATERMARK --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
+        
+        .watermark-wrap {
+            position: fixed; top: 50%; left: 0; width: 100vw; transform: translateY(-50%);
+            z-index: 0; pointer-events: none; display: flex; justify-content: center; overflow: visible; 
         }
         .watermark { 
-            font-size: 9.5vw; font-weight: 700; color: var(--gold); opacity: 0.02;
-            text-transform: uppercase; letter-spacing: 2vw; white-space: nowrap;
+            font-size: 11vw; font-weight: 700; color: rgba(212, 175, 55, 0.02); 
+            letter-spacing: 2.5vw; text-transform: uppercase; white-space: nowrap; padding: 0 5vw;
         }
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
 
         /* --- HEADER --- */
         header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; }
+        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
 
-        /* --- BUBBLE FIELD --- */
+        /* --- FIELD & BUBBLES --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
         .bubble { 
             position: absolute; border-radius: 50%; border: 1px solid var(--border); 
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); 
+            background: var(--glass); backdrop-filter: blur(8px); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            transition: 0.5s; cursor: pointer; text-align: center; 
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: center; 
         }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
-        .b-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0 10px; }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        .b-id { font-size: 0.5rem; color: var(--gold); letter-spacing: 1px; margin-bottom: 5px; opacity: 0.6; }
+        .b-title { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 0 10px; color: #eee; }
 
-        /* --- THE GLOWING ACTION BUTTON (RESTORED GEOMETRY) --- */
-        .action-container { 
-            position: fixed; bottom: 60px; right: 60px; z-index: 200; 
-            display: flex; justify-content: center; align-items: center; 
-        }
+        /* --- RADIANT ACTION BUTTON --- */
+        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
         
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
-            50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.8); }
-            100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
+            0% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.7); }
+            100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
         }
 
         .action-btn { 
-            width: 70px; height: 70px; border-radius: 50%; 
-            background: var(--gold); color: #000; border: none; 
-            font-size: 2rem; cursor: pointer; z-index: 2; 
-            animation: pulseGlow 3s infinite ease-in-out;
-            transition: 0.3s; font-weight: bold;
+            width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; 
+            font-size: 2rem; cursor: pointer; z-index: 2; animation: pulseGlow 3s infinite ease-in-out; font-weight: bold;
         }
 
         .rotating-svg { 
-            position: absolute; width: 150px; height: 150px; 
-            animation: rotate 20s linear infinite; pointer-events: none; 
-            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
+            position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; pointer-events: none; 
+            filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.3));
         }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- MODALS & OVERLAYS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .card { width: 450px; padding: 50px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; margin-top: 20px; }
-        input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 20px; font-family: inherit; }
+        /* --- OVERLAYS & PANELS --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
+        .panel { width: 520px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 60px rgba(0,0,0,1); }
+        
+        .state-tag { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 4px 12px; letter-spacing: 3px; display: inline-block; margin-bottom: 25px; text-transform: uppercase; }
+        h2 { font-size: 1.6rem; letter-spacing: 4px; margin-bottom: 25px; text-transform: uppercase; font-weight: 700; }
+        p { color: #888; line-height: 1.8; margin-bottom: 35px; font-size: 0.9rem; }
+        
+        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; transition: 0.4s; }
+        .btn:hover { background: #fff; transform: translateY(-2px); }
+        
+        input, textarea { width: 100%; padding: 18px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 25px; font-family: inherit; font-size: 0.85rem; outline: none; }
+        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; opacity: 0.8; }
     </style>
 </head>
 <body onload="init()">
 
-    <div class="watermark-layer">
-        <div class="watermark">PUBLIC LEDGER</div>
-    </div>
-
+    <div class="watermark-wrap"><div class="watermark">PUBLIC LEDGER</div></div>
     <canvas id="bg-canvas"></canvas>
 
     <header>
@@ -96,20 +95,44 @@
         <button class="action-btn" onclick="openModal()">+</button>
     </div>
 
-    <div id="modal" class="overlay" onclick="closeModal()">
-        <div class="card" onclick="event.stopPropagation()">
-            <h3 style="letter-spacing:4px; margin-bottom:30px; font-size:0.8rem; color:var(--gold);">NEW INTENT SPILL</h3>
-            <input type="text" id="inTitle" placeholder="INTENT NAME">
-            <textarea id="inDesc" rows="4" placeholder="DESCRIBE THE CORE LOGIC..."></textarea>
-            <button class="btn-main" onclick="saveNew()">SUBMIT TO HUB</button>
+    <div id="detail-overlay" class="overlay" onclick="closeAll()">
+        <div class="panel" onclick="event.stopPropagation()">
+            <span class="state-tag" id="cState">PROPOSED</span>
+            <h2 id="cTitle">--</h2>
+            <p id="cDesc">--</p>
+            <div id="cAuthor" style="font-size: 0.55rem; color: #444; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase;">MAPPED ORIGIN: --</div>
+            <button class="btn" onclick="openValidation()">Participate in Validation</button>
+        </div>
+    </div>
+
+    <div id="validation-overlay" class="overlay" onclick="closeAll()">
+        <div class="panel" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing: 4px; font-size: 0.75rem; margin-bottom: 40px; text-align: center; color: var(--gold);">SIGNAL CONTRIBUTION</h3>
+            <label>What is the primary execution risk?</label>
+            <textarea id="vRisk" rows="2"></textarea>
+            <label>Material / Logic Requirements?</label>
+            <input type="text" id="vMaterial">
+            <button class="btn" onclick="submitSignal()">Record Signal to Ledger</button>
+        </div>
+    </div>
+
+    <div id="modal" class="overlay" onclick="closeAll()">
+        <div class="panel" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing:4px; margin-bottom:35px; font-size:0.75rem; color:var(--gold); text-align: center;">NEW INTENT SPILL</h3>
+            <label>Intent Title</label>
+            <input type="text" id="inTitle" placeholder="SHORT & TECHNICAL">
+            <label>Core Description</label>
+            <textarea id="inDesc" rows="4"></textarea>
+            <button class="btn" onclick="saveNew()">Commit to Public Ledger</button>
         </div>
     </div>
 
     <script>
-        let items = JSON.parse(localStorage.getItem('tspill_items')) || [
-            {id: 1024, title: 'QUANTUM SHELL', desc: 'A reinforced casing for heavy industry.', x: 300, y: 300},
-            {id: 2048, title: 'KINETIC VALVE', desc: 'Pressure-based logic system.', x: 700, y: 400}
+        let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [
+            {id: 1024, title: 'QUANTUM SHELL', desc: 'A reinforced casing for heavy industry.', author: 'TS-8821', state: 'PROPOSED', x: 300, y: 300},
+            {id: 2048, title: 'KINETIC VALVE', desc: 'Pressure-based logic system.', author: 'TS-1092', state: 'PROPOSED', x: 700, y: 400}
         ];
+        let activeID = null;
 
         function init() {
             document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
@@ -125,9 +148,30 @@
                 b.className = 'bubble';
                 b.style.left = `${item.x}px`; b.style.top = `${item.y}px`;
                 b.style.width = b.style.height = `140px`;
-                b.innerHTML = `<span class="b-title">${item.title}</span>`;
+                b.innerHTML = `<span class="b-id">SIGNAL-${item.id}</span><span class="b-title">${item.title}</span>`;
+                b.onclick = () => openDetail(item);
                 field.appendChild(b);
             });
+        }
+
+        function openDetail(item) {
+            activeID = item.id;
+            document.getElementById('cTitle').innerText = item.title;
+            document.getElementById('cDesc').innerText = item.desc;
+            document.getElementById('cState').innerText = item.state || 'PROPOSED';
+            document.getElementById('cAuthor').innerText = `MAPPED ORIGIN: ${item.author}`;
+            document.getElementById('detail-overlay').style.display = 'flex';
+        }
+
+        function openValidation() {
+            document.getElementById('detail-overlay').style.display = 'none';
+            document.getElementById('validation-overlay').style.display = 'flex';
+        }
+
+        function submitSignal() {
+            items = items.map(i => i.id === activeID ? {...i, state: 'UNDER VALIDATION'} : i);
+            localStorage.setItem('tspill_ledger', JSON.stringify(items));
+            closeAll(); render();
         }
 
         function saveNew() {
@@ -135,15 +179,17 @@
             const d = document.getElementById('inDesc').value;
             if(!t || !d) return;
             items.push({
-                id: Math.floor(Math.random()*9000)+1000, title: t, desc: d,
-                x: Math.random() * (window.innerWidth - 200), y: Math.random() * (window.innerHeight - 200)
+                id: Math.floor(1000 + Math.random() * 9000), title: t, desc: d,
+                author: sessionStorage.getItem('currentID') || 'ANON',
+                state: 'PROPOSED',
+                x: Math.random() * (window.innerWidth - 180), y: Math.random() * (window.innerHeight - 180)
             });
-            localStorage.setItem('tspill_items', JSON.stringify(items));
-            location.reload();
+            localStorage.setItem('tspill_ledger', JSON.stringify(items));
+            closeAll(); render();
         }
 
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
 
         function initCanvas() {
             const canvas = document.getElementById('bg-canvas');
