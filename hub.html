@@ -20,12 +20,12 @@
             text-transform: uppercase; letter-spacing: 20px; white-space: nowrap;
         }
 
-        /* --- BACKGROUND & HEADER --- */
+        /* --- BACKGROUND --- */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.5; }
         header { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; z-index: 100; }
         .user-meta { font-size: 0.7rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 12px 24px; border: 1px solid var(--border); text-transform: uppercase; }
 
-        /* --- BUBBLES --- */
+        /* --- INTERACTIVE FIELD --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
         .bubble { 
             position: absolute; border-radius: 50%; border: 1px solid var(--border); 
@@ -37,39 +37,38 @@
         .b-id { font-size: 0.55rem; color: var(--gold); opacity: 0.7; margin-bottom: 4px;}
         .b-title { font-size: 0.7rem; text-transform: uppercase; color: #fff; padding: 0 10px; letter-spacing: 1px; }
 
-        /* --- GLOWING ACTION BUTTON --- */
+        /* --- ACTION BUTTON & RADIANT TEXT --- */
         .action-container { 
             position: fixed; bottom: 50px; right: 50px; z-index: 200; 
-            width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; 
+            width: 170px; height: 170px; display: flex; align-items: center; justify-content: center; 
         }
         
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.8); }
-            100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+            0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 45px rgba(212, 175, 55, 0.7); transform: scale(1.02); }
+            100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); transform: scale(1); }
         }
 
         .action-btn { 
             width: 70px; height: 70px; border-radius: 50%; 
             background: var(--gold); color: #000; border: none; 
             font-size: 2.2rem; cursor: pointer; z-index: 5; font-weight: bold;
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
-            animation: pulseGlow 3s infinite ease-in-out;
+            animation: pulseGlow 4s infinite ease-in-out;
             transition: 0.3s;
         }
-        .action-btn:hover { transform: scale(1.1); }
 
         .rotating-svg { 
             position: absolute; width: 100%; height: 100%; 
             animation: rotate 20s linear infinite; 
-            filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.4));
+            /* Subtle glow for the circular text */
+            filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
         }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- OVERLAYS --- */
+        /* --- PANEL OVERLAYS --- */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .panel { width: 500px; padding: 60px; background: #000; border: 1px solid var(--gold); }
-        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .panel { width: 500px; padding: 60px; background: #000; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
+        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
         input, textarea { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: #fff; margin-bottom: 15px; font-family: inherit; }
     </style>
 </head>
@@ -90,42 +89,34 @@
             <defs>
                 <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
             </defs>
-            <text fill="#d4af37" style="font-size:5.2px; font-weight: 600; text-transform: uppercase; letter-spacing: 3.1px;">
-                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
+            <text fill="#d4af37" style="font-size:5.1px; font-weight: 600; text-transform: uppercase; letter-spacing: 3.45px;">
+                <textPath xlink:href="#circlePath" startOffset="0%">SPILL NEW INTENT • CREATE RECORD • </textPath>
             </text>
         </svg>
         <button class="action-btn" onclick="document.getElementById('modal').style.display='flex'">+</button>
     </div>
 
-    <div id="detail-overlay" class="overlay" onclick="this.style.display='none'">
-        <div class="panel" onclick="event.stopPropagation()">
-            <h2 id="cTitle" style="letter-spacing:4px; margin-bottom:20px; text-transform: uppercase;">TITLE</h2>
-            <p id="cDesc" style="color:#aaa; line-height:1.6; margin-bottom:30px;">Description...</p>
-            <button class="btn" onclick="openValidation()">Participate in Validation</button>
-        </div>
-    </div>
-
-    <div id="validation-overlay" class="overlay" onclick="this.style.display='none'">
-        <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-bottom:25px; letter-spacing:2px;">VALIDATION SIGNAL</h3>
-            <textarea rows="4" placeholder="Enter technical risk signal..."></textarea>
-            <button class="btn" onclick="location.reload()">Log Signal</button>
-        </div>
-    </div>
-
     <div id="modal" class="overlay" onclick="this.style.display='none'">
         <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
-            <input type="text" id="inTitle" placeholder="Title">
-            <textarea id="inDesc" placeholder="Description" rows="4"></textarea>
-            <button class="btn" onclick="saveNew()">Commit to Ledger</button>
+            <h3 style="color:var(--gold); margin-bottom:20px; letter-spacing:3px;">NEW INTENT SPILL</h3>
+            <input type="text" id="inTitle" placeholder="INTENT TITLE">
+            <textarea id="inDesc" placeholder="CORE DESCRIPTION" rows="4"></textarea>
+            <button class="btn" onclick="saveNew()">COMMIT TO LEDGER</button>
+        </div>
+    </div>
+
+    <div id="detail-overlay" class="overlay" onclick="this.style.display='none'">
+        <div class="panel" onclick="event.stopPropagation()">
+            <h2 id="cTitle" style="letter-spacing:4px; margin-bottom:20px; text-transform: uppercase;">--</h2>
+            <p id="cDesc" style="color:#aaa; line-height:1.6; margin-bottom:30px;">--</p>
+            <button class="btn" onclick="openValidation()">PARTICIPATE IN VALIDATION</button>
         </div>
     </div>
 
     <script>
         let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [
-            {id: 4021, title: 'THERMAL CORE', desc: 'Core housing for liquid gold processing.', author: 'TS-901', x: 300, y: 400},
-            {id: 7729, title: 'FLUID LOGIC', desc: 'Non-electric signaling for pressure gates.', author: 'TS-442', x: 800, y: 200}
+            {id: 4021, title: 'THERMAL CORE', desc: 'Core housing for liquid gold processing.', x: 300, y: 400},
+            {id: 7729, title: 'FLUID LOGIC', desc: 'Non-electric signaling for pressure gates.', x: 800, y: 200}
         ];
 
         function init() {
@@ -152,18 +143,12 @@
             });
         }
 
-        function openValidation() {
-            document.getElementById('detail-overlay').style.display = 'none';
-            document.getElementById('validation-overlay').style.display = 'flex';
-        }
-
         function saveNew() {
             const t = document.getElementById('inTitle').value.toUpperCase();
             const d = document.getElementById('inDesc').value;
             if(!t || !d) return;
             items.push({
                 id: Math.floor(1000 + Math.random() * 9000), title: t, desc: d,
-                author: sessionStorage.getItem('currentID') || 'ANON',
                 x: Math.random() * (window.innerWidth - 200), y: Math.random() * (window.innerHeight - 200)
             });
             localStorage.setItem('tspill_ledger', JSON.stringify(items));
