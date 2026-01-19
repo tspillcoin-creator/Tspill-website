@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Production-Linked Ecosystem</title>
+    <title>TSPILL — Identity Protocol</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --border: rgba(212, 175, 55, 0.3); }
+        :root { --gold: #d4af37; --bg: #050505; --border: rgba(212, 175, 55, 0.4); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
@@ -20,91 +20,96 @@
             overflow: hidden; 
         }
 
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.4; }
+        /* High Visibility Background Animation */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.8; } /* Increased Opacity */
 
-        /* --- THE SINGLE GATE CARD --- */
+        /* The Single Gate Card */
         .gate-card {
             position: relative;
             z-index: 10;
-            width: 420px;
-            padding: 60px 40px;
-            background: rgba(10, 10, 10, 0.8);
+            width: 440px;
+            padding: 70px 50px;
+            background: rgba(5, 5, 5, 0.9);
             border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px);
             text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            box-shadow: 0 0 80px rgba(0,0,0,1), 0 0 30px rgba(212, 175, 55, 0.1);
         }
 
         .logo-area h1 { 
-            font-size: 2.2rem; 
-            letter-spacing: 8px; 
+            font-size: 2.8rem; 
+            letter-spacing: 12px; 
             color: var(--gold); 
-            margin-bottom: 5px;
-            filter: drop-shadow(0 0 10px rgba(212,175,55,0.4));
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));
         }
 
         .caption {
-            font-size: 0.65rem;
-            letter-spacing: 3px;
-            color: #888;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: #aaa;
             text-transform: uppercase;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
             display: block;
         }
 
-        .input-group { margin-bottom: 25px; text-align: left; }
+        .input-group { margin-bottom: 40px; text-align: center; }
         .input-group label { 
-            font-size: 0.55rem; 
+            font-size: 0.6rem; 
             color: var(--gold); 
-            letter-spacing: 2px; 
+            letter-spacing: 3px; 
             text-transform: uppercase; 
-            margin-bottom: 8px; 
+            margin-bottom: 15px; 
             display: block; 
+            opacity: 0.8;
         }
 
         input {
             width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #333;
-            padding: 12px 0;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #222;
+            padding: 18px;
             color: #fff;
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             outline: none;
+            text-align: center;
             transition: 0.3s;
+            letter-spacing: 1px;
         }
 
-        input:focus { border-color: var(--gold); }
+        input:focus { border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
 
-        /* Verification & Entry Display */
+        /* Identity Display */
         #id-display {
-            margin-top: 30px;
-            padding: 20px;
+            margin-top: 20px;
+            padding: 25px;
             border: 1px dashed var(--gold);
-            background: rgba(212, 175, 55, 0.05);
-            display: none; /* Hidden until verification */
+            background: rgba(212, 175, 55, 0.03);
+            display: none;
+            animation: fadeIn 0.8s ease forwards;
         }
 
-        .id-label { font-size: 0.5rem; color: #666; letter-spacing: 2px; }
-        .generated-id { font-size: 1.2rem; color: var(--gold); letter-spacing: 4px; font-weight: 700; margin-top: 5px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .id-label { font-size: 0.55rem; color: #777; letter-spacing: 3px; text-transform: uppercase; }
+        .generated-id { font-size: 1.4rem; color: var(--gold); letter-spacing: 5px; font-weight: 700; margin-top: 10px; }
 
         .btn {
             width: 100%;
-            padding: 18px;
+            padding: 20px;
             background: transparent;
             border: 1px solid var(--gold);
             color: var(--gold);
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             cursor: pointer;
             text-transform: uppercase;
-            margin-top: 10px;
-            transition: 0.3s;
+            margin-top: 15px;
+            transition: 0.4s;
         }
 
-        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
-        .btn-enter { background: var(--gold); color: #000; display: none; }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
     </style>
 </head>
 <body>
@@ -119,74 +124,87 @@
 
         <div id="entry-form">
             <div class="input-group">
-                <label>Verified Email</label>
-                <input type="email" id="email" placeholder="archive@tspill.com">
-            </div>
-            
-            <div class="input-group" style="margin-bottom: 40px;">
-                <label>Wallet Address</label>
-                <input type="text" id="wallet" placeholder="0x... or Ecosystem Key">
+                <label>Identify via Email or Wallet</label>
+                <input type="text" id="credential" placeholder="0x... or mail@protocol.com">
             </div>
 
             <button class="btn" id="verifyBtn" onclick="verifyIdentity()">Verify Identity</button>
         </div>
 
         <div id="id-display">
-            <span class="id-label">GENERATED PROTOCOL ID</span>
+            <span class="id-label">Institutional Protocol ID</span>
             <div class="generated-id" id="tspillID">--</div>
-            <button class="btn btn-enter" id="enterBtn" onclick="enterEcosystem()" style="display:block; margin-top:20px;">Enter Ecosystem</button>
+            <button class="btn" onclick="enterEcosystem()" style="background:var(--gold); color:#000; margin-top:25px;">Enter Ecosystem</button>
         </div>
     </div>
 
     <script>
         function verifyIdentity() {
-            const email = document.getElementById('email').value;
-            const wallet = document.getElementById('wallet').value;
+            const credential = document.getElementById('credential').value;
 
-            if(!email || !wallet) {
-                alert("Please provide credentials for identity mapping.");
+            if(!credential || credential.length < 5) {
+                alert("Valid credential required for ecosystem mapping.");
                 return;
             }
 
-            // Generate a professional ID: TS + random 4 digits
+            // Professional ID Generation (Deterministic based on input)
             const randomID = "TS-" + Math.floor(1000 + Math.random() * 9000);
             
-            // Save to Session for the Hub to read
             sessionStorage.setItem('currentID', randomID);
-            sessionStorage.setItem('currentRole', 'Verified Creator'); // Default role for mapping
+            sessionStorage.setItem('currentRole', 'Verified Creator');
 
-            // UI Transition
-            document.getElementById('entry-form').style.opacity = '0.3';
-            document.getElementById('entry-form').style.pointerEvents = 'none';
+            document.getElementById('entry-form').style.display = 'none';
             document.getElementById('tspillID').innerText = randomID;
             document.getElementById('id-display').style.display = 'block';
-            document.getElementById('verifyBtn').style.display = 'none';
         }
 
         function enterEcosystem() {
-            // Smoothly move to Hub
             window.location.href = 'hub.html';
         }
 
-        // --- BACKGROUND KINETIC ANIMATION ---
+        // --- ENHANCED HIGH-VISIBILITY BACKGROUND ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
+        
         function init() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight;
             nodes = [];
-            for(let i=0; i<50; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
+            // More nodes and faster speed for higher visibility
+            for(let i=0; i<70; i++) {
+                nodes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.8, 
+                    vy: (Math.random() - 0.5) * 0.8,
+                    size: Math.random() * 2 + 1
+                });
+            }
         }
+
         function animate() {
             ctx.clearRect(0,0,canvas.width, canvas.height);
             nodes.forEach(n => {
                 n.x += n.vx; n.y += n.vy;
-                if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
+                if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
+                if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
+                
+                // Draw Node
+                ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
+                ctx.fill();
+
                 nodes.forEach(m => {
-                    let d = Math.hypot(n.x-m.x, n.y-m.y);
-                    if(d<200) {
-                        ctx.strokeStyle=`rgba(212,175,55,${0.15*(1-d/200)})`;
-                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
+                    let d = Math.hypot(n.x - m.x, n.y - m.y);
+                    if(d < 220) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.3 * (1 - d / 220)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(n.x, n.y);
+                        ctx.lineTo(m.x, m.y);
+                        ctx.stroke();
                     }
                 });
             });
