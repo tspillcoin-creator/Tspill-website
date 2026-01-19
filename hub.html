@@ -6,43 +6,53 @@
     <title>TSPILL — Public Ledger Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(212, 175, 55, 0.3); }
+        :root { 
+            --gold: #d4af37; 
+            --bg: #050505; 
+            --glass: rgba(255, 255, 255, 0.03); 
+            --border: rgba(212, 175, 55, 0.3);
+            --watermark-opacity: 0.02;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- BACKGROUND & WATERMARK FIX --- */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
-        
-        /* The container spans the screen but allows the text to go outside */
-        .watermark-wrap {
+        /* --- THE FINAL WATERMARK FIX --- */
+        .watermark-layer {
             position: fixed;
-            top: 50%;
-            left: 0;
-            width: 100vw;
-            transform: translateY(-50%);
+            inset: 0;
+            display: grid;
+            place-items: center; /* Centers the container perfectly */
             z-index: 0;
             pointer-events: none;
-            display: flex;
-            justify-content: center; /* Center the whole phrase */
-            overflow: visible; 
+        }
+
+        .watermark-box {
+            display: inline-block;
+            white-space: nowrap;
+            width: auto;
+            /* Adjust this padding to push P and R inward from the screen edge */
+            padding: 0 40px; 
         }
 
         .watermark { 
             font-size: 13vw; 
             font-weight: 700; 
-            color: rgba(212, 175, 55, 0.018); 
-            letter-spacing: 2.5vw; /* Fluid spacing based on screen width */
+            color: var(--gold);
+            opacity: var(--watermark-opacity);
             text-transform: uppercase; 
-            white-space: nowrap;
-            display: inline-block;
-            padding: 0 5vw; /* Adds a safety buffer so P and R don't touch screen edges */
+            letter-spacing: 3vw;
+            display: block;
+            line-height: 1;
         }
 
-        /* --- HEADER & META --- */
-        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
+        /* --- BACKGROUND KINETIC ANIMATION --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
 
-        /* --- CONSTELLATION --- */
+        /* --- HEADER & USER IDENTITY --- */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
+        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.85); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
+
+        /* --- CONSTELLATION BUBBLES --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
         .bubble { 
             position: absolute; border-radius: 50%; border: 1px solid var(--border); 
@@ -50,26 +60,26 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: center; 
         }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
         .b-id { font-size: 0.5rem; color: var(--gold); letter-spacing: 1px; margin-bottom: 5px; opacity: 0.6; }
         .b-title { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 0 10px; color: #eee; }
 
-        /* --- ACTION BUTTON --- */
+        /* --- FLOATING ACTION BUTTON --- */
         .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
         .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2rem; cursor: pointer; z-index: 2; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); transition: 0.3s; }
         .rotating-svg { position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; pointer-events: none; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- OVERLAYS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
-        .panel { width: 520px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 60px rgba(0,0,0,1); }
+        /* --- OVERLAY LENSES --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(30px); }
+        .panel { width: 520px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 80px rgba(0,0,0,1); }
         
-        .state-tag { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 4px 12px; letter-spacing: 3px; display: inline-block; margin-bottom: 25px; text-transform: uppercase; }
+        .state-tag { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 5px 12px; letter-spacing: 3px; display: inline-block; margin-bottom: 25px; text-transform: uppercase; }
         h2 { font-size: 1.6rem; letter-spacing: 4px; margin-bottom: 25px; text-transform: uppercase; font-weight: 700; }
-        p { color: #888; line-height: 1.8; margin-bottom: 35px; font-size: 0.9rem; }
+        p { color: #888; line-height: 1.8; margin-bottom: 35px; font-size: 0.9rem; font-weight: 300; }
         
         .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; transition: 0.4s; }
-        .btn:hover { background: #fff; transform: translateY(-2px); }
+        .btn:hover { background: #fff; transform: translateY(-3px); }
         
         input, textarea { width: 100%; padding: 18px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 25px; font-family: inherit; font-size: 0.85rem; outline: none; }
         label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; opacity: 0.8; }
@@ -77,8 +87,10 @@
 </head>
 <body onload="init()">
 
-    <div class="watermark-wrap">
-        <div class="watermark">PUBLIC LEDGER</div>
+    <div class="watermark-layer">
+        <div class="watermark-box">
+            <span class="watermark">PUBLIC LEDGER</span>
+        </div>
     </div>
 
     <canvas id="bg-canvas"></canvas>
@@ -139,7 +151,7 @@
         let activeID = null;
 
         function init() {
-            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'UNVERIFIED'}`;
+            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
             initCanvas();
             render();
         }
