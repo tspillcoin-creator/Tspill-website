@@ -23,18 +23,16 @@
         /* High Visibility Kinetic Background */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.9; }
 
-        /* The Solid White Institutional Card */
+        /* THE MAIN WHITE CARD */
         .gate-card {
             position: relative;
             z-index: 10;
             width: 440px;
             padding: 80px 50px;
             background: var(--card-white);
-            border: none;
             text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 100px rgba(212, 175, 55, 0.2);
-            transform: translateY(0);
-            transition: transform 0.4s ease;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            border-radius: 2px;
         }
 
         .logo-area h1 { 
@@ -50,15 +48,13 @@
             letter-spacing: 4px;
             color: #666;
             text-transform: uppercase;
-            margin-bottom: 60px;
+            margin-bottom: 50px;
             display: block;
-            font-weight: 500;
         }
 
-        .input-group { margin-bottom: 40px; text-align: center; }
         .input-group label { 
             font-size: 0.6rem; 
-            color: #888; 
+            color: #999; 
             letter-spacing: 3px; 
             text-transform: uppercase; 
             margin-bottom: 15px; 
@@ -67,7 +63,7 @@
 
         input {
             width: 100%;
-            background: #f5f5f5;
+            background: #f9f9f9;
             border: 1px solid #eee;
             padding: 20px;
             color: #000;
@@ -75,30 +71,36 @@
             font-size: 0.9rem;
             outline: none;
             text-align: center;
-            transition: 0.3s;
-            letter-spacing: 1px;
+            margin-bottom: 30px;
         }
 
-        input:focus { border-color: var(--gold); background: #fff; box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
-
-        /* ID Display Section */
+        /* THE POPPED ID WINDOW (DARK THEME) */
         #id-display {
-            margin-top: 20px;
-            padding: 30px;
-            border: 2px solid var(--gold);
-            background: #fff;
+            margin-top: 10px;
+            padding: 40px 30px;
+            background: #0a0a0a; /* Dark Theme */
+            border: 2px dashed var(--gold); /* Golden Dotted Line */
             display: none;
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #fff;
         }
 
         @keyframes popIn { 
-            0% { opacity: 0; transform: scale(0.8); } 
-            100% { opacity: 1; transform: scale(1); } 
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); } 
+            100% { opacity: 1; transform: scale(1) translateY(0); } 
         }
 
-        .id-label { font-size: 0.6rem; color: #999; letter-spacing: 3px; text-transform: uppercase; }
-        .generated-id { font-size: 1.8rem; color: #000; letter-spacing: 6px; font-weight: 700; margin-top: 10px; }
+        .id-label { font-size: 0.55rem; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; opacity: 0.8; }
+        .generated-id { 
+            font-size: 2rem; 
+            color: #fff; 
+            letter-spacing: 8px; 
+            font-weight: 700; 
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
 
+        /* BUTTONS */
         .btn {
             width: 100%;
             padding: 22px;
@@ -109,16 +111,16 @@
             letter-spacing: 4px;
             cursor: pointer;
             text-transform: uppercase;
-            margin-top: 15px;
             transition: 0.3s;
         }
 
-        .btn:hover { background: var(--gold); color: #000; transform: translateY(-2px); }
+        .btn:hover { background: var(--gold); color: #000; }
 
         .enter-btn {
             background: var(--gold);
             color: #000;
-            margin-top: 30px;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
     </style>
 </head>
@@ -126,29 +128,31 @@
 
     <canvas id="bg-canvas"></canvas>
 
-    <div class="gate-card" id="mainCard">
-        <div class="logo-area">
-            <h1>TSPILL</h1>
-            <span class="caption">Production-Linked Ecosystem</span>
-        </div>
-
-        <div id="entry-form">
-            <div class="input-group">
-                <label>Institutional Identifier</label>
-                <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
+    <div class="gate-card">
+        <div id="main-content">
+            <div class="logo-area">
+                <h1>TSPILL</h1>
+                <span class="caption">Production-Linked Ecosystem</span>
             </div>
-            <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
+
+            <div id="entry-form">
+                <div class="input-group">
+                    <label>Institutional Identifier</label>
+                    <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
+                </div>
+                <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
+            </div>
         </div>
 
         <div id="id-display">
-            <span class="id-label">Protocol Access Granted</span>
+            <span class="id-label">Protocol Access Mapped</span>
             <div class="generated-id" id="tspillID">--</div>
+            <p style="font-size: 0.6rem; color: #555; letter-spacing: 1px; margin-bottom: 20px;">Identity persistent across all TSPILL nodes.</p>
             <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
         </div>
     </div>
 
     <script>
-        // Deterministic Persistence (Same Input = Same ID)
         function generateFixedID(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -160,62 +164,45 @@
 
         function verifyIdentity() {
             const credential = document.getElementById('credential').value.trim().toLowerCase();
-
             if(!credential || credential.length < 5) {
                 alert("Please provide valid credentials.");
                 return;
             }
 
             const persistentID = generateFixedID(credential);
-            
-            // Store for use in Hub/Home pages
             sessionStorage.setItem('currentID', persistentID);
 
-            document.getElementById('entry-form').style.display = 'none';
+            // Hide form, show Dark ID Card
+            document.getElementById('main-content').style.display = 'none';
             document.getElementById('tspillID').innerText = persistentID;
             document.getElementById('id-display').style.display = 'block';
         }
 
         function enterEcosystem() {
-            // Redirects to home.html as requested
             window.location.href = 'home.html';
         }
 
-        // --- ENHANCED HIGH-VISIBILITY KINETIC BACKGROUND ---
+        // --- BACKGROUND KINETIC ANIMATION ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
-        
         function init() {
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             nodes = [];
-            for(let i=0; i<85; i++) {
-                nodes.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.7, 
-                    vy: (Math.random() - 0.5) * 0.7
-                });
-            }
+            for(let i=0; i<85; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.7, vy:(Math.random()-0.5)*0.7});
         }
-
         function animate() {
             ctx.clearRect(0,0,canvas.width, canvas.height);
             nodes.forEach(n => {
                 n.x += n.vx; n.y += n.vy;
                 if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
                 if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
-                
                 nodes.forEach(m => {
                     let d = Math.hypot(n.x - m.x, n.y - m.y);
                     if(d < 220) {
                         ctx.strokeStyle = `rgba(212, 175, 55, ${0.5 * (1 - d / 220)})`;
                         ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(n.x, n.y);
-                        ctx.lineTo(m.x, m.y);
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
                     }
                 });
             });
