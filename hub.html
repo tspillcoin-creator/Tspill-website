@@ -2,87 +2,204 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TSPILL — Public Ledger Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSPILL — Public Ledger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(212, 175, 55, 0.3); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* Constellation Field */
-        #hub-canvas { position: fixed; inset: 0; z-index: 1; cursor: crosshair; }
+        /* --- BACKGROUND & WATERMARK --- */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12vw; font-weight: 700; color: rgba(212, 175, 55, 0.02); letter-spacing: 25px; text-transform: uppercase; pointer-events: none; z-index: 0; white-space: nowrap; }
 
-        /* Bubble Style (The Raw Signal) */
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(5px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            z-index: 10;
-        }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.05); }
-        .id-label { font-size: 0.5rem; color: var(--gold); letter-spacing: 2px; margin-bottom: 5px; }
-        .title-label { font-size: 0.7rem; text-align: center; padding: 0 10px; text-transform: uppercase; }
+        /* --- HEADER & PERSISTENT IDENTITY --- */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
+        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.6); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
 
-        /* Overlays (The Detail & Validation Layers) */
-        .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 100; display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(20px);
+        /* --- CONSTELLATION FIELD --- */
+        #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
+        .bubble { 
+            position: absolute; border-radius: 50%; border: 1px solid var(--border); 
+            background: var(--glass); backdrop-filter: blur(8px); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: center; 
         }
-        .panel { 
-            width: 500px; padding: 50px; background: #000; border: 1px solid var(--gold); 
-            max-height: 80vh; overflow-y: auto;
-        }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        .b-id { font-size: 0.5rem; color: var(--gold); letter-spacing: 1px; margin-bottom: 5px; opacity: 0.7; }
+        .b-title { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 0 10px; }
+
+        /* --- GLOWING ACTION BUTTON --- */
+        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2rem; cursor: pointer; z-index: 2; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); transition: 0.3s; }
+        .rotating-svg { position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; pointer-events: none; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- OVERLAYS (THE LENSES) --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .panel { width: 500px; padding: 50px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); max-height: 85vh; overflow-y: auto; }
         
-        /* State Indicators */
-        .state-tag { font-size: 0.6rem; letter-spacing: 3px; color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; display: inline-block; margin-bottom: 20px; }
+        .state-tag { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 4px 10px; letter-spacing: 2px; display: inline-block; margin-bottom: 20px; }
+        h2 { font-size: 1.5rem; letter-spacing: 3px; margin-bottom: 20px; text-transform: uppercase; }
+        p { color: #888; line-height: 1.7; margin-bottom: 30px; font-size: 0.9rem; }
+        
+        .btn { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; }
+        .btn:hover { background: #fff; }
+        
+        input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 20px; font-family: inherit; font-size: 0.8rem; }
+        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; display: block; }
 
-        .btn { width: 100%; padding: 15px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; margin-top: 20px; letter-spacing: 2px; }
-        .input-box { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 12px; margin-bottom: 20px; font-family: inherit; }
     </style>
 </head>
-<body>
+<body onload="init()">
 
-    <div id="hub-canvas"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="watermark">PUBLIC LEDGER</div>
 
-    <div id="detail-overlay" class="overlay">
-        <div class="panel">
-            <span class="state-tag" id="detail-state">PROPOSED</span>
-            <h2 id="detail-title" style="margin-bottom: 20px; letter-spacing: 2px;">IDEA TITLE</h2>
-            <p id="detail-desc" style="color: #888; line-height: 1.6; margin-bottom: 30px;">Raw intent description goes here...</p>
-            <div style="font-size: 0.6rem; color: #555; margin-bottom: 30px;" id="detail-author">CREATOR: TS-XXXX</div>
-            
-            <button class="btn" onclick="openValidation()">PARTICIPATE IN VALIDATION</button>
-            <button onclick="closeAll()" style="background:none; color:#444; border:none; width:100%; margin-top:20px; cursor:pointer;">CLOSE MAP</button>
+    <header>
+        <div class="user-meta" id="displayID">ID: --</div>
+        <div class="user-meta" id="displayRole">ROLE: VERIFIED CREATOR</div>
+    </header>
+
+    <div id="field"></div>
+
+    <div class="action-container">
+        <svg class="rotating-svg" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
+            <text fill="#d4af37" style="font-size:5px; letter-spacing:3.2px; text-transform: uppercase; opacity: 0.8;">
+                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
+            </text>
+        </svg>
+        <button class="action-btn" onclick="openModal()">+</button>
+    </div>
+
+    <div id="detail-overlay" class="overlay" onclick="closeAll()">
+        <div class="panel" onclick="event.stopPropagation()">
+            <span class="state-tag" id="cState">PROPOSED</span>
+            <h2 id="cTitle">TITLE</h2>
+            <p id="cDesc">Description...</p>
+            <div id="cAuthor" style="font-size: 0.6rem; color: #444; margin-bottom: 30px; letter-spacing: 1px;">ORIGIN: --</div>
+            <button class="btn" onclick="openValidation()">Participate in Validation</button>
         </div>
     </div>
 
-    <div id="validation-overlay" class="overlay">
-        <div class="panel">
-            <h3 style="letter-spacing: 3px; font-size: 0.8rem; margin-bottom: 30px;">CONTRIBUTE VALIDATION SIGNALS</h3>
+    <div id="validation-overlay" class="overlay" onclick="closeAll()">
+        <div class="panel" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing: 3px; font-size: 0.8rem; margin-bottom: 30px; text-align: center;">VALIDATION SIGNALS</h3>
             
-            <label style="font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 10px;">WHAT IS THE MAIN RISK?</label>
-            <textarea class="input-box" rows="3"></textarea>
+            <label>What is the main execution risk?</label>
+            <textarea id="vRisk" rows="2" placeholder="Technical or structural constraints..."></textarea>
 
-            <label style="font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 10px;">MATERIAL REQUIREMENTS?</label>
-            <textarea class="input-box" rows="3"></textarea>
+            <label>What materials are required?</label>
+            <input type="text" id="vMaterial" placeholder="e.g. Liquid Gold, Carbon Fiber">
 
-            <label style="font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 10px;">HAS THIS BEEN DONE BEFORE?</label>
-            <input type="text" class="input-box">
+            <label>Suggested Builder / Manufacturer?</label>
+            <input type="text" id="vBuilder" placeholder="Who has the capability?">
 
-            <button class="btn" onclick="submitValidation()">SUBMIT SIGNAL</button>
+            <button class="btn" onclick="submitSignal()">Submit Signal</button>
+        </div>
+    </div>
+
+    <div id="modal" class="overlay" onclick="closeAll()">
+        <div class="panel" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing:4px; margin-bottom:30px; font-size:0.8rem; color:var(--gold);">NEW INTENT SPILL</h3>
+            <input type="text" id="inTitle" placeholder="SHORT TITLE (MAX 20 CHARS)">
+            <textarea id="inDesc" rows="4" placeholder="DESCRIBE THE CORE LOGIC..."></textarea>
+            <button class="btn" onclick="saveNew()">SPILL TO LEDGER</button>
         </div>
     </div>
 
     <script>
-        // Data logic would follow here, rendering bubbles based on the "items" array.
-        // Interaction logic opens overlays in sequence: Hub -> Detail -> Validation.
+        let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [];
+        let activeID = null;
+
+        function init() {
+            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST'}`;
+            initCanvas();
+            render();
+        }
+
+        function render() {
+            const field = document.getElementById('field');
+            field.innerHTML = '';
+            items.forEach(item => {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                b.style.left = `${item.x}px`;
+                b.style.top = `${item.y}px`;
+                b.style.width = b.style.height = `130px`;
+                b.innerHTML = `<span class="b-id">ID-${item.id}</span><span class="b-title">${item.title}</span><span class="b-id" style="margin-top:5px; opacity:0.4">${item.author}</span>`;
+                b.onclick = () => openDetail(item);
+                field.appendChild(b);
+            });
+        }
+
+        function openDetail(item) {
+            activeID = item.id;
+            document.getElementById('cTitle').innerText = item.title;
+            document.getElementById('cDesc').innerText = item.desc;
+            document.getElementById('cState').innerText = item.state || 'PROPOSED';
+            document.getElementById('cAuthor').innerText = `ORIGIN: ${item.author}`;
+            document.getElementById('detail-overlay').style.display = 'flex';
+        }
+
+        function openValidation() {
+            document.getElementById('detail-overlay').style.display = 'none';
+            document.getElementById('validation-overlay').style.display = 'flex';
+        }
+
+        function submitSignal() {
+            // In a real system, these signals would be stored in a sub-ledger.
+            // For now, we update the state to reflect participation.
+            items = items.map(i => i.id === activeID ? {...i, state: 'UNDER VALIDATION'} : i);
+            localStorage.setItem('tspill_ledger', JSON.stringify(items));
+            alert("Signal Logged to Ledger.");
+            closeAll();
+            render();
+        }
+
+        function saveNew() {
+            const t = document.getElementById('inTitle').value.toUpperCase();
+            const d = document.getElementById('inDesc').value;
+            if(!t || !d) return;
+            items.push({
+                id: Math.floor(1000 + Math.random() * 9000),
+                title: t, desc: d,
+                author: sessionStorage.getItem('currentID') || 'ANON',
+                state: 'PROPOSED',
+                x: Math.random() * (window.innerWidth - 150),
+                y: Math.random() * (window.innerHeight - 150)
+            });
+            localStorage.setItem('tspill_ledger', JSON.stringify(items));
+            closeAll();
+            render();
+        }
+
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
+
+        // --- BACKGROUND ANIMATION ---
+        function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let nodes = [];
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            for(let i=0; i<60; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
+            function animate() {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                nodes.forEach(n => {
+                    n.x += n.vx; n.y += n.vy;
+                    if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
+                    nodes.forEach(m => {
+                        let d = Math.hypot(n.x-m.x, n.y-m.y);
+                        if(d<200) { ctx.strokeStyle=`rgba(212,175,55,${0.3*(1-d/200)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
+                    });
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
     </script>
 </body>
 </html>
