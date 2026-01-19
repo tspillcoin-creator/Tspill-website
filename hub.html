@@ -2,226 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Ecosystem Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>TSPILL — Public Ledger Hub</title>
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(212, 175, 55, 0.3); }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
+        :root { --gold: #d4af37; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
 
-        /* Background & Watermark */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.3; }
-        .watermark { position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.02); letter-spacing: 20px; text-transform: uppercase; pointer-events: none; z-index: 0; }
+        /* Constellation Field */
+        #hub-canvas { position: fixed; inset: 0; z-index: 1; cursor: crosshair; }
 
-        /* Header */
-        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; background: linear-gradient(to bottom, #000 60%, transparent); }
-        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(212, 175, 55, 0.08); padding: 8px 18px; border: 1px solid var(--border); text-transform: uppercase; }
-
-        /* Zones */
-        .zones-bar { position: fixed; top: 85px; width: 100%; display: flex; border-bottom: 1px solid rgba(212, 175, 55, 0.1); z-index: 50; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
-        .zone { flex: 1; text-align: center; padding: 12px; font-size: 0.65rem; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
-
-        /* Bubbles */
-        #field { position: absolute; inset: 0; z-index: 10; }
-        .bubble { position: absolute; border-radius: 50%; border: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: center; padding: 10px; pointer-events: auto; }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3)); }
-        .b-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-
-        /* --- THE GLOWING ACTION BUTTON --- */
-        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
-        .action-btn { 
-            width: 70px; height: 70px; border-radius: 50%; 
-            background: var(--gold); color: #000; border: none; 
-            font-size: 2rem; cursor: pointer; z-index: 2; 
-            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); 
-            transition: 0.3s;
+        /* Bubble Style (The Raw Signal) */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            z-index: 10;
         }
-        .action-btn:hover { transform: scale(1.1); filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.8)); }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.05); }
+        .id-label { font-size: 0.5rem; color: var(--gold); letter-spacing: 2px; margin-bottom: 5px; }
+        .title-label { font-size: 0.7rem; text-align: center; padding: 0 10px; text-transform: uppercase; }
+
+        /* Overlays (The Detail & Validation Layers) */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(20px);
+        }
+        .panel { 
+            width: 500px; padding: 50px; background: #000; border: 1px solid var(--gold); 
+            max-height: 80vh; overflow-y: auto;
+        }
         
-        .rotating-svg { 
-            position: absolute; width: 150px; height: 150px; 
-            animation: rotate 20s linear infinite; pointer-events: none; 
-            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
-        }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* State Indicators */
+        .state-tag { font-size: 0.6rem; letter-spacing: 3px; color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; display: inline-block; margin-bottom: 20px; }
 
-        /* --- EXPANDING DETAIL WINDOW --- */
-        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); transition: 0.5s; }
-        .card { 
-            width: 500px; max-height: 85vh; overflow-y: auto;
-            padding: 50px; border: 1px solid var(--gold); 
-            background: #0a0a0a; transition: width 0.5s, height 0.5s; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-        }
-        .card.expanded { width: 800px; } /* Wider for Validation */
-
-        .attribute-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
-            margin-top: 30px; padding-top: 20px; border-top: 1px solid #222;
-            display: none; /* Hidden until Validation Zone */
-        }
-        .attr-slot { background: rgba(255,255,255,0.02); padding: 15px; border: 1px solid #222; }
-        .attr-label { font-size: 0.55rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 5px; }
-
-        .claim-btn { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; margin-top: 20px; text-transform: uppercase; }
+        .btn { width: 100%; padding: 15px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; margin-top: 20px; letter-spacing: 2px; }
+        .input-box { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 12px; margin-bottom: 20px; font-family: inherit; }
     </style>
 </head>
-<body onload="init()">
+<body>
 
-    <canvas id="bg-canvas"></canvas>
-    <div class="watermark">PUBLIC LEDGER</div>
+    <div id="hub-canvas"></div>
 
-    <header>
-        <div class="user-meta" id="displayID">ID: --</div>
-        <div class="user-meta" id="displayRole">ROLE: --</div>
-    </header>
-
-    <div class="zones-bar">
-        <div class="zone">01 / Intent</div>
-        <div class="zone">02 / Validation</div>
-        <div class="zone">03 / Execution</div>
-    </div>
-
-    <div id="field"></div>
-
-    <div class="action-container">
-        <svg class="rotating-svg" viewBox="0 0 100 100">
-            <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
-            <text fill="#d4af37" style="font-size:5px; letter-spacing:3.2px; text-transform: uppercase; opacity: 0.8;">
-                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
-            </text>
-        </svg>
-        <button class="action-btn" onclick="openModal()">+</button>
-    </div>
-
-    <div id="overlay" onclick="closeDetail()">
-        <div class="card" id="detailCard" onclick="event.stopPropagation()">
-            <div id="cZone" style="color:var(--gold); font-size:0.6rem; letter-spacing:3px; margin-bottom:10px;">ZONE 01</div>
-            <h2 id="cTitle" style="font-size:1.8rem; margin-bottom:20px; letter-spacing:2px;">TITLE</h2>
-            <p id="cBody" style="color:#888; margin-bottom:20px; line-height:1.7; font-size:0.95rem;"></p>
+    <div id="detail-overlay" class="overlay">
+        <div class="panel">
+            <span class="state-tag" id="detail-state">PROPOSED</span>
+            <h2 id="detail-title" style="margin-bottom: 20px; letter-spacing: 2px;">IDEA TITLE</h2>
+            <p id="detail-desc" style="color: #888; line-height: 1.6; margin-bottom: 30px;">Raw intent description goes here...</p>
+            <div style="font-size: 0.6rem; color: #555; margin-bottom: 30px;" id="detail-author">CREATOR: TS-XXXX</div>
             
-            <div class="attribute-grid" id="attrGrid">
-                <div class="attr-slot"><span class="attr-label">Attribution</span><div style="font-size:0.8rem">Verified Origin</div></div>
-                <div class="attr-slot"><span class="attr-label">Materiality</span><div style="font-size:0.8rem">Pending Review</div></div>
-                <div class="attr-slot"><span class="attr-label">Dimensions</span><div style="font-size:0.8rem">Awaiting Specs</div></div>
-                <div class="attr-slot"><span class="attr-label">Ledger ID</span><div id="cardLedgerID" style="font-size:0.7rem; color:#555;">--</div></div>
-            </div>
-
-            <button class="claim-btn" id="claimAction" onclick="moveZone()">CLAIM FOR VALIDATION</button>
-            <button onclick="closeDetail()" style="margin-top:20px; background:none; color:#444; border:none; width:100%; cursor:pointer; font-size:0.6rem; letter-spacing:2px;">CLOSE ARCHIVE</button>
+            <button class="btn" onclick="openValidation()">PARTICIPATE IN VALIDATION</button>
+            <button onclick="closeAll()" style="background:none; color:#444; border:none; width:100%; margin-top:20px; cursor:pointer;">CLOSE MAP</button>
         </div>
     </div>
 
-    <div id="modal" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:2000; display:none; align-items:center; justify-content:center;">
-        <div class="card" style="width:450px;">
-            <h3 style="letter-spacing:4px; margin-bottom:30px; font-size:0.8rem; color:var(--gold);">NEW INTENT SPILL</h3>
-            <input type="text" id="inTitle" placeholder="INTENT NAME" style="width:100%; padding:15px; background:#000; border:1px solid #222; color:#fff; margin-bottom:20px;">
-            <textarea id="inDesc" rows="4" placeholder="DESCRIBE THE CORE LOGIC..." style="width:100%; padding:15px; background:#000; border:1px solid #222; color:#fff; margin-bottom:20px; font-family:inherit;"></textarea>
-            <button class="claim-btn" onclick="saveNew()">SUBMIT TO HUB</button>
+    <div id="validation-overlay" class="overlay">
+        <div class="panel">
+            <h3 style="letter-spacing: 3px; font-size: 0.8rem; margin-bottom: 30px;">CONTRIBUTE VALIDATION SIGNALS</h3>
+            
+            <label style="font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 10px;">WHAT IS THE MAIN RISK?</label>
+            <textarea class="input-box" rows="3"></textarea>
+
+            <label style="font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 10px;">MATERIAL REQUIREMENTS?</label>
+            <textarea class="input-box" rows="3"></textarea>
+
+            <label style="font-size: 0.6rem; color: var(--gold); display: block; margin-bottom: 10px;">HAS THIS BEEN DONE BEFORE?</label>
+            <input type="text" class="input-box">
+
+            <button class="btn" onclick="submitValidation()">SUBMIT SIGNAL</button>
         </div>
     </div>
 
     <script>
-        let items = JSON.parse(localStorage.getItem('tspill_items')) || [];
-        let activeID = null;
-
-        function init() {
-            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST'}`;
-            document.getElementById('displayRole').innerText = `ROLE: ${sessionStorage.getItem('currentRole') || 'EXPLORER'}`;
-            initCanvas();
-            render();
-        }
-
-        function render() {
-            const field = document.getElementById('field');
-            field.innerHTML = '';
-            items.forEach(item => {
-                const b = document.createElement('div');
-                b.className = 'bubble';
-                const zoneW = window.innerWidth / 3;
-                b.style.left = `${((item.zone-1) * zoneW) + item.xOffset}px`;
-                b.style.top = `${item.y}px`;
-                b.style.width = b.style.height = `130px`;
-                b.innerHTML = `<span class="b-title" style="padding:10px;">${item.title}</span>`;
-                b.onclick = () => openDetail(item);
-                field.appendChild(b);
-            });
-        }
-
-        function openDetail(item) {
-            activeID = item.id;
-            const card = document.getElementById('detailCard');
-            const grid = document.getElementById('attrGrid');
-            const btn = document.getElementById('claimAction');
-            
-            document.getElementById('cTitle').innerText = item.title;
-            document.getElementById('cBody').innerText = item.desc;
-            document.getElementById('cZone').innerText = `ZONE 0${item.zone} / ${item.zone==1?'INTENT':item.zone==2?'VALIDATION':'EXECUTION'}`;
-            
-            // Visual Expansion Logic
-            if(item.zone >= 2) {
-                card.classList.add('expanded');
-                grid.style.display = 'grid';
-                document.getElementById('cardLedgerID').innerText = `TS-${item.id}`;
-                btn.innerText = item.zone == 2 ? "FINALIZE FOR EXECUTION" : "RECORD VALIDATED";
-                if(item.zone == 3) btn.style.display = 'none';
-            } else {
-                card.classList.remove('expanded');
-                grid.style.display = 'none';
-                btn.innerText = "CLAIM FOR VALIDATION";
-                btn.style.display = 'block';
-            }
-
-            document.getElementById('overlay').style.display = 'flex';
-        }
-
-        function moveZone() {
-            items = items.map(i => i.id === activeID ? {...i, zone: Math.min(i.zone + 1, 3)} : i);
-            localStorage.setItem('tspill_items', JSON.stringify(items));
-            closeDetail();
-            render();
-        }
-
-        function saveNew() {
-            const t = document.getElementById('inTitle').value;
-            const d = document.getElementById('inDesc').value;
-            if(!t || !d) return;
-            items.push({
-                id: Math.floor(Math.random()*9000)+1000, title: t.toUpperCase(), desc: d,
-                author: sessionStorage.getItem('currentID'),
-                zone: 1, xOffset: 80 + Math.random() * 100, y: 250 + Math.random() * 200
-            });
-            localStorage.setItem('tspill_items', JSON.stringify(items));
-            document.getElementById('modal').style.display = 'none';
-            render();
-        }
-
-        function openModal() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function closeDetail() { document.getElementById('overlay').style.display = 'none'; }
-
-        // Kinetic Background
-        function initCanvas() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
-            let nodes = [];
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            for(let i=0; i<60; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4});
-            function animate() {
-                ctx.clearRect(0,0,canvas.width, canvas.height);
-                nodes.forEach(n => {
-                    n.x += n.vx; n.y += n.vy;
-                    if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
-                    nodes.forEach(m => {
-                        let d = Math.hypot(n.x-m.x, n.y-m.y);
-                        if(d<180) { ctx.strokeStyle=`rgba(212,175,55,${0.25*(1-d/180)})`; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
-                    });
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
+        // Data logic would follow here, rendering bubbles based on the "items" array.
+        // Interaction logic opens overlays in sequence: Hub -> Detail -> Validation.
     </script>
 </body>
 </html>
