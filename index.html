@@ -21,9 +21,8 @@
         }
 
         /* High Visibility Background Animation */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.8; } /* Increased Opacity */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.8; }
 
-        /* The Single Gate Card */
         .gate-card {
             position: relative;
             z-index: 10;
@@ -80,7 +79,6 @@
 
         input:focus { border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
 
-        /* Identity Display */
         #id-display {
             margin-top: 20px;
             padding: 25px;
@@ -124,37 +122,47 @@
 
         <div id="entry-form">
             <div class="input-group">
-                <label>Identify via Email or Wallet</label>
-                <input type="text" id="credential" placeholder="0x... or mail@protocol.com">
+                <label>Institutional Identifier</label>
+                <input type="text" id="credential" placeholder="Email or Wallet Address">
             </div>
-
-            <button class="btn" id="verifyBtn" onclick="verifyIdentity()">Verify Identity</button>
+            <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
         </div>
 
         <div id="id-display">
-            <span class="id-label">Institutional Protocol ID</span>
+            <span class="id-label">Protocol Mapping Successful</span>
             <div class="generated-id" id="tspillID">--</div>
             <button class="btn" onclick="enterEcosystem()" style="background:var(--gold); color:#000; margin-top:25px;">Enter Ecosystem</button>
         </div>
     </div>
 
     <script>
+        // Deterministic ID generation logic
+        function generateFixedID(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // Ensure a positive 4-digit number
+            const finalNum = Math.abs(hash % 9000) + 1000;
+            return `TS-${finalNum}`;
+        }
+
         function verifyIdentity() {
-            const credential = document.getElementById('credential').value;
+            const credential = document.getElementById('credential').value.trim().toLowerCase();
 
             if(!credential || credential.length < 5) {
                 alert("Valid credential required for ecosystem mapping.");
                 return;
             }
 
-            // Professional ID Generation (Deterministic based on input)
-            const randomID = "TS-" + Math.floor(1000 + Math.random() * 9000);
+            // Generate the SAME ID for the same email/wallet every time
+            const persistentID = generateFixedID(credential);
             
-            sessionStorage.setItem('currentID', randomID);
+            sessionStorage.setItem('currentID', persistentID);
             sessionStorage.setItem('currentRole', 'Verified Creator');
 
             document.getElementById('entry-form').style.display = 'none';
-            document.getElementById('tspillID').innerText = randomID;
+            document.getElementById('tspillID').innerText = persistentID;
             document.getElementById('id-display').style.display = 'block';
         }
 
@@ -162,7 +170,7 @@
             window.location.href = 'hub.html';
         }
 
-        // --- ENHANCED HIGH-VISIBILITY BACKGROUND ---
+        // --- BACKGROUND ANIMATION (HIGH VISIBILITY) ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
@@ -171,14 +179,12 @@
             canvas.width = window.innerWidth; 
             canvas.height = window.innerHeight;
             nodes = [];
-            // More nodes and faster speed for higher visibility
-            for(let i=0; i<70; i++) {
+            for(let i=0; i<80; i++) {
                 nodes.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.8, 
-                    vy: (Math.random() - 0.5) * 0.8,
-                    size: Math.random() * 2 + 1
+                    vx: (Math.random() - 0.5) * 0.6, 
+                    vy: (Math.random() - 0.5) * 0.6
                 });
             }
         }
@@ -190,16 +196,10 @@
                 if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
                 if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
                 
-                // Draw Node
-                ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
-                ctx.beginPath();
-                ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
-                ctx.fill();
-
                 nodes.forEach(m => {
                     let d = Math.hypot(n.x - m.x, n.y - m.y);
-                    if(d < 220) {
-                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.3 * (1 - d / 220)})`;
+                    if(d < 200) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 * (1 - d / 200)})`;
                         ctx.lineWidth = 0.8;
                         ctx.beginPath();
                         ctx.moveTo(n.x, n.y);
