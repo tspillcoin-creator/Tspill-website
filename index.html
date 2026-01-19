@@ -1,139 +1,199 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>TSPILL — Entry</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg-deep: #000000; 
-      --card-bg: #ffffff; 
-      --text-main: #1a1c20;
-      --text-muted: #666;
-      --gold: #d4a055;
-      --border: rgba(0, 0, 0, 0.1);
-      --gradient-gold: linear-gradient(135deg,#d4a055,#f0c87a,#a67c3d);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSPILL — Production-Linked Ecosystem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #d4af37; --bg: #050505; --border: rgba(212, 175, 55, 0.3); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-deep);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      padding: 20px;
-    }
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.4; }
 
-    canvas#bg { position: fixed; inset: 0; z-index: 1; }
+        /* --- THE SINGLE GATE CARD --- */
+        .gate-card {
+            position: relative;
+            z-index: 10;
+            width: 420px;
+            padding: 60px 40px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
 
-    .portal-box {
-      background: var(--card-bg);
-      border-radius: 24px;
-      width: 100%;
-      max-width: 380px; /* Slimmer card */
-      padding: 40px 30px; /* Reduced padding */
-      text-align: center;
-      box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-      z-index: 10;
-      position: relative;
-    }
+        .logo-area h1 { 
+            font-size: 2.2rem; 
+            letter-spacing: 8px; 
+            color: var(--gold); 
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 10px rgba(212,175,55,0.4));
+        }
 
-    .logo-container img { 
-      width: 70px; height: 70px; border-radius: 16px; margin-bottom: 15px; 
-    }
-    
-    h1.brand-title { 
-      font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; margin-bottom: 4px; 
-      background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-      font-weight: 700; letter-spacing: 0.05em;
-    }
+        .caption {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            display: block;
+        }
 
-    p.tagline { 
-      color: var(--text-muted); font-size: 0.75rem; margin-bottom: 25px; 
-      text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; 
-    }
+        .input-group { margin-bottom: 25px; text-align: left; }
+        .input-group label { 
+            font-size: 0.55rem; 
+            color: var(--gold); 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+            display: block; 
+        }
 
-    /* Single Smart Input */
-    input {
-      width: 100%; padding: 14px 16px; border-radius: 10px; border: 1.5px solid var(--border);
-      background: #f9f9f9; font-size: 0.9rem; margin-bottom: 12px; outline: none; transition: 0.3s;
-      font-family: 'Inter', sans-serif; text-align: center;
-    }
-    input:focus { border-color: var(--gold); background: #fff; box-shadow: 0 0 0 4px rgba(212,160,85,0.05); }
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #333;
+            padding: 12px 0;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.3s;
+        }
 
-    .btn-enter {
-      width: 100%; padding: 14px; border-radius: 10px; border: none; 
-      background: var(--text-main); color: #fff; font-weight: 700; 
-      text-transform: uppercase; cursor: pointer; transition: 0.3s;
-      font-size: 0.8rem; letter-spacing: 0.1em;
-    }
-    .btn-enter:hover { transform: translateY(-1px); background: #000; }
+        input:focus { border-color: var(--gold); }
 
-    footer { 
-      position: fixed; bottom: 30px; width: 100%; text-align: center;
-      font-size: 0.8rem; color: rgba(255,255,255,0.3); letter-spacing: 0.5em; z-index: 20; 
-      text-transform: uppercase;
-    }
-  </style>
+        /* Verification & Entry Display */
+        #id-display {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px dashed var(--gold);
+            background: rgba(212, 175, 55, 0.05);
+            display: none; /* Hidden until verification */
+        }
+
+        .id-label { font-size: 0.5rem; color: #666; letter-spacing: 2px; }
+        .generated-id { font-size: 1.2rem; color: var(--gold); letter-spacing: 4px; font-weight: 700; margin-top: 5px; }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-weight: 700;
+            letter-spacing: 3px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+        .btn-enter { background: var(--gold); color: #000; display: none; }
+    </style>
 </head>
 <body>
 
-<canvas id="bg"></canvas>
+    <canvas id="bg-canvas"></canvas>
 
-<div class="portal-box">
-  <div class="logo-container">
-    <img src="./Tea_spill_logo.png" alt="TSPILL Logo">
-  </div>
-  
-  <h1 class="brand-title">TSPILL</h1>
-  <p class="tagline">Production-Linked Ecosystem</p>
+    <div class="gate-card">
+        <div class="logo-area">
+            <h1>TSPILL</h1>
+            <span class="caption">Production-Linked Ecosystem</span>
+        </div>
 
-  <div class="input-group">
-    <input type="text" id="userInput" placeholder="EMAIL OR WALLET ADDRESS">
-    <button class="btn btn-enter" onclick="enterSystem()">Enter System</button>
-  </div>
-</div>
+        <div id="entry-form">
+            <div class="input-group">
+                <label>Verified Email</label>
+                <input type="email" id="email" placeholder="archive@tspill.com">
+            </div>
+            
+            <div class="input-group" style="margin-bottom: 40px;">
+                <label>Wallet Address</label>
+                <input type="text" id="wallet" placeholder="0x... or Ecosystem Key">
+            </div>
 
-<footer>TSPILL™</footer>
+            <button class="btn" id="verifyBtn" onclick="verifyIdentity()">Verify Identity</button>
+        </div>
 
-<script>
-  // LIQUID GOLD ANIMATION
-  const c = document.getElementById("bg"), ctx = c.getContext("2d");
-  function resize() { c.width = innerWidth; c.height = innerHeight; }
-  window.addEventListener("resize", resize); resize();
-  const pts = [...Array(100)].map(() => ({ x: Math.random()*c.width, y: Math.random()*c.height, vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25 }));
-  function animate() {
-    ctx.clearRect(0, 0, c.width, c.height);
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i]; p.x += p.vx; p.y += p.vy;
-      if (p.x < 0 || p.x > c.width) p.vx *= -1; if (p.y < 0 || p.y > c.height) p.vy *= -1;
-      for (let j = i+1; j < pts.length; j++) {
-        const q = pts[j]; const d = Math.hypot(p.x - q.x, p.y - q.y);
-        if (d < 180) { ctx.strokeStyle = `rgba(212, 160, 85, ${(1 - d/180)*0.7})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
-      }
-      ctx.fillStyle = "rgba(212, 160, 85, 0.85)"; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI * 2); ctx.fill();
-    }
-    requestAnimationFrame(animate);
-  }
-  animate();
+        <div id="id-display">
+            <span class="id-label">GENERATED PROTOCOL ID</span>
+            <div class="generated-id" id="tspillID">--</div>
+            <button class="btn btn-enter" id="enterBtn" onclick="enterEcosystem()" style="display:block; margin-top:20px;">Enter Ecosystem</button>
+        </div>
+    </div>
 
-  function enterSystem() {
-    const input = document.getElementById("userInput").value.trim();
-    if (!input) { alert("Please enter your identity to proceed."); return; }
+    <script>
+        function verifyIdentity() {
+            const email = document.getElementById('email').value;
+            const wallet = document.getElementById('wallet').value;
 
-    localStorage.setItem("tspill_user_id", input);
-    // Simple logic to tag the type for the home page
-    localStorage.setItem("tspill_login_type", input.includes('@') ? "email" : "wallet");
-    
-    window.location.href = "home.html";
-  }
-</script>
+            if(!email || !wallet) {
+                alert("Please provide credentials for identity mapping.");
+                return;
+            }
+
+            // Generate a professional ID: TS + random 4 digits
+            const randomID = "TS-" + Math.floor(1000 + Math.random() * 9000);
+            
+            // Save to Session for the Hub to read
+            sessionStorage.setItem('currentID', randomID);
+            sessionStorage.setItem('currentRole', 'Verified Creator'); // Default role for mapping
+
+            // UI Transition
+            document.getElementById('entry-form').style.opacity = '0.3';
+            document.getElementById('entry-form').style.pointerEvents = 'none';
+            document.getElementById('tspillID').innerText = randomID;
+            document.getElementById('id-display').style.display = 'block';
+            document.getElementById('verifyBtn').style.display = 'none';
+        }
+
+        function enterEcosystem() {
+            // Smoothly move to Hub
+            window.location.href = 'hub.html';
+        }
+
+        // --- BACKGROUND KINETIC ANIMATION ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let nodes = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            nodes = [];
+            for(let i=0; i<50; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5});
+        }
+        function animate() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            nodes.forEach(n => {
+                n.x += n.vx; n.y += n.vy;
+                if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
+                nodes.forEach(m => {
+                    let d = Math.hypot(n.x-m.x, n.y-m.y);
+                    if(d<200) {
+                        ctx.strokeStyle=`rgba(212,175,55,${0.15*(1-d/200)})`;
+                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+        window.onresize = init;
+        init(); animate();
+    </script>
 </body>
 </html>
