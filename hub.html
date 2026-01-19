@@ -10,71 +10,73 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- WATERMARK --- */
-        .watermark-container {
-            position: fixed; width: 100%; top: 50%; transform: translateY(-50%);
-            z-index: 0; pointer-events: none; text-align: center; padding: 0 40px;
+        /* --- WATERMARK & BACKGROUND --- */
+        /* Fixed centering logic to prevent 'GER' cutoff */
+        .watermark-layer {
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+            z-index: 0; pointer-events: none; padding: 0 50px;
         }
         .watermark { 
-            font-size: 8rem; font-weight: 700; color: var(--gold); opacity: 0.02;
-            text-transform: uppercase; letter-spacing: 20px; white-space: nowrap;
+            font-size: 9.5vw; font-weight: 700; color: var(--gold); opacity: 0.02;
+            text-transform: uppercase; letter-spacing: 2vw; white-space: nowrap;
         }
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
 
-        /* --- BACKGROUND --- */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.5; }
-        header { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .user-meta { font-size: 0.7rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 12px 24px; border: 1px solid var(--border); text-transform: uppercase; }
+        /* --- HEADER --- */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
+        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; }
 
-        /* --- INTERACTIVE FIELD --- */
+        /* --- BUBBLE FIELD --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
         .bubble { 
             position: absolute; border-radius: 50%; border: 1px solid var(--border); 
-            background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); 
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            transition: 0.4s; cursor: pointer; text-align: center; 
+            transition: 0.5s; cursor: pointer; text-align: center; 
         }
-        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212,175,55,0.2); }
-        .b-id { font-size: 0.55rem; color: var(--gold); opacity: 0.7; margin-bottom: 4px;}
-        .b-title { font-size: 0.7rem; text-transform: uppercase; color: #fff; padding: 0 10px; letter-spacing: 1px; }
+        .bubble:hover { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
+        .b-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0 10px; }
 
-        /* --- ACTION BUTTON & RADIANT TEXT --- */
+        /* --- THE GLOWING ACTION BUTTON (RESTORED GEOMETRY) --- */
         .action-container { 
-            position: fixed; bottom: 50px; right: 50px; z-index: 200; 
-            width: 170px; height: 170px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; bottom: 60px; right: 60px; z-index: 200; 
+            display: flex; justify-content: center; align-items: center; 
         }
         
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); transform: scale(1); }
-            50% { box-shadow: 0 0 45px rgba(212, 175, 55, 0.7); transform: scale(1.02); }
-            100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); transform: scale(1); }
+            0% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
+            50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.8); }
+            100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
         }
 
         .action-btn { 
             width: 70px; height: 70px; border-radius: 50%; 
             background: var(--gold); color: #000; border: none; 
-            font-size: 2.2rem; cursor: pointer; z-index: 5; font-weight: bold;
-            animation: pulseGlow 4s infinite ease-in-out;
-            transition: 0.3s;
+            font-size: 2rem; cursor: pointer; z-index: 2; 
+            animation: pulseGlow 3s infinite ease-in-out;
+            transition: 0.3s; font-weight: bold;
         }
 
         .rotating-svg { 
-            position: absolute; width: 100%; height: 100%; 
-            animation: rotate 20s linear infinite; 
-            /* Subtle glow for the circular text */
-            filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
+            position: absolute; width: 150px; height: 150px; 
+            animation: rotate 20s linear infinite; pointer-events: none; 
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
         }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- PANEL OVERLAYS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .panel { width: 500px; padding: 60px; background: #000; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
-        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: #fff; margin-bottom: 15px; font-family: inherit; }
+        /* --- MODALS & OVERLAYS --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .card { width: 450px; padding: 50px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; margin-top: 20px; }
+        input, textarea { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 20px; font-family: inherit; }
     </style>
 </head>
 <body onload="init()">
 
-    <div class="watermark-container"><h1 class="watermark">PUBLIC LEDGER</h1></div>
+    <div class="watermark-layer">
+        <div class="watermark">PUBLIC LEDGER</div>
+    </div>
+
     <canvas id="bg-canvas"></canvas>
 
     <header>
@@ -86,37 +88,27 @@
 
     <div class="action-container">
         <svg class="rotating-svg" viewBox="0 0 100 100">
-            <defs>
-                <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
-            </defs>
-            <text fill="#d4af37" style="font-size:5.1px; font-weight: 600; text-transform: uppercase; letter-spacing: 3.45px;">
-                <textPath xlink:href="#circlePath" startOffset="0%">SPILL NEW INTENT • CREATE RECORD • </textPath>
+            <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
+            <text fill="#d4af37" style="font-size:5.1px; font-weight: 600; letter-spacing:3.4px; text-transform: uppercase;">
+                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
             </text>
         </svg>
-        <button class="action-btn" onclick="document.getElementById('modal').style.display='flex'">+</button>
+        <button class="action-btn" onclick="openModal()">+</button>
     </div>
 
-    <div id="modal" class="overlay" onclick="this.style.display='none'">
-        <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-bottom:20px; letter-spacing:3px;">NEW INTENT SPILL</h3>
-            <input type="text" id="inTitle" placeholder="INTENT TITLE">
-            <textarea id="inDesc" placeholder="CORE DESCRIPTION" rows="4"></textarea>
-            <button class="btn" onclick="saveNew()">COMMIT TO LEDGER</button>
-        </div>
-    </div>
-
-    <div id="detail-overlay" class="overlay" onclick="this.style.display='none'">
-        <div class="panel" onclick="event.stopPropagation()">
-            <h2 id="cTitle" style="letter-spacing:4px; margin-bottom:20px; text-transform: uppercase;">--</h2>
-            <p id="cDesc" style="color:#aaa; line-height:1.6; margin-bottom:30px;">--</p>
-            <button class="btn" onclick="openValidation()">PARTICIPATE IN VALIDATION</button>
+    <div id="modal" class="overlay" onclick="closeModal()">
+        <div class="card" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing:4px; margin-bottom:30px; font-size:0.8rem; color:var(--gold);">NEW INTENT SPILL</h3>
+            <input type="text" id="inTitle" placeholder="INTENT NAME">
+            <textarea id="inDesc" rows="4" placeholder="DESCRIBE THE CORE LOGIC..."></textarea>
+            <button class="btn-main" onclick="saveNew()">SUBMIT TO HUB</button>
         </div>
     </div>
 
     <script>
-        let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [
-            {id: 4021, title: 'THERMAL CORE', desc: 'Core housing for liquid gold processing.', x: 300, y: 400},
-            {id: 7729, title: 'FLUID LOGIC', desc: 'Non-electric signaling for pressure gates.', x: 800, y: 200}
+        let items = JSON.parse(localStorage.getItem('tspill_items')) || [
+            {id: 1024, title: 'QUANTUM SHELL', desc: 'A reinforced casing for heavy industry.', x: 300, y: 300},
+            {id: 2048, title: 'KINETIC VALVE', desc: 'Pressure-based logic system.', x: 700, y: 400}
         ];
 
         function init() {
@@ -133,12 +125,7 @@
                 b.className = 'bubble';
                 b.style.left = `${item.x}px`; b.style.top = `${item.y}px`;
                 b.style.width = b.style.height = `140px`;
-                b.innerHTML = `<span class="b-id">SIGNAL-${item.id}</span><span class="b-title">${item.title}</span>`;
-                b.onclick = () => {
-                    document.getElementById('cTitle').innerText = item.title;
-                    document.getElementById('cDesc').innerText = item.desc;
-                    document.getElementById('detail-overlay').style.display = 'flex';
-                };
+                b.innerHTML = `<span class="b-title">${item.title}</span>`;
                 field.appendChild(b);
             });
         }
@@ -148,12 +135,15 @@
             const d = document.getElementById('inDesc').value;
             if(!t || !d) return;
             items.push({
-                id: Math.floor(1000 + Math.random() * 9000), title: t, desc: d,
+                id: Math.floor(Math.random()*9000)+1000, title: t, desc: d,
                 x: Math.random() * (window.innerWidth - 200), y: Math.random() * (window.innerHeight - 200)
             });
-            localStorage.setItem('tspill_ledger', JSON.stringify(items));
+            localStorage.setItem('tspill_items', JSON.stringify(items));
             location.reload();
         }
+
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
         function initCanvas() {
             const canvas = document.getElementById('bg-canvas');
