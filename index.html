@@ -6,12 +6,12 @@
     <title>TSPILL — Identity Protocol</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --border: rgba(212, 175, 55, 0.4); }
+        :root { --gold: #d4af37; --bg: #050505; --card-white: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
             background: var(--bg); 
-            color: #fff; 
+            color: #000; 
             font-family: 'Space Grotesk', sans-serif; 
             height: 100vh; 
             display: flex; 
@@ -20,101 +20,113 @@
             overflow: hidden; 
         }
 
-        /* High Visibility Background Animation */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.8; }
+        /* High Visibility Kinetic Background */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.9; }
 
+        /* The Solid White Institutional Card */
         .gate-card {
             position: relative;
             z-index: 10;
             width: 440px;
-            padding: 70px 50px;
-            background: rgba(5, 5, 5, 0.9);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(15px);
+            padding: 80px 50px;
+            background: var(--card-white);
+            border: none;
             text-align: center;
-            box-shadow: 0 0 80px rgba(0,0,0,1), 0 0 30px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 100px rgba(212, 175, 55, 0.2);
+            transform: translateY(0);
+            transition: transform 0.4s ease;
         }
 
         .logo-area h1 { 
-            font-size: 2.8rem; 
+            font-size: 3rem; 
             letter-spacing: 12px; 
-            color: var(--gold); 
-            margin-bottom: 8px;
-            filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));
+            color: #000; 
+            margin-bottom: 5px;
+            font-weight: 700;
         }
 
         .caption {
             font-size: 0.7rem;
             letter-spacing: 4px;
-            color: #aaa;
+            color: #666;
             text-transform: uppercase;
             margin-bottom: 60px;
             display: block;
+            font-weight: 500;
         }
 
         .input-group { margin-bottom: 40px; text-align: center; }
         .input-group label { 
             font-size: 0.6rem; 
-            color: var(--gold); 
+            color: #888; 
             letter-spacing: 3px; 
             text-transform: uppercase; 
             margin-bottom: 15px; 
             display: block; 
-            opacity: 0.8;
         }
 
         input {
             width: 100%;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid #222;
-            padding: 18px;
-            color: #fff;
+            background: #f5f5f5;
+            border: 1px solid #eee;
+            padding: 20px;
+            color: #000;
             font-family: inherit;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             outline: none;
             text-align: center;
             transition: 0.3s;
             letter-spacing: 1px;
         }
 
-        input:focus { border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
+        input:focus { border-color: var(--gold); background: #fff; box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
 
+        /* ID Display Section */
         #id-display {
             margin-top: 20px;
-            padding: 25px;
-            border: 1px dashed var(--gold);
-            background: rgba(212, 175, 55, 0.03);
+            padding: 30px;
+            border: 2px solid var(--gold);
+            background: #fff;
             display: none;
-            animation: fadeIn 0.8s ease forwards;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 
+            0% { opacity: 0; transform: scale(0.8); } 
+            100% { opacity: 1; transform: scale(1); } 
+        }
 
-        .id-label { font-size: 0.55rem; color: #777; letter-spacing: 3px; text-transform: uppercase; }
-        .generated-id { font-size: 1.4rem; color: var(--gold); letter-spacing: 5px; font-weight: 700; margin-top: 10px; }
+        .id-label { font-size: 0.6rem; color: #999; letter-spacing: 3px; text-transform: uppercase; }
+        .generated-id { font-size: 1.8rem; color: #000; letter-spacing: 6px; font-weight: 700; margin-top: 10px; }
 
         .btn {
             width: 100%;
-            padding: 20px;
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
+            padding: 22px;
+            background: #000;
+            color: #fff;
+            border: none;
             font-weight: 700;
             letter-spacing: 4px;
             cursor: pointer;
             text-transform: uppercase;
             margin-top: 15px;
-            transition: 0.4s;
+            transition: 0.3s;
         }
 
-        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+        .btn:hover { background: var(--gold); color: #000; transform: translateY(-2px); }
+
+        .enter-btn {
+            background: var(--gold);
+            color: #000;
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
 
     <canvas id="bg-canvas"></canvas>
 
-    <div class="gate-card">
+    <div class="gate-card" id="mainCard">
         <div class="logo-area">
             <h1>TSPILL</h1>
             <span class="caption">Production-Linked Ecosystem</span>
@@ -123,26 +135,25 @@
         <div id="entry-form">
             <div class="input-group">
                 <label>Institutional Identifier</label>
-                <input type="text" id="credential" placeholder="Email or Wallet Address">
+                <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
             </div>
             <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
         </div>
 
         <div id="id-display">
-            <span class="id-label">Protocol Mapping Successful</span>
+            <span class="id-label">Protocol Access Granted</span>
             <div class="generated-id" id="tspillID">--</div>
-            <button class="btn" onclick="enterEcosystem()" style="background:var(--gold); color:#000; margin-top:25px;">Enter Ecosystem</button>
+            <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
         </div>
     </div>
 
     <script>
-        // Deterministic ID generation logic
+        // Deterministic Persistence (Same Input = Same ID)
         function generateFixedID(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
-            // Ensure a positive 4-digit number
             const finalNum = Math.abs(hash % 9000) + 1000;
             return `TS-${finalNum}`;
         }
@@ -151,15 +162,14 @@
             const credential = document.getElementById('credential').value.trim().toLowerCase();
 
             if(!credential || credential.length < 5) {
-                alert("Valid credential required for ecosystem mapping.");
+                alert("Please provide valid credentials.");
                 return;
             }
 
-            // Generate the SAME ID for the same email/wallet every time
             const persistentID = generateFixedID(credential);
             
+            // Store for use in Hub/Home pages
             sessionStorage.setItem('currentID', persistentID);
-            sessionStorage.setItem('currentRole', 'Verified Creator');
 
             document.getElementById('entry-form').style.display = 'none';
             document.getElementById('tspillID').innerText = persistentID;
@@ -167,10 +177,11 @@
         }
 
         function enterEcosystem() {
-            window.location.href = 'hub.html';
+            // Redirects to home.html as requested
+            window.location.href = 'home.html';
         }
 
-        // --- BACKGROUND ANIMATION (HIGH VISIBILITY) ---
+        // --- ENHANCED HIGH-VISIBILITY KINETIC BACKGROUND ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
@@ -179,12 +190,12 @@
             canvas.width = window.innerWidth; 
             canvas.height = window.innerHeight;
             nodes = [];
-            for(let i=0; i<80; i++) {
+            for(let i=0; i<85; i++) {
                 nodes.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.6, 
-                    vy: (Math.random() - 0.5) * 0.6
+                    vx: (Math.random() - 0.5) * 0.7, 
+                    vy: (Math.random() - 0.5) * 0.7
                 });
             }
         }
@@ -198,9 +209,9 @@
                 
                 nodes.forEach(m => {
                     let d = Math.hypot(n.x - m.x, n.y - m.y);
-                    if(d < 200) {
-                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 * (1 - d / 200)})`;
-                        ctx.lineWidth = 0.8;
+                    if(d < 220) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.5 * (1 - d / 220)})`;
+                        ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(n.x, n.y);
                         ctx.lineTo(m.x, m.y);
