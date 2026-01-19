@@ -10,19 +10,34 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- BACKGROUND & CORRECTED WATERMARK --- */
+        /* --- BACKGROUND & WATERMARK FIX --- */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
         
+        .watermark-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            width: 150vw; /* Forces it to be wider than the screen */
+            display: flex;
+            justify-content: center;
+            overflow: visible;
+        }
+
         .watermark { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            font-size: 14vw; font-weight: 700; color: rgba(212, 175, 55, 0.02); 
-            letter-spacing: 30px; text-transform: uppercase; pointer-events: none; 
-            z-index: 0; white-space: nowrap; width: 120vw; text-align: center;
+            font-size: 15vw; 
+            font-weight: 700; 
+            color: rgba(212, 175, 55, 0.015); 
+            letter-spacing: 40px; 
+            text-transform: uppercase; 
+            white-space: nowrap; /* Prevents P and R from snapping to new lines */
         }
 
         /* --- HEADER --- */
         header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.7); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
+        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
 
         /* --- CONSTELLATION --- */
         #field { position: absolute; inset: 0; z-index: 10; overflow: hidden; }
@@ -42,26 +57,28 @@
         .rotating-svg { position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; pointer-events: none; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- PANEL SYSTEM --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
+        /* --- OVERLAYS --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
         .panel { width: 520px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); box-shadow: 0 0 60px rgba(0,0,0,1); }
         
         .state-tag { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 4px 12px; letter-spacing: 3px; display: inline-block; margin-bottom: 25px; text-transform: uppercase; }
         h2 { font-size: 1.6rem; letter-spacing: 4px; margin-bottom: 25px; text-transform: uppercase; font-weight: 700; }
-        p { color: #888; line-height: 1.8; margin-bottom: 35px; font-size: 0.9rem; font-weight: 300; }
+        p { color: #888; line-height: 1.8; margin-bottom: 35px; font-size: 0.9rem; }
         
         .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; transition: 0.4s; }
         .btn:hover { background: #fff; transform: translateY(-2px); }
         
         input, textarea { width: 100%; padding: 18px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 25px; font-family: inherit; font-size: 0.85rem; outline: none; }
-        input:focus, textarea:focus { border-color: var(--gold); }
         label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; opacity: 0.8; }
     </style>
 </head>
 <body onload="init()">
 
+    <div class="watermark-container">
+        <div class="watermark">PUBLIC LEDGER</div>
+    </div>
+
     <canvas id="bg-canvas"></canvas>
-    <div class="watermark">PUBLIC LEDGER</div>
 
     <header>
         <div class="user-meta" id="displayID">ID: --</div>
@@ -93,16 +110,12 @@
     <div id="validation-overlay" class="overlay" onclick="closeAll()">
         <div class="panel" onclick="event.stopPropagation()">
             <h3 style="letter-spacing: 4px; font-size: 0.75rem; margin-bottom: 40px; text-align: center; color: var(--gold);">SIGNAL CONTRIBUTION</h3>
-            
             <label>What is the primary execution risk?</label>
-            <textarea id="vRisk" rows="2" placeholder="e.g. Scalability of logic, material scarcity..."></textarea>
-
+            <textarea id="vRisk" rows="2" placeholder="e.g. Scalability of logic..."></textarea>
             <label>Material / Logic Requirements?</label>
             <input type="text" id="vMaterial" placeholder="List technical requirements">
-
             <label>Suggested Manufacturer / Builder?</label>
             <input type="text" id="vBuilder" placeholder="Who can realize this?">
-
             <button class="btn" onclick="submitSignal()">Record Signal to Ledger</button>
         </div>
     </div>
@@ -113,7 +126,7 @@
             <label>Intent Title</label>
             <input type="text" id="inTitle" placeholder="SHORT & TECHNICAL">
             <label>Core Description</label>
-            <textarea id="inDesc" rows="4" placeholder="Describe the logic or product intent..."></textarea>
+            <textarea id="inDesc" rows="4" placeholder="Describe the logic..."></textarea>
             <button class="btn" onclick="saveNew()">Commit to Public Ledger</button>
         </div>
     </div>
@@ -137,11 +150,7 @@
                 b.style.left = `${item.x}px`;
                 b.style.top = `${item.y}px`;
                 b.style.width = b.style.height = `140px`;
-                b.innerHTML = `
-                    <span class="b-id">SIGNAL-${item.id}</span>
-                    <span class="b-title">${item.title}</span>
-                    <span class="b-id" style="margin-top:8px; opacity:0.3">${item.author}</span>
-                `;
+                b.innerHTML = `<span class="b-id">SIGNAL-${item.id}</span><span class="b-title">${item.title}</span><span class="b-id" style="margin-top:8px; opacity:0.3">${item.author}</span>`;
                 b.onclick = () => openDetail(item);
                 field.appendChild(b);
             });
@@ -164,8 +173,7 @@
         function submitSignal() {
             items = items.map(i => i.id === activeID ? {...i, state: 'UNDER VALIDATION'} : i);
             localStorage.setItem('tspill_ledger', JSON.stringify(items));
-            closeAll();
-            render();
+            closeAll(); render();
         }
 
         function saveNew() {
@@ -181,8 +189,7 @@
                 y: Math.random() * (window.innerHeight - 180)
             });
             localStorage.setItem('tspill_ledger', JSON.stringify(items));
-            closeAll();
-            render();
+            closeAll(); render();
         }
 
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
