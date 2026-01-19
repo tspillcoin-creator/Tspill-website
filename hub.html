@@ -13,29 +13,32 @@
         /* --- BACKGROUND & WATERMARK FIX --- */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; }
         
-        .watermark-container {
+        /* The container spans the screen but allows the text to go outside */
+        .watermark-wrap {
             position: fixed;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            left: 0;
+            width: 100vw;
+            transform: translateY(-50%);
             z-index: 0;
             pointer-events: none;
-            width: 150vw; /* Forces it to be wider than the screen */
             display: flex;
-            justify-content: center;
-            overflow: visible;
+            justify-content: center; /* Center the whole phrase */
+            overflow: visible; 
         }
 
         .watermark { 
-            font-size: 15vw; 
+            font-size: 13vw; 
             font-weight: 700; 
-            color: rgba(212, 175, 55, 0.015); 
-            letter-spacing: 40px; 
+            color: rgba(212, 175, 55, 0.018); 
+            letter-spacing: 2.5vw; /* Fluid spacing based on screen width */
             text-transform: uppercase; 
-            white-space: nowrap; /* Prevents P and R from snapping to new lines */
+            white-space: nowrap;
+            display: inline-block;
+            padding: 0 5vw; /* Adds a safety buffer so P and R don't touch screen edges */
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER & META --- */
         header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
         .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; backdrop-filter: blur(10px); }
 
@@ -74,7 +77,7 @@
 </head>
 <body onload="init()">
 
-    <div class="watermark-container">
+    <div class="watermark-wrap">
         <div class="watermark">PUBLIC LEDGER</div>
     </div>
 
@@ -111,11 +114,11 @@
         <div class="panel" onclick="event.stopPropagation()">
             <h3 style="letter-spacing: 4px; font-size: 0.75rem; margin-bottom: 40px; text-align: center; color: var(--gold);">SIGNAL CONTRIBUTION</h3>
             <label>What is the primary execution risk?</label>
-            <textarea id="vRisk" rows="2" placeholder="e.g. Scalability of logic..."></textarea>
+            <textarea id="vRisk" rows="2"></textarea>
             <label>Material / Logic Requirements?</label>
-            <input type="text" id="vMaterial" placeholder="List technical requirements">
+            <input type="text" id="vMaterial">
             <label>Suggested Manufacturer / Builder?</label>
-            <input type="text" id="vBuilder" placeholder="Who can realize this?">
+            <input type="text" id="vBuilder">
             <button class="btn" onclick="submitSignal()">Record Signal to Ledger</button>
         </div>
     </div>
@@ -126,7 +129,7 @@
             <label>Intent Title</label>
             <input type="text" id="inTitle" placeholder="SHORT & TECHNICAL">
             <label>Core Description</label>
-            <textarea id="inDesc" rows="4" placeholder="Describe the logic..."></textarea>
+            <textarea id="inDesc" rows="4"></textarea>
             <button class="btn" onclick="saveNew()">Commit to Public Ledger</button>
         </div>
     </div>
