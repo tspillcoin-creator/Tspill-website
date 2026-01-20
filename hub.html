@@ -21,20 +21,41 @@
         header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; z-index: 100; }
         .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
 
-        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); grid-auto-rows: minmax(160px, auto); gap: 20px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
+        /* PRECISION GRID: 6 COLUMNS */
+        #registry { 
+            position: absolute; inset: 0; padding: 120px 40px; 
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            grid-auto-rows: 180px; /* Controlled height */
+            gap: 15px; 
+            overflow-y: auto; 
+            z-index: 10; 
+            scrollbar-width: none; 
+        }
 
         /* Chips/Tiles */
-        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 25px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px; }
-        .tile:hover { border-color: var(--gold); transform: translateY(-3px); }
-        .tile-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; width: 85%; overflow-wrap: break-word; line-height: 1.3; }
-        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: var(--gold); opacity: 0.6; margin-top: 10px; }
+        .tile { 
+            background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; 
+            cursor: pointer; transition: 0.3s; position: relative; 
+            display: flex; flex-direction: column; justify-content: space-between;
+            height: 180px; /* Fixed height for 4-grid look */
+        }
+        .tile:hover { border-color: var(--gold); background: rgba(20,20,20,1); }
         
-        .led-row { display: flex; gap: 12px; margin-top: 15px; }
-        .led { display: flex; align-items: center; font-size: 0.5rem; color: #333; text-transform: uppercase; font-weight: bold; }
+        .tile-title { 
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; 
+            color: #fff; width: 80%; overflow-wrap: break-word; line-height: 1.2;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        
+        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; margin-top: 5px; }
+        
+        .led-row { display: flex; gap: 8px; margin-top: 10px; }
+        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; text-transform: uppercase; font-weight: bold; }
         .led.active { color: var(--gold); }
-        .dot { width: 5px; height: 5px; border-radius: 50%; background: #222; margin-right: 6px; }
-        .led.active .dot { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
-        .presence-tag { position: absolute; top: 25px; right: 20px; font-family: 'JetBrains Mono'; font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 2px 5px; }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 4px; }
+        .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+        .presence-tag { position: absolute; top: 20px; right: 15px; font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 4px; }
 
         /* Side Panel */
         #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 80px 40px; overflow-y: auto; }
@@ -45,15 +66,15 @@
         input { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; outline: none; margin-bottom: 10px;}
 
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .cb { border: 1px solid #222; padding: 15px; font-size: 0.65rem; color: #555; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; }
+        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; cursor: pointer; text-transform: uppercase; text-align: center; }
         .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
         
-        .lock-notice { padding: 20px; border: 1px dashed #333; color: #444; font-size: 0.6rem; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .lock-notice { padding: 20px; border: 1px dashed #333; color: #444; font-size: 0.55rem; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
         .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
 
         /* Action Button */
         .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; }
-        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; z-index: 5; transition: 0.3s; box-shadow: 0 0 15px rgba(212,175,55,0.3); }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; z-index: 5; }
         .rotating-text { position: absolute; width: 160px; height: 160px; top: -45px; left: -45px; animation: rotate 20s linear infinite; pointer-events: none; filter: drop-shadow(0 0 5px var(--gold)); }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -124,7 +145,7 @@
     </div>
 
     <script>
-        let registry = JSON.parse(localStorage.getItem('tspill_v3')) || [];
+        let registry = JSON.parse(localStorage.getItem('tspill_v4')) || [];
         let activeID = null;
 
         window.onload = () => {
@@ -140,9 +161,10 @@
         function toggleCB(el) { el.classList.toggle('active'); }
 
         function handleLogicToggle(el) {
-            el.classList.toggle('active');
+            if(el.classList) el.classList.toggle('active');
             const count = document.querySelectorAll('#refine-con-container .cb.active').length;
-            const isCreator = registry.find(x => x.id === activeID).author === sessionStorage.getItem('currentID');
+            const record = registry.find(x => x.id === activeID);
+            const isCreator = record && record.author === sessionStorage.getItem('currentID');
             
             document.getElementById('commission-form').style.display = (count >= 2 && isCreator) ? 'block' : 'none';
             document.getElementById('lock-msg').style.display = (count >= 2) ? 'none' : 'block';
@@ -184,7 +206,7 @@
                 c.style.pointerEvents = isCreator ? 'auto' : 'none';
             });
             
-            handleLogicToggle({classList: {toggle: () => {}}}); // Trigger UI refresh
+            handleLogicToggle({}); 
             document.getElementById('side-panel').classList.add('open');
         }
 
@@ -201,7 +223,7 @@
             };
             if(!entry.title) return;
             registry.push(entry);
-            localStorage.setItem('tspill_v3', JSON.stringify(registry));
+            localStorage.setItem('tspill_v4', JSON.stringify(registry));
             location.reload();
         }
 
@@ -211,7 +233,7 @@
             registry[idx].material = document.getElementById('m-mat').value;
             registry[idx].dim = document.getElementById('m-dim').value;
             registry[idx].ref = document.getElementById('m-ref').value;
-            localStorage.setItem('tspill_v3', JSON.stringify(registry));
+            localStorage.setItem('tspill_v4', JSON.stringify(registry));
             render(); closeSidePanel();
         }
 
