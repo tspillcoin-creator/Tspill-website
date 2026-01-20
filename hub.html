@@ -3,80 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Satellite Ledger</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>TSPILL — Blueprint Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(212, 175, 55, 0.3); }
+        :root { --gold: #d4af37; --bg: #050505; --grid: rgba(212, 175, 55, 0.08); --border: rgba(212, 175, 55, 0.3); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- WATERMARK & BG --- */
-        .watermark-layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; padding: 0 50px; }
-        .watermark { font-size: 9.5vw; font-weight: 700; color: rgba(212, 175, 55, 0.02); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; }
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4; transition: opacity 1s; }
+        /* --- BLUEPRINT GRID --- */
+        .blueprint-bg {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 1; pointer-events: none;
+        }
 
-        /* --- UI COMPONENTS --- */
-        header { position: fixed; top: 0; width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .user-meta { font-size: 0.65rem; letter-spacing: 2px; color: var(--gold); background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid var(--border); text-transform: uppercase; }
+        /* --- CROSSHAIR --- */
+        #cursor-h { position: fixed; left: 0; width: 100%; height: 1px; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
+        #cursor-v { position: fixed; top: 0; width: 1px; height: 100%; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
 
-        /* --- THE FIELD --- */
-        #field { position: absolute; inset: 0; z-index: 10; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* --- WATERMARK: STABLE CENTER --- */
+        .watermark-layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; }
+        .watermark { font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; }
+
+        /* --- HEADER --- */
+        header { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .meta-box { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: rgba(0,0,0,0.9); pointer-events: auto; }
+
+        /* --- THE REGISTRY (CHIPS) --- */
+        #registry { position: absolute; inset: 0; z-index: 10; padding: 100px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); grid-gap: 50px; overflow-y: auto; }
         
-        .bubble { 
-            position: absolute; border-radius: 50%; border: 1px solid var(--border); 
-            background: var(--glass); backdrop-filter: blur(8px); 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: center; 
+        .chip { 
+            background: rgba(10, 10, 10, 0.9); border: 1px solid var(--border); padding: 25px;
+            position: relative; transition: 0.3s; cursor: pointer; height: 200px;
         }
-        .bubble:hover { border-color: var(--gold); box-shadow: 0 0 30px rgba(212,175,55,0.2); }
-        .b-title { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: #eee; }
+        .chip:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.1); transform: translateY(-2px); }
+        
+        .chip-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .chip-id { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--gold); opacity: 0.7; margin-bottom: 20px; display: block; }
+        
+        /* Indicators */
+        .status-row { display: flex; gap: 15px; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
+        .indicator { display: flex; align-items: center; font-size: 0.5rem; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+        .indicator.active { color: var(--gold); }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #222; margin-right: 6px; }
+        .indicator.active .dot { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
 
-        /* --- SATELLITE MODE (CENTER STAGE) --- */
-        .bubble.active { 
-            left: 50% !important; top: 50% !important; 
-            transform: translate(-50%, -50%) scale(1.4) !important; 
-            z-index: 1000; border-color: var(--gold); box-shadow: 0 0 50px rgba(212,175,55,0.4);
-        }
-
-        .satellite {
-            position: absolute; width: 90px; height: 90px; border-radius: 50%;
-            border: 1px solid var(--border); background: rgba(0,0,0,0.9);
-            display: none; align-items: center; justify-content: center;
-            font-size: 0.5rem; color: var(--gold); text-transform: uppercase;
-            letter-spacing: 1px; transition: 0.5s; cursor: pointer; z-index: 999;
-        }
-        .satellite:hover { border-color: #fff; color: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        /* Presence Tag */
+        .presence-tag { position: absolute; top: 15px; right: 15px; font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; }
 
         /* --- ACTION BUTTON --- */
         .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
-        .action-btn { width: 75px; height: 75px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.2rem; cursor: pointer; z-index: 5; font-weight: bold; box-shadow: 0 0 20px rgba(212,175,55,0.4); }
-        .rotating-svg { position: absolute; width: 160px; height: 160px; animation: rotate 20s linear infinite; pointer-events: none; filter: drop-shadow(0 0 5px rgba(212,175,55,0.4)); }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2rem; cursor: pointer; z-index: 5; font-weight: bold; }
+        .rotating-svg { position: absolute; width: 150px; height: 150px; animation: rotate 20s linear infinite; pointer-events: none; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- PANELS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(25px); }
-        .panel { width: 520px; padding: 60px; background: #0a0a0a; border: 1px solid var(--gold); }
-        .btn { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; }
-        input, textarea { width: 100%; padding: 18px; background: #000; border: 1px solid #222; color: #fff; margin-bottom: 25px; font-family: inherit; }
-        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        /* --- MODAL / FORM --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .panel { width: 500px; padding: 50px; background: #000; border: 1px solid var(--gold); }
+        h3 { letter-spacing: 5px; font-size: 0.8rem; margin-bottom: 30px; color: var(--gold); text-align: center; text-transform: uppercase; }
+        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 8px; margin-top: 20px; }
+        input, textarea { width: 100%; padding: 15px; background: #0a0a0a; border: 1px solid #333; color: #fff; font-family: inherit; font-size: 0.8rem; outline: none; }
+        
+        .constraint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .check-box { display: flex; align-items: center; font-size: 0.65rem; color: #888; cursor: pointer; padding: 10px; border: 1px solid #222; }
+        .check-box.active { border-color: var(--gold); color: var(--gold); }
+        .check-box input { display: none; }
+
+        .btn-submit { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; margin-top: 30px; }
     </style>
 </head>
-<body onload="init()">
+<body onmousemove="moveCrosshair(event)" onload="init()">
 
+    <div class="blueprint-bg"></div>
+    <div id="cursor-h"></div>
+    <div id="cursor-v"></div>
     <div class="watermark-layer"><div class="watermark">PUBLIC LEDGER</div></div>
-    <canvas id="bg-canvas"></canvas>
 
     <header>
-        <div class="user-meta" id="displayID">ID: --</div>
-        <div class="user-meta">STATUS: ACTIVE HUB</div>
+        <div class="meta-box" id="displayID">ID: --</div>
+        <div class="meta-box">SYSTEM: ARCHIVE_MODE</div>
     </header>
 
-    <div id="field"></div>
-
-    <div id="sat-validation" class="satellite" onclick="openPanel('validation')">Signal</div>
-    <div id="sat-technical" class="satellite" onclick="openPanel('technical')">Technical</div>
-    <div id="sat-production" class="satellite" onclick="openPanel('production')">Production</div>
-    <div id="sat-history" class="satellite" onclick="openPanel('history')">Ledger</div>
+    <div id="registry"></div>
 
     <div class="action-container">
         <svg class="rotating-svg" viewBox="0 0 100 100">
@@ -85,140 +93,101 @@
                 <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
             </text>
         </svg>
-        <button class="action-btn" onclick="openPanel('newIntent')">+</button>
+        <button class="action-btn" onclick="openModal()">+</button>
     </div>
 
-    <div id="panel-technical" class="overlay" onclick="closePanels()">
+    <div id="modal" class="overlay" onclick="closeModal()">
         <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="letter-spacing:4px; margin-bottom:30px; color:var(--gold);">ARTIFACT ATTRIBUTES</h3>
-            <label>Material Composition</label>
-            <input type="text" id="attrMaterial" placeholder="e.g. LIQUID GOLD / BRASS">
-            <label>Dimensional Specs (Weight/Size)</label>
-            <input type="text" id="attrSpecs" placeholder="e.g. 450g / 120mm">
-            <label>Integrity State</label>
-            <input type="text" id="attrState" placeholder="e.g. FUNCTIONAL PROTOTYPE">
-            <button class="btn" onclick="saveAttributes()">Update Attributes</button>
-        </div>
-    </div>
+            <h3>Create Intent Record</h3>
+            
+            <label>Idea Title</label>
+            <input type="text" id="inTitle" placeholder="SHORT & PRECISE">
+            
+            <label>One-Line Intent</label>
+            <textarea id="inIntent" rows="2" placeholder="WHAT THIS IS"></textarea>
 
-    <div id="panel-newIntent" class="overlay" onclick="closePanels()">
-        <div class="panel" onclick="event.stopPropagation()">
-            <h3 style="letter-spacing:4px; margin-bottom:35px; color:var(--gold);">NEW INTENT</h3>
-            <label>Intent Title</label>
-            <input type="text" id="inTitle">
-            <label>Core Description</label>
-            <textarea id="inDesc" rows="4"></textarea>
-            <button class="btn" onclick="saveNew()">Commit</button>
+            <label>Constraints (Min. 2 for Clarity)</label>
+            <div class="constraint-grid">
+                <label class="check-box" id="l-time"><input type="checkbox" class="con-check" value="Time"> Time-Bound</label>
+                <label class="check-box" id="l-res"><input type="checkbox" class="con-check" value="Resource"> Resource-Bound</label>
+                <label class="check-box" id="l-scope"><input type="checkbox" class="con-check" value="Scope"> Scope-Limited</label>
+                <label class="check-box" id="l-med"><input type="checkbox" class="con-check" value="Medium"> Medium-Specified</label>
+            </div>
+
+            <label>Physical Presence</label>
+            <select id="inPresence" style="width:100%; padding:15px; background:#0a0a0a; border:1px solid #333; color:white;">
+                <option value="DIGITAL">DIGITAL</option>
+                <option value="PHYSICAL">PHYSICAL</option>
+                <option value="HYBRID">HYBRID</option>
+            </select>
+
+            <button class="btn-submit" onclick="saveRecord()">Commit to Registry</button>
         </div>
     </div>
 
     <script>
-        let items = JSON.parse(localStorage.getItem('tspill_ledger')) || [
-            {id: 4021, title: 'THERMAL CORE', desc: 'Liquid gold hull.', author: 'TS-901', x: 300, y: 300},
-            {id: 7729, title: 'KINETIC VALVE', desc: 'Logic system.', author: 'TS-442', x: 700, y: 200}
-        ];
-        let activeBubble = null;
+        let records = JSON.parse(localStorage.getItem('tspill_registry')) || [];
 
         function init() {
             document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
-            initCanvas();
             render();
+            setupCheckboxes();
+        }
+
+        function moveCrosshair(e) {
+            document.getElementById('cursor-h').style.top = e.clientY + 'px';
+            document.getElementById('cursor-v').style.left = e.clientX + 'px';
+        }
+
+        function setupCheckboxes() {
+            document.querySelectorAll('.check-box').forEach(cb => {
+                cb.onclick = () => {
+                    const input = cb.querySelector('input');
+                    input.checked = !input.checked;
+                    cb.classList.toggle('active', input.checked);
+                };
+            });
         }
 
         function render() {
-            const field = document.getElementById('field');
-            field.innerHTML = '';
-            items.forEach(item => {
-                const b = document.createElement('div');
-                b.className = 'bubble';
-                b.style.left = `${item.x}px`; b.style.top = `${item.y}px`;
-                b.style.width = b.style.height = `140px`;
-                b.innerHTML = `<span class="b-title">${item.title}</span>`;
-                b.onclick = (e) => toggleSatelliteSystem(e, b, item);
-                field.appendChild(b);
+            const reg = document.getElementById('registry');
+            reg.innerHTML = '';
+            records.forEach(r => {
+                const isDefined = r.constraints.length >= 2;
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `
+                    <span class="presence-tag">${r.presence}</span>
+                    <span class="chip-title">${r.title}</span>
+                    <span class="chip-id">CREATOR: ${r.author}</span>
+                    <div class="status-row">
+                        <div class="indicator ${isDefined ? 'active' : ''}"><div class="dot"></div>Defined</div>
+                        <div class="indicator"><div class="dot"></div>Artifact</div>
+                        <div class="indicator"><div class="dot"></div>Ready</div>
+                    </div>
+                `;
+                reg.appendChild(chip);
             });
         }
 
-        function toggleSatelliteSystem(e, el, item) {
-            e.stopPropagation();
-            if(activeBubble === el) {
-                resetSystem();
-                return;
-            }
-            resetSystem();
-            activeBubble = el;
-            el.classList.add('active');
-            document.getElementById('bg-canvas').style.opacity = '0.1';
-            
-            // Position Satellites
-            const sats = ['sat-validation', 'sat-technical', 'sat-production', 'sat-history'];
-            const radius = 180;
-            sats.forEach((id, i) => {
-                const s = document.getElementById(id);
-                const angle = (i * 90) * (Math.PI / 180);
-                const x = window.innerWidth / 2 + radius * Math.cos(angle) - 45;
-                const y = window.innerHeight / 2 + radius * Math.sin(angle) - 45;
-                s.style.display = 'flex';
-                s.style.left = `${x}px`; s.style.top = `${y}px`;
-            });
-        }
-
-        function resetSystem() {
-            if(activeBubble) activeBubble.classList.remove('active');
-            activeBubble = null;
-            document.getElementById('bg-canvas').style.opacity = '0.4';
-            document.querySelectorAll('.satellite').forEach(s => s.style.display = 'none');
-        }
-
-        function openPanel(type) {
-            document.getElementById(`panel-${type}`).style.display = 'flex';
-        }
-
-        function closePanels() {
-            document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-        }
-
-        function saveNew() {
-            const t = document.getElementById('inTitle').value.toUpperCase();
-            if(!t) return;
-            items.push({
-                id: Math.floor(1000 + Math.random() * 9000), title: t, 
+        function saveRecord() {
+            const constraints = Array.from(document.querySelectorAll('.con-check:checked')).map(c => c.value);
+            const r = {
+                title: document.getElementById('inTitle').value.toUpperCase(),
+                intent: document.getElementById('inIntent').value,
                 author: sessionStorage.getItem('currentID') || 'ANON',
-                x: Math.random() * (window.innerWidth - 200), y: Math.random() * (window.innerHeight - 200)
-            });
-            localStorage.setItem('tspill_ledger', JSON.stringify(items));
+                presence: document.getElementById('inPresence').value,
+                constraints: constraints,
+                id: Date.now()
+            };
+            if(!r.title) return;
+            records.push(r);
+            localStorage.setItem('tspill_registry', JSON.stringify(records));
             location.reload();
         }
 
-        function saveAttributes() {
-            // Logic to save specific satellite data
-            alert("Technical Attributes Recorded to Ledger.");
-            closePanels();
-            resetSystem();
-        }
-
-        document.body.onclick = resetSystem;
-
-        function initCanvas() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            let nodes = [];
-            for(let i=0; i<50; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3});
-            function animate() {
-                ctx.clearRect(0,0,canvas.width, canvas.height);
-                nodes.forEach(n => {
-                    n.x += n.vx; n.y += n.vy;
-                    if(n.x<0 || n.x>canvas.width) n.vx*=-1; if(n.y<0 || n.y>canvas.height) n.vy*=-1;
-                    nodes.forEach(m => {
-                        let d = Math.hypot(n.x-m.x, n.y-m.y);
-                        if(d<150) { ctx.strokeStyle=`rgba(212,175,55,${0.2*(1-d/150)})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke(); }
-                    });
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
 </html>
