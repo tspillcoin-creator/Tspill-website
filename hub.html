@@ -10,11 +10,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* Background Watermark & Grid */
+        /* Background & Grid */
         .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
         .watermark-layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; }
         .watermark { font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; }
-        
         #cursor-h, #cursor-v { position: fixed; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
         #cursor-h { left: 0; width: 100%; height: 1px; } #cursor-v { top: 0; width: 1px; height: 100%; }
 
@@ -22,32 +21,13 @@
         .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
 
         /* PRECISION GRID: 6 COLUMNS */
-        #registry { 
-            position: absolute; inset: 0; padding: 120px 40px; 
-            display: grid; 
-            grid-template-columns: repeat(6, 1fr); 
-            grid-auto-rows: 180px; /* Controlled height */
-            gap: 15px; 
-            overflow-y: auto; 
-            z-index: 10; 
-            scrollbar-width: none; 
-        }
+        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
 
-        /* Chips/Tiles */
-        .tile { 
-            background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; 
-            cursor: pointer; transition: 0.3s; position: relative; 
-            display: flex; flex-direction: column; justify-content: space-between;
-            height: 180px; /* Fixed height for 4-grid look */
-        }
-        .tile:hover { border-color: var(--gold); background: rgba(20,20,20,1); }
+        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; }
+        .tile:hover { border-color: var(--gold); }
+        .tile.finalized { border: 1px solid var(--gold); box-shadow: 0 0 15px rgba(212,175,55,0.1); }
         
-        .tile-title { 
-            font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; 
-            color: #fff; width: 80%; overflow-wrap: break-word; line-height: 1.2;
-            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-        }
-        
+        .tile-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 80%; overflow-wrap: break-word; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; margin-top: 5px; }
         
         .led-row { display: flex; gap: 8px; margin-top: 10px; }
@@ -71,6 +51,7 @@
         
         .lock-notice { padding: 20px; border: 1px dashed #333; color: #444; font-size: 0.55rem; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
         .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
+        .btn-commission { background: #fff; color: #000; margin-top: 15px; }
 
         /* Action Button */
         .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; }
@@ -109,7 +90,9 @@
             <label>Material Composition</label><input type="text" id="m-mat">
             <label>Dimensions (MM/G)</label><input type="text" id="m-dim">
             <label>Evidence Link</label><input type="text" id="m-ref">
-            <button class="btn-action" onclick="saveRefinement()">Commit Refinement</button>
+            
+            <button class="btn-action" id="saveRefineBtn" onclick="saveRefinement()">Update Attributes</button>
+            <button class="btn-action btn-commission" id="commissionBtn" onclick="sealArtifact()" style="display:none;">Seal & Commission (RDY)</button>
         </div>
         <div id="lock-msg" class="lock-notice">Defining Intent Required</div>
     </div>
@@ -129,13 +112,6 @@
             <h3>Spill New Intent</h3>
             <label>Title</label><input type="text" id="new-title" placeholder="IDENTIFIER">
             <label>Intent One-Liner</label><input type="text" id="new-intent" placeholder="TECHNICAL LOGIC">
-            <label>Initial Constraints</label>
-            <div class="con-grid" id="new-con-container">
-                <div class="cb" onclick="toggleCB(this)" data-val="Time">Time-Bound</div>
-                <div class="cb" onclick="toggleCB(this)" data-val="Resource">Resource-Bound</div>
-                <div class="cb" onclick="toggleCB(this)" data-val="Scope">Scope-Limited</div>
-                <div class="cb" onclick="toggleCB(this)" data-val="Medium">Medium-Specified</div>
-            </div>
             <label>Presence</label>
             <select id="new-pres" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #222;">
                 <option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option>
@@ -145,7 +121,7 @@
     </div>
 
     <script>
-        let registry = JSON.parse(localStorage.getItem('tspill_v4')) || [];
+        let registry = JSON.parse(localStorage.getItem('tspill_v5')) || [];
         let activeID = null;
 
         window.onload = () => {
@@ -158,24 +134,35 @@
             document.getElementById('cursor-v').style.left = e.clientX + 'px';
         }
 
-        function toggleCB(el) { el.classList.toggle('active'); }
-
         function handleLogicToggle(el) {
-            if(el.classList) el.classList.toggle('active');
-            const count = document.querySelectorAll('#refine-con-container .cb.active').length;
+            if(el && el.classList) el.classList.toggle('active');
             const record = registry.find(x => x.id === activeID);
-            const isCreator = record && record.author === sessionStorage.getItem('currentID');
-            
-            document.getElementById('commission-form').style.display = (count >= 2 && isCreator) ? 'block' : 'none';
-            document.getElementById('lock-msg').style.display = (count >= 2) ? 'none' : 'block';
+            if(!record || record.rdy) return; 
+
+            const conCount = document.querySelectorAll('#refine-con-container .cb.active').length;
+            const mat = document.getElementById('m-mat').value;
+            const dim = document.getElementById('m-dim').value;
+            const isCreator = record.author === sessionStorage.getItem('currentID');
+
+            // DEF Logic
+            document.getElementById('lock-msg').style.display = (conCount >= 2) ? 'none' : 'block';
+            document.getElementById('commission-form').style.display = (conCount >= 2 && isCreator) ? 'block' : 'none';
+
+            // Commission Button Logic (Only if DEF and ATR are done)
+            if(conCount >= 2 && mat && dim) {
+                document.getElementById('commissionBtn').style.display = 'block';
+            } else {
+                document.getElementById('commissionBtn').style.display = 'none';
+            }
         }
 
         function render() {
             const reg = document.getElementById('registry'); reg.innerHTML = '';
             registry.forEach(r => {
                 const isDef = r.constraints.length >= 2;
+                const isAtr = r.material && r.dim;
                 const tile = document.createElement('div');
-                tile.className = 'tile';
+                tile.className = `tile ${r.rdy ? 'finalized' : ''}`;
                 tile.onclick = (e) => { e.stopPropagation(); openSidePanel(r.id); };
                 tile.innerHTML = `
                     <div class="presence-tag">${r.presence[0]}</div>
@@ -183,8 +170,8 @@
                     <div class="tile-id">BY: ${r.author} • ${r.date}</div>
                     <div class="led-row">
                         <div class="led ${isDef?'active':''}"><div class="dot"></div>DEF</div>
-                        <div class="led ${r.material?'active':''}"><div class="dot"></div>ART</div>
-                        <div class="led"><div class="dot"></div>RDY</div>
+                        <div class="led ${isAtr?'active':''}"><div class="dot"></div>ATR</div>
+                        <div class="led ${r.rdy?'active':''}"><div class="dot"></div>RDY</div>
                     </div>
                 `;
                 reg.appendChild(tile);
@@ -201,13 +188,48 @@
             document.getElementById('m-ref').value = r.ref || '';
 
             const isCreator = (r.author === sessionStorage.getItem('currentID'));
+            const isLocked = r.rdy;
+
             document.querySelectorAll('#refine-con-container .cb').forEach(c => {
                 c.classList.toggle('active', r.constraints.includes(c.getAttribute('data-val')));
-                c.style.pointerEvents = isCreator ? 'auto' : 'none';
+                c.style.pointerEvents = (isCreator && !isLocked) ? 'auto' : 'none';
             });
             
-            handleLogicToggle({}); 
+            // Read-only check for finalized artifacts
+            const inputs = document.querySelectorAll('#commission-form input');
+            inputs.forEach(i => i.disabled = isLocked);
+            document.getElementById('saveRefineBtn').style.display = isLocked ? 'none' : 'block';
+            
+            if(isLocked) {
+                document.getElementById('commission-form').style.display = 'block';
+                document.getElementById('commissionBtn').style.display = 'none';
+                document.getElementById('lock-msg').innerText = "ARTIFACT SEALED / GALLERY READY";
+                document.getElementById('lock-msg').style.display = 'block';
+            } else {
+                handleLogicToggle();
+            }
+
             document.getElementById('side-panel').classList.add('open');
+        }
+
+        function sealArtifact() {
+            if(!confirm("Seal record? This will lock the blueprint forever.")) return;
+            const idx = registry.findIndex(x => x.id === activeID);
+            registry[idx].rdy = true;
+            localStorage.setItem('tspill_v5', JSON.stringify(registry));
+            render();
+            closeSidePanel();
+        }
+
+        function saveRefinement() {
+            const idx = registry.findIndex(x => x.id === activeID);
+            registry[idx].constraints = Array.from(document.querySelectorAll('#refine-con-container .cb.active')).map(c => c.getAttribute('data-val'));
+            registry[idx].material = document.getElementById('m-mat').value;
+            registry[idx].dim = document.getElementById('m-dim').value;
+            registry[idx].ref = document.getElementById('m-ref').value;
+            localStorage.setItem('tspill_v5', JSON.stringify(registry));
+            render();
+            handleLogicToggle();
         }
 
         function commitNewIntent() {
@@ -218,23 +240,12 @@
                 author: sessionStorage.getItem('currentID') || "GUEST-ID",
                 date: new Date().toLocaleDateString('en-GB'),
                 presence: document.getElementById('new-pres').value,
-                constraints: Array.from(document.querySelectorAll('#new-con-container .cb.active')).map(c => c.getAttribute('data-val')),
-                material: "", dim: "", ref: ""
+                constraints: [], material: "", dim: "", ref: "", rdy: false
             };
             if(!entry.title) return;
             registry.push(entry);
-            localStorage.setItem('tspill_v4', JSON.stringify(registry));
+            localStorage.setItem('tspill_v5', JSON.stringify(registry));
             location.reload();
-        }
-
-        function saveRefinement() {
-            const idx = registry.findIndex(x => x.id === activeID);
-            registry[idx].constraints = Array.from(document.querySelectorAll('#refine-con-container .cb.active')).map(c => c.getAttribute('data-val'));
-            registry[idx].material = document.getElementById('m-mat').value;
-            registry[idx].dim = document.getElementById('m-dim').value;
-            registry[idx].ref = document.getElementById('m-ref').value;
-            localStorage.setItem('tspill_v4', JSON.stringify(registry));
-            render(); closeSidePanel();
         }
 
         function openCreateModal() { document.getElementById('create-modal').style.display = 'flex'; }
