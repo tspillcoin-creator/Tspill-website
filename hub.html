@@ -8,165 +8,167 @@
     <style>
         :root { --gold: #d4af37; --bg: #050505; --grid: rgba(212, 175, 55, 0.08); --border: rgba(212, 175, 55, 0.2); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; transition: background 0.5s; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
         
-        /* State Control */
-        body.gallery-mode { --grid: transparent; --border: rgba(255,255,255,0.05); }
-
-        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; transition: 0.5s; }
-        .watermark { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
+        body.gallery-mode { --grid: transparent; }
+        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
         
         header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .meta-group { display: flex; gap: 10px; pointer-events: auto; }
-        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; cursor: default; }
-        .meta.clickable { cursor: pointer; transition: 0.3s; }
-        .meta.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        .meta-group { display: flex; gap: 10px; }
+        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
+        .meta.clickable { cursor: pointer; }
+        .meta.active { background: var(--gold); color: #000; }
 
-        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; transition: 0.5s; }
+        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
 
-        /* Tile Styles */
-        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; overflow: hidden; }
+        /* Tiles */
+        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; transition: 0.4s; overflow: hidden; }
         .tile.finalized { border-color: var(--gold); }
-        .tile-img { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: 0.5s; z-index: -1; transform: scale(1.1); }
+        .tile-img-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; z-index: 0; transition: 0.5s; }
         
-        /* Gallery Mode Transformations */
-        body.gallery-mode .tile:not(.finalized) { opacity: 0; transform: scale(0.9); pointer-events: none; }
-        body.gallery-mode .tile.finalized { border: none; background: #000; }
-        body.gallery-mode .tile.finalized .tile-img { opacity: 0.6; transform: scale(1); }
-        body.gallery-mode .tile.finalized:hover .tile-img { opacity: 1; }
-        body.gallery-mode .tile-title { font-size: 1rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-        body.gallery-mode .led-row, body.gallery-mode .tile-id { display: none; }
+        body.gallery-mode .tile:not(.finalized) { display: none; }
+        body.gallery-mode .tile.finalized { border: none; }
+        body.gallery-mode .tile.finalized .tile-img-bg { opacity: 0.5; }
+        body.gallery-mode .tile.finalized:hover .tile-img-bg { opacity: 1; transform: scale(1.05); }
 
-        /* Standard Components */
-        .tile-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; line-height: 1.2; z-index: 2; }
-        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; z-index: 2; }
-        .led-row { display: flex; gap: 8px; z-index: 2; }
+        .tile-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; z-index: 2; position: relative; width: 85%; overflow-wrap: break-word; }
+        .tile-info { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.7; z-index: 2; margin-top: 5px; }
+        
+        .led-row { display: flex; gap: 8px; z-index: 2; margin-top: 10px; }
         .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; font-weight: bold; }
         .led.active { color: var(--gold); }
         .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 4px; }
         .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
-        
+
         /* Side Panel */
-        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 80px 40px; overflow-y: auto; }
-        #side-panel.open { right: 0; }
-        input { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
-        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
+        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; overflow-y: auto; }
+        #side-panel.open { right: 0; box-shadow: -20px 0 50px #000; }
         
-        /* Action Button */
-        .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; }
-        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
-        .modal-box { width: 500px; padding: 50px; border: 1px solid var(--gold); background: #000; }
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; text-align: center; cursor: pointer; text-transform: uppercase; }
+        .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
+        
+        input, select { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
+        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
+        .btn-upload { background: #111; color: var(--gold); border: 1px solid var(--gold); font-size: 0.6rem; padding: 10px; margin-bottom: 20px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .modal-box { width: 450px; padding: 40px; border: 1px solid var(--gold); background: #000; }
     </style>
 </head>
-<body onmousemove="updateCursor(event)">
+<body>
 
-    <div class="watermark">PUBLIC LEDGER</div>
     <div class="blueprint-bg"></div>
-    <div id="cursor-h" style="position:fixed; background:rgba(212,175,55,0.2); width:100%; height:1px; z-index:2; pointer-events:none;"></div>
-    <div id="cursor-v" style="position:fixed; background:rgba(212,175,55,0.2); width:1px; height:100%; z-index:2; pointer-events:none;"></div>
 
     <header>
         <div class="meta" id="displayID">ID: --</div>
         <div class="meta-group">
-            <div id="btn-hub" class="meta clickable active" onclick="setMode('hub')">Blueprint Hub</div>
-            <div id="btn-gal" class="meta clickable" onclick="setMode('gallery')">Artifact Gallery</div>
+            <div id="m-hub" class="meta clickable active" onclick="switchMode('hub')">Blueprint</div>
+            <div id="m-gal" class="meta clickable" onclick="switchMode('gallery')">Gallery</div>
         </div>
     </header>
 
-    <div id="registry" onclick="closeSidePanel()"></div>
+    <div id="registry" onclick="closePanel()"></div>
 
     <div id="side-panel">
-        <h3 id="p-title" style="color:var(--gold); letter-spacing:4px; margin-bottom:20px;">--</h3>
-        <p id="p-intent" style="font-size:0.8rem; color:#888; margin-bottom:40px;"></p>
+        <h3 id="p-title" style="color:var(--gold); letter-spacing:3px;">--</h3>
+        <p id="p-intent" style="font-size:0.75rem; color:#777; margin: 15px 0 30px 0; line-height:1.5;"></p>
         
-        <label style="font-size:0.6rem; color:var(--gold); text-transform:uppercase; letter-spacing:2px;">Refine Constraints</label>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;" id="con-box">
-            <div class="cb" onclick="toggleLogic(this)" data-val="Time" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Time-Bound</div>
-            <div class="cb" onclick="toggleLogic(this)" data-val="Resource" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Resource-Bound</div>
-            <div class="cb" onclick="toggleLogic(this)" data-val="Scope" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Scope-Limited</div>
-            <div class="cb" onclick="toggleLogic(this)" data-val="Medium" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Medium-Specified</div>
+        <label style="font-size:0.55rem; color:var(--gold); text-transform:uppercase;">Constraints</label>
+        <div class="con-grid" id="con-list">
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Time">Time-Bound</div>
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Resource">Resource-Bound</div>
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Scope">Scope-Limited</div>
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Medium">Medium-Specified</div>
         </div>
 
-        <div id="form-box" style="display:none; margin-top:30px;">
-            <label style="font-size:0.6rem; color:var(--gold);">Material</label><input type="text" id="m-mat" placeholder="e.g. TITANIUM">
-            <label style="font-size:0.6rem; color:var(--gold);">Dimensions</label><input type="text" id="m-dim" placeholder="100x100mm">
-            <label style="font-size:0.6rem; color:var(--gold);">Evidence URL (Image Link)</label><input type="text" id="m-img" placeholder="https://image.link">
+        <div id="form-area" style="display:none;">
+            <label style="font-size:0.55rem; color:var(--gold);">Attributes</label>
+            <input type="text" id="in-mat" placeholder="MATERIAL">
+            <input type="text" id="in-dim" placeholder="DIMENSIONS">
             
-            <button class="btn-action" id="saveBtn" onclick="saveData()">Save Changes</button>
-            <button class="btn-action" id="sealBtn" onclick="sealRecord()" style="background:#fff; display:none;">Seal for Gallery (RDY)</button>
+            <label style="font-size:0.55rem; color:var(--gold);">Evidence (Media)</label>
+            <input type="text" id="in-img" placeholder="IMAGE URL">
+            <button class="btn-upload" onclick="document.getElementById('file-up').click()">+ UPLOAD LOCAL FILE</button>
+            <input type="file" id="file-up" hidden accept="image/*" onchange="handleUpload(this)">
+
+            <button class="btn-action" onclick="saveProgress()">Save Archive</button>
+            <button class="btn-action" id="seal-btn" style="background:#fff; display:none;" onclick="sealArtifact()">Commission to Gallery</button>
         </div>
-        <div id="lock-info" style="margin-top:20px; text-align:center; font-size:0.6rem; color:#444; border:1px dashed #333; padding:20px;">Awaiting Definition</div>
+        <div id="lock-msg" style="text-align:center; padding:30px; border:1px dashed #222; color:#333; font-size:0.6rem; text-transform:uppercase;">Definition Required</div>
     </div>
 
-    <div class="action-container"><button class="action-btn" onclick="document.getElementById('c-modal').style.display='flex'">+</button></div>
+    <div style="position:fixed; bottom:40px; right:40px; z-index:100;">
+        <button onclick="document.getElementById('new-modal').style.display='flex'" style="width:60px; height:60px; border-radius:50%; background:var(--gold); border:none; cursor:pointer; font-size:1.5rem;">+</button>
+    </div>
 
-    <div id="c-modal" class="overlay" onclick="this.style.display='none'">
+    <div id="new-modal" class="overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
             <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
-            <input type="text" id="c-title" placeholder="IDENTIFIER">
-            <input type="text" id="c-intent" placeholder="INTENT LOGIC">
-            <select id="c-pres" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #222; margin-bottom:20px;">
-                <option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option>
-            </select>
-            <button class="btn-action" onclick="create()">Commence</button>
+            <input type="text" id="new-t" placeholder="TITLE">
+            <input type="text" id="new-i" placeholder="INTENT LOGIC">
+            <select id="new-p"><option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option></select>
+            <button class="btn-action" onclick="createNew()">Commence</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('tspill_v6')) || [];
+        let db = JSON.parse(localStorage.getItem('tspill_final')) || [];
         let activeID = null;
 
         window.onload = () => {
-            document.getElementById('displayID').innerText = "ID: " + (sessionStorage.getItem('currentID') || "GUEST");
+            document.getElementById('displayID').innerText = "ID: " + (sessionStorage.getItem('currentID') || "GUEST-ID");
             render();
         };
 
-        function setMode(mode) {
-            document.body.classList.toggle('gallery-mode', mode === 'gallery');
-            document.getElementById('btn-hub').classList.toggle('active', mode === 'hub');
-            document.getElementById('btn-gal').classList.toggle('active', mode === 'gallery');
+        function switchMode(m) {
+            document.body.className = (m === 'gallery') ? 'gallery-mode' : '';
+            document.getElementById('m-hub').classList.toggle('active', m === 'hub');
+            document.getElementById('m-gal').classList.toggle('active', m === 'gallery');
         }
 
-        function updateCursor(e) {
-            document.getElementById('cursor-h').style.top = e.clientY + 'px';
-            document.getElementById('cursor-v').style.left = e.clientX + 'px';
+        function toggleConstraint(el) {
+            if(db.find(x => x.id === activeID).rdy) return;
+            el.classList.toggle('active');
+            updateUIState();
         }
 
-        function toggleLogic(el) { el.classList.toggle('active'); checkGating(); }
+        function handleUpload(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => { document.getElementById('in-img').value = reader.result; updateUIState(); };
+            if (file) reader.readAsDataURL(file);
+        }
 
-        function checkGating() {
-            const count = document.querySelectorAll('#con-box .cb.active').length;
-            const mat = document.getElementById('m-mat').value;
-            const img = document.getElementById('m-img').value;
-            const r = db.find(x => x.id === activeID);
-            const isCreator = r.author === sessionStorage.getItem('currentID');
+        function updateUIState() {
+            const cons = document.querySelectorAll('#con-list .cb.active').length;
+            const mat = document.getElementById('in-mat').value;
+            const dim = document.getElementById('in-dim').value;
+            const img = document.getElementById('in-img').value;
 
-            document.getElementById('form-box').style.display = (count >= 2 && isCreator) ? 'block' : 'none';
-            document.getElementById('lock-info').style.display = (count >= 2) ? 'none' : 'block';
-            document.getElementById('sealBtn').style.display = (count >= 2 && mat && img) ? 'block' : 'none';
+            document.getElementById('form-area').style.display = (cons >= 2) ? 'block' : 'none';
+            document.getElementById('lock-msg').style.display = (cons >= 2) ? 'none' : 'block';
+            document.getElementById('seal-btn').style.display = (cons >= 2 && mat && dim && img) ? 'block' : 'none';
         }
 
         function render() {
-            const container = document.getElementById('registry'); container.innerHTML = '';
+            const reg = document.getElementById('registry'); reg.innerHTML = '';
             db.forEach(r => {
-                const isDef = r.cons.length >= 2;
-                const isAtr = r.mat && r.img;
                 const tile = document.createElement('div');
                 tile.className = `tile ${r.rdy ? 'finalized' : ''}`;
                 tile.onclick = (e) => { e.stopPropagation(); openPanel(r.id); };
                 tile.innerHTML = `
-                    <div class="tile-img" style="background-image:url('${r.img || ''}')"></div>
-                    <div class="presence-tag" style="position:absolute; top:20px; right:15px; font-size:0.5rem; border:1px solid var(--gold); padding:2px 4px; color:var(--gold);">${r.pres[0]}</div>
+                    <div class="tile-img-bg" style="background-image:url('${r.img || ''}')"></div>
+                    <div class="presence-tag" style="position:absolute; top:20px; right:15px; font-size:0.5rem; border:1px solid var(--gold); padding:1px 4px; color:var(--gold); z-index:5;">${r.pres[0]}</div>
                     <div class="tile-title">${r.title}</div>
-                    <div class="tile-id">BY: ${r.author} • ${r.date}</div>
+                    <div class="tile-info">BY: ${r.author} • ${r.date}</div>
                     <div class="led-row">
-                        <div class="led ${isDef?'active':''}"><div class="dot"></div>DEF</div>
-                        <div class="led ${isAtr?'active':''}"><div class="dot"></div>ATR</div>
-                        <div class="led ${r.rdy?'active':''}"><div class="dot"></div>RDY</div>
+                        <div class="led ${r.cons.length >= 2 ? 'active' : ''}"><div class="dot"></div>DEF</div>
+                        <div class="led ${r.mat && r.img ? 'active' : ''}"><div class="dot"></div>ATR</div>
+                        <div class="led ${r.rdy ? 'active' : ''}"><div class="dot"></div>RDY</div>
                     </div>
                 `;
-                container.appendChild(tile);
+                reg.appendChild(tile);
             });
         }
 
@@ -174,51 +176,52 @@
             const r = db.find(x => x.id === id); activeID = id;
             document.getElementById('p-title').innerText = r.title;
             document.getElementById('p-intent').innerText = r.intent;
-            document.getElementById('m-mat').value = r.mat || '';
-            document.getElementById('m-dim').value = r.dim || '';
-            document.getElementById('m-img').value = r.img || '';
+            document.getElementById('in-mat').value = r.mat || '';
+            document.getElementById('in-dim').value = r.dim || '';
+            document.getElementById('in-img').value = r.img || '';
+
+            document.querySelectorAll('#con-list .cb').forEach(c => {
+                c.classList.toggle('active', r.cons.includes(c.getAttribute('data-val')));
+            });
 
             const isLocked = r.rdy;
-            document.querySelectorAll('#con-box .cb').forEach(c => {
-                c.classList.toggle('active', r.cons.includes(c.getAttribute('data-val')));
-                c.style.pointerEvents = isLocked ? 'none' : 'auto';
+            document.querySelectorAll('#side-panel input, #side-panel .cb').forEach(el => {
+                el.style.pointerEvents = isLocked ? 'none' : 'auto';
             });
             
-            document.querySelectorAll('#form-box input').forEach(i => i.disabled = isLocked);
-            document.getElementById('saveBtn').style.display = isLocked ? 'none' : 'block';
-            checkGating();
+            updateUIState();
             document.getElementById('side-panel').classList.add('open');
         }
 
-        function sealRecord() {
+        function saveProgress() {
+            const idx = db.findIndex(x => x.id === activeID);
+            db[idx].cons = Array.from(document.querySelectorAll('#con-list .cb.active')).map(c => c.getAttribute('data-val'));
+            db[idx].mat = document.getElementById('in-mat').value;
+            db[idx].dim = document.getElementById('in-dim').value;
+            db[idx].img = document.getElementById('in-img').value;
+            localStorage.setItem('tspill_final', JSON.stringify(db));
+            render();
+        }
+
+        function sealArtifact() {
             const idx = db.findIndex(x => x.id === activeID);
             db[idx].rdy = true;
-            localStorage.setItem('tspill_v6', JSON.stringify(db));
-            render(); closeSidePanel();
+            saveProgress();
+            closePanel();
         }
 
-        function saveData() {
-            const idx = db.findIndex(x => x.id === activeID);
-            db[idx].cons = Array.from(document.querySelectorAll('#con-box .cb.active')).map(c => c.getAttribute('data-val'));
-            db[idx].mat = document.getElementById('m-mat').value;
-            db[idx].dim = document.getElementById('m-dim').value;
-            db[idx].img = document.getElementById('m-img').value;
-            localStorage.setItem('tspill_v6', JSON.stringify(db));
-            render(); checkGating();
-        }
-
-        function create() {
+        function createNew() {
             const entry = {
-                id: Date.now(), title: document.getElementById('c-title').value.toUpperCase(),
-                intent: document.getElementById('c-intent').value, author: sessionStorage.getItem('currentID'),
-                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('c-pres').value,
+                id: Date.now(), title: document.getElementById('new-t').value.toUpperCase(),
+                intent: document.getElementById('new-i').value, author: sessionStorage.getItem('currentID') || "GUEST",
+                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('new-p').value,
                 cons: [], mat: "", dim: "", img: "", rdy: false
             };
-            db.push(entry); localStorage.setItem('tspill_v6', JSON.stringify(db));
+            db.push(entry); localStorage.setItem('tspill_final', JSON.stringify(db));
             location.reload();
         }
 
-        function closeSidePanel() { document.getElementById('side-panel').classList.remove('open'); }
+        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
 </html>
