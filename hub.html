@@ -10,146 +10,168 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* Backgrounds */
+        /* Background & Grid */
         .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
         #cursor-h, #cursor-v { position: fixed; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
         #cursor-h { left: 0; width: 100%; height: 1px; } #cursor-v { top: 0; width: 1px; height: 100%; }
 
-        /* Layout */
-        header { position: fixed; top: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-        .meta { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--gold); border: 1px solid var(--border); padding: 8px 12px; background: #000; pointer-events: auto; text-transform: uppercase; }
+        /* Header */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; z-index: 100; }
+        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
 
-        #registry { position: absolute; inset: 0; padding: 100px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 160px; gap: 20px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
+        /* The Grid Registry */
+        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 160px; gap: 20px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
 
-        /* Tiles */
-        .tile { background: rgba(10,10,10,0.9); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
-        .tile:hover { border-color: var(--gold); background: rgba(20,20,20,1); }
-        .tile-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        /* Chips/Tiles */
+        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .tile:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .tile-title { font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
         .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; }
         
-        .led-row { display: flex; gap: 10px; margin-top: 10px; }
-        .led { display: flex; align-items: center; font-size: 0.45rem; color: #444; text-transform: uppercase; letter-spacing: 1px; }
+        .led-row { display: flex; gap: 12px; margin-top: 10px; }
+        .led { display: flex; align-items: center; font-size: 0.5rem; color: #333; text-transform: uppercase; font-weight: bold; }
         .led.active { color: var(--gold); }
-        .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 5px; }
-        .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
-        .presence-tag { position: absolute; top: 20px; right: 20px; font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 4px; }
+        .dot { width: 5px; height: 5px; border-radius: 50%; background: #222; margin-right: 6px; }
+        .led.active .dot { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+        .presence-tag { position: absolute; top: 20px; right: 20px; font-family: 'JetBrains Mono'; font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 2px 5px; }
 
         /* Side Panel */
-        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #080808; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; overflow-y: auto; }
-        #side-panel.open { right: 0; box-shadow: -20px 0 50px rgba(0,0,0,0.8); }
+        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 80px 40px; overflow-y: auto; box-shadow: -20px 0 50px rgba(0,0,0,1); }
+        #side-panel.open { right: 0; }
         
-        h3 { font-size: 0.9rem; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 40px; }
-        label { font-size: 0.55rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 25px; margin-bottom: 8px; opacity: 0.7; }
-        input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.75rem; outline: none; }
+        h3 { font-size: 1rem; letter-spacing: 5px; color: var(--gold); text-transform: uppercase; margin-bottom: 30px; }
+        .desc-text { font-size: 0.8rem; color: #888; line-height: 1.6; margin-bottom: 30px; border-left: 1px solid #222; padding-left: 15px; }
+        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 30px; margin-bottom: 10px; }
         
-        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
-        .cb { border: 1px solid #222; padding: 10px; font-size: 0.6rem; color: #555; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        input, textarea, select { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; outline: none; }
+        input:focus { border-color: var(--gold); }
+
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cb { border: 1px solid #222; padding: 15px; font-size: 0.65rem; color: #555; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; }
         .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
         
-        .section-lock { padding: 20px; border: 1px dashed #222; text-align: center; color: #333; font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 30px; }
-        .btn-action { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
-        
-        /* Action + */
-        .action-container { position: fixed; bottom: 40px; right: 40px; z-index: 200; display: flex; justify-content: center; align-items: center; }
-        .action-btn { width: 60px; height: 60px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 1.8rem; cursor: pointer; z-index: 5; font-weight: bold; }
-        .rotating-svg { position: absolute; width: 130px; height: 130px; animation: rotate 20s linear infinite; pointer-events: none; }
+        .lock-notice { padding: 20px; border: 1px dashed #333; color: #444; font-size: 0.6rem; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
+
+        /* Action Button */
+        .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; position: relative; z-index: 5; }
+        .rotating-text { position: absolute; width: 150px; height: 150px; top: -40px; left: -40px; animation: rotate 20s linear infinite; pointer-events: none; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Modal */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .modal-box { width: 450px; padding: 50px; border: 1px solid var(--gold); background: #000; }
+        /* Creation Modal */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+        .modal-box { width: 500px; padding: 50px; border: 1px solid var(--gold); background: #000; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
-<body onmousemove="updateCursor(event)" onclick="closePanel()">
+<body onmousemove="updateCursor(event)">
 
     <div class="blueprint-bg"></div>
     <div id="cursor-h"></div><div id="cursor-v"></div>
 
     <header>
         <div class="meta" id="displayID">ID: --</div>
-        <div class="meta">TECHNICAL REGISTRY v1.0</div>
+        <div class="meta">ARCHIVE_STATE: ACTIVE</div>
     </header>
 
-    <div id="registry"></div>
+    <div id="registry" onclick="closeSidePanel()"></div>
 
-    <div id="side-panel" onclick="event.stopPropagation()">
-        <h3 id="p-title">RECORD_TITLE</h3>
-        <p id="p-intent" style="font-size: 0.75rem; color: #777; line-height: 1.6; margin-bottom: 30px;"></p>
+    <div id="side-panel">
+        <h3 id="p-title">--</h3>
+        <p class="desc-text" id="p-intent">--</p>
         
         <label>Refine Constraints</label>
-        <div class="con-grid" id="con-edit">
-            <div class="cb" data-val="Time">Time-Bound</div>
-            <div class="cb" data-val="Resource">Resource-Bound</div>
-            <div class="cb" data-val="Scope">Scope-Limited</div>
-            <div class="cb" data-val="Medium">Medium-Specified</div>
+        <div class="con-grid" id="refine-con-container">
+            <div class="cb" onclick="toggleCB(this)" data-val="Time">Time-Bound</div>
+            <div class="cb" onclick="toggleCB(this)" data-val="Resource">Resource-Bound</div>
+            <div class="cb" onclick="toggleCB(this)" data-val="Scope">Scope-Limited</div>
+            <div class="cb" onclick="toggleCB(this)" data-val="Medium">Medium-Specified</div>
         </div>
 
-        <div id="commission-section">
-            <label>Material / Medium</label>
-            <input type="text" id="m-mat" placeholder="e.g. 7075 ALUMINUM">
-            <label>Dimensions (X/Y/Z)</label>
-            <input type="text" id="m-dim" placeholder="e.g. 10x10x5mm">
+        <div id="commission-form" style="display:none;">
+            <label>Material Composition</label>
+            <input type="text" id="m-mat">
+            <label>Dimensions (MM/G)</label>
+            <input type="text" id="m-dim">
             <label>Evidence Reference</label>
-            <input type="text" id="m-ref" placeholder="URL OR ARCHIVE CODE">
-            <button class="btn-action" id="saveBtn" onclick="saveRefinement()">Commit Refinement</button>
+            <input type="text" id="m-ref">
+            <button class="btn-action" onclick="saveRefinement()">Save Refinement</button>
         </div>
-        <div id="lock-msg" class="section-lock" style="display:none;">Awaiting Clarity Definition</div>
+        <div id="lock-msg" class="lock-notice">Defining Intent Required</div>
     </div>
 
     <div class="action-container">
-        <svg class="rotating-svg" viewBox="0 0 100 100">
+        <svg class="rotating-text" viewBox="0 0 100 100">
             <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
-            <text fill="#d4af37" style="font-size:5px; font-weight: 600; letter-spacing:3.5px; text-transform: uppercase;">
-                <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
+            <text fill="#d4af37" style="font-size:4.5px; font-weight: 700; letter-spacing:3px; text-transform: uppercase;">
+                <textPath xlink:href="#circlePath">SPILL NEW INTENT • RECORD ARTIFACT • </textPath>
             </text>
         </svg>
-        <button class="action-btn" onclick="openModal(event)">+</button>
+        <button class="action-btn" onclick="openCreateModal()">+</button>
     </div>
 
-    <div id="modal" class="overlay" onclick="closeModal()">
+    <div id="create-modal" class="overlay" onclick="closeCreateModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <h3>New Intent Spill</h3>
+            <h3>Spill New Intent</h3>
             <label>Title</label>
-            <input type="text" id="in-title">
-            <label>Intent Logic</label>
-            <textarea id="in-intent" rows="2"></textarea>
-            <label>Primary Presence</label>
-            <select id="in-pres"><option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option></select>
-            <button class="btn-action" onclick="createRecord()">Spill Intent</button>
+            <input type="text" id="new-title" placeholder="NAME OF INTENT">
+            <label>Intent One-Liner</label>
+            <textarea id="new-intent" rows="2" placeholder="TECHNICAL LOGIC"></textarea>
+            
+            <label>Initial Constraints</label>
+            <div class="con-grid" id="new-con-container">
+                <div class="cb" onclick="toggleCB(this)" data-val="Time">Time-Bound</div>
+                <div class="cb" onclick="toggleCB(this)" data-val="Resource">Resource-Bound</div>
+                <div class="cb" onclick="toggleCB(this)" data-val="Scope">Scope-Limited</div>
+                <div class="cb" onclick="toggleCB(this)" data-val="Medium">Medium-Specified</div>
+            </div>
+
+            <label>Presence</label>
+            <select id="new-pres">
+                <option value="DIGITAL">DIGITAL</option>
+                <option value="PHYSICAL">PHYSICAL</option>
+                <option value="HYBRID">HYBRID</option>
+            </select>
+            
+            <button class="btn-action" onclick="commitNewIntent()">Commit to Registry</button>
         </div>
     </div>
 
     <script>
-        let registry = JSON.parse(localStorage.getItem('tspill_archive')) || [];
+        let registry = JSON.parse(localStorage.getItem('tspill_archive_v2')) || [];
         let activeID = null;
 
-        function init() {
-            document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
+        window.onload = function() {
+            const storedID = sessionStorage.getItem('currentID') || "GUEST-ID";
+            document.getElementById('displayID').innerText = "ID: " + storedID;
             render();
-            setupCB();
-        }
+        };
 
         function updateCursor(e) {
             document.getElementById('cursor-h').style.top = e.clientY + 'px';
             document.getElementById('cursor-v').style.left = e.clientX + 'px';
         }
 
+        function toggleCB(el) {
+            el.classList.toggle('active');
+        }
+
         function render() {
             const reg = document.getElementById('registry');
             reg.innerHTML = '';
             registry.forEach(r => {
-                const isDefined = r.constraints && r.constraints.length >= 2;
-                const isReady = r.material && r.dim;
+                const isDefined = r.constraints.length >= 2;
+                const isArtifact = (r.material && r.material !== "");
                 const tile = document.createElement('div');
                 tile.className = 'tile';
-                tile.onclick = (e) => openPanel(e, r.id);
+                tile.onclick = (e) => { e.stopPropagation(); openSidePanel(r.id); };
                 tile.innerHTML = `
                     <div class="presence-tag">${r.presence[0]}</div>
                     <div class="tile-title">${r.title}</div>
-                    <div class="tile-id">BY: ${r.author}</div>
+                    <div class="tile-id">CREATOR: ${r.author}</div>
                     <div class="led-row">
                         <div class="led ${isDefined?'active':''}"><div class="dot"></div>DEF</div>
-                        <div class="led ${isReady?'active':''}"><div class="dot"></div>ART</div>
+                        <div class="led ${isArtifact?'active':''}"><div class="dot"></div>ART</div>
                         <div class="led"><div class="dot"></div>RDY</div>
                     </div>
                 `;
@@ -157,11 +179,9 @@
             });
         }
 
-        function openPanel(e, id) {
-            e.stopPropagation();
+        function openSidePanel(id) {
             const r = registry.find(x => x.id === id);
-            const currentID = sessionStorage.getItem('currentID');
-            const isCreator = r.author === currentID;
+            const currentUserID = sessionStorage.getItem('currentID');
             activeID = id;
 
             document.getElementById('p-title').innerText = r.title;
@@ -170,63 +190,73 @@
             document.getElementById('m-dim').value = r.dim || '';
             document.getElementById('m-ref').value = r.ref || '';
 
-            // Update UI for constraints
-            document.querySelectorAll('.cb').forEach(c => {
+            // Reset and Set Checkboxes
+            const checkboxes = document.querySelectorAll('#refine-con-container .cb');
+            checkboxes.forEach(c => {
                 const val = c.getAttribute('data-val');
-                const active = r.constraints.includes(val);
-                c.classList.toggle('active', active);
-                c.style.pointerEvents = isCreator ? 'auto' : 'none';
+                c.classList.toggle('active', r.constraints.includes(val));
+                // Only creator can click
+                c.style.pointerEvents = (r.author === currentUserID) ? 'auto' : 'none';
             });
 
-            // Clarity Lock logic
-            const isDefined = r.constraints.length >= 2;
-            document.getElementById('commission-section').style.display = (isDefined && isCreator) ? 'block' : 'none';
-            document.getElementById('lock-msg').style.display = (isDefined) ? 'none' : 'block';
-            if (!isCreator) {
-                document.getElementById('commission-section').style.display = 'none';
-                document.getElementById('lock-msg').innerText = "VIEWING ARCHIVE_READ_ONLY";
-                document.getElementById('lock-msg').style.display = 'block';
+            // Logic Gating
+            const isCreator = (r.author === currentUserID);
+            const isDefined = (r.constraints.length >= 2);
+
+            document.getElementById('commission-form').style.display = (isCreator && isDefined) ? 'block' : 'none';
+            
+            const lockMsg = document.getElementById('lock-msg');
+            if (!isDefined) {
+                lockMsg.innerText = "CLARITY REQUIRED (MIN 2 CONSTRAINTS)";
+                lockMsg.style.display = 'block';
+            } else if (!isCreator) {
+                lockMsg.innerText = "READ-ONLY ARCHIVE";
+                lockMsg.style.display = 'block';
+            } else {
+                lockMsg.style.display = 'none';
             }
 
             document.getElementById('side-panel').classList.add('open');
         }
 
-        function saveRefinement() {
-            const rIdx = registry.findIndex(x => x.id === activeID);
-            const r = registry[rIdx];
-            r.constraints = Array.from(document.querySelectorAll('.cb.active')).map(c => c.getAttribute('data-val'));
-            r.material = document.getElementById('m-mat').value;
-            r.dim = document.getElementById('m-dim').value;
-            r.ref = document.getElementById('m-ref').value;
+        function commitNewIntent() {
+            const title = document.getElementById('new-title').value.toUpperCase();
+            const intent = document.getElementById('new-intent').value;
+            const constraints = Array.from(document.querySelectorAll('#new-con-container .cb.active')).map(c => c.getAttribute('data-val'));
+            const presence = document.getElementById('new-pres').value;
+            const author = sessionStorage.getItem('currentID') || "GUEST-ID";
 
-            localStorage.setItem('tspill_archive', JSON.stringify(registry));
-            render(); closePanel();
-        }
+            if (!title || !intent) return alert("All fields required");
 
-        function createRecord() {
-            const r = {
+            const entry = {
                 id: Date.now(),
-                title: document.getElementById('in-title').value.toUpperCase(),
-                intent: document.getElementById('in-intent').value,
-                author: sessionStorage.getItem('currentID') || 'ANON',
-                presence: document.getElementById('in-pres').value,
-                constraints: []
+                title, intent, author, presence, constraints,
+                material: "", dim: "", ref: ""
             };
-            if(!r.title) return;
-            registry.push(r);
-            localStorage.setItem('tspill_archive', JSON.stringify(registry));
-            closeModal(); render();
+
+            registry.push(entry);
+            localStorage.setItem('tspill_archive_v2', JSON.stringify(registry));
+            closeCreateModal();
+            render();
         }
 
-        function setupCB() {
-            document.querySelectorAll('.cb').forEach(c => {
-                c.onclick = () => c.classList.toggle('active');
-            });
+        function saveRefinement() {
+            const idx = registry.findIndex(x => x.id === activeID);
+            const constraints = Array.from(document.querySelectorAll('#refine-con-container .cb.active')).map(c => c.getAttribute('data-val'));
+            
+            registry[idx].constraints = constraints;
+            registry[idx].material = document.getElementById('m-mat').value;
+            registry[idx].dim = document.getElementById('m-dim').value;
+            registry[idx].ref = document.getElementById('m-ref').value;
+
+            localStorage.setItem('tspill_archive_v2', JSON.stringify(registry));
+            render();
+            closeSidePanel();
         }
 
-        function openModal(e) { e.stopPropagation(); document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
+        function openCreateModal() { document.getElementById('create-modal').style.display = 'flex'; }
+        function closeCreateModal() { document.getElementById('create-modal').style.display = 'none'; }
+        function closeSidePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
 </html>
