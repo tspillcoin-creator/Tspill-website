@@ -3,92 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Blueprint Hub</title>
+    <title>TSPILL — Technical Registry</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --grid: rgba(212, 175, 55, 0.08); --border: rgba(212, 175, 55, 0.3); }
+        :root { --gold: #d4af37; --bg: #050505; --grid: rgba(212, 175, 55, 0.08); --border: rgba(212, 175, 55, 0.2); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* --- BLUEPRINT GRID LAYER --- */
-        .blueprint-bg {
-            position: fixed; inset: 0;
-            background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-            background-size: 50px 50px; z-index: 1; pointer-events: none;
-        }
+        /* Backgrounds */
+        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
+        #cursor-h, #cursor-v { position: fixed; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
+        #cursor-h { left: 0; width: 100%; height: 1px; } #cursor-v { top: 0; width: 1px; height: 100%; }
 
-        /* --- TECHNICAL CROSSHAIR --- */
-        #cursor-h, #cursor-v { position: fixed; background: rgba(212, 175, 55, 0.15); z-index: 2; pointer-events: none; }
-        #cursor-h { left: 0; width: 100%; height: 1px; }
-        #cursor-v { top: 0; width: 1px; height: 100%; }
+        /* Layout */
+        header { position: fixed; top: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .meta { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--gold); border: 1px solid var(--border); padding: 8px 12px; background: #000; pointer-events: auto; text-transform: uppercase; }
 
-        /* --- WATERMARK: ABSOLUTELY CENTERED --- */
-        .watermark-layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; }
-        .watermark { font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; }
+        #registry { position: absolute; inset: 0; padding: 100px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 160px; gap: 20px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
 
-        /* --- HEADER --- */
-        header { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; z-index: 100; }
-        .meta-box { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- REGISTRY GRID --- */
-        #registry { position: absolute; inset: 0; z-index: 10; padding: 120px 80px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); grid-auto-rows: 220px; grid-gap: 40px; overflow-y: auto; scrollbar-width: none; }
+        /* Tiles */
+        .tile { background: rgba(10,10,10,0.9); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .tile:hover { border-color: var(--gold); background: rgba(20,20,20,1); }
+        .tile-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; }
         
-        .chip { 
-            background: rgba(10, 10, 10, 0.8); border: 1px solid var(--border); padding: 30px;
-            position: relative; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .chip:hover { border-color: var(--gold); box-shadow: 0 0 25px rgba(212,175,55,0.15); transform: translateY(-5px); }
-        
-        .chip-title { font-size: 1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
-        .chip-id { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--gold); opacity: 0.6; margin-top: 5px; }
-        
-        /* Indicators */
-        .status-block { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
-        .indicator { display: flex; align-items: center; font-size: 0.55rem; letter-spacing: 1px; text-transform: uppercase; color: #444; font-weight: 500; }
-        .indicator.active { color: var(--gold); }
-        .dot { width: 5px; height: 5px; border-radius: 50%; background: #222; margin-right: 10px; transition: 0.3s; }
-        .indicator.active .dot { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .led-row { display: flex; gap: 10px; margin-top: 10px; }
+        .led { display: flex; align-items: center; font-size: 0.45rem; color: #444; text-transform: uppercase; letter-spacing: 1px; }
+        .led.active { color: var(--gold); }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 5px; }
+        .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+        .presence-tag { position: absolute; top: 20px; right: 20px; font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 4px; }
 
-        .presence-tag { position: absolute; bottom: 30px; right: 30px; font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--gold); border: 1px solid var(--gold); padding: 3px 8px; opacity: 0.8; }
-
-        /* --- ACTION BUTTON: PERFECTED --- */
-        .action-container { position: fixed; bottom: 60px; right: 60px; z-index: 200; display: flex; justify-content: center; align-items: center; }
-        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.2rem; cursor: pointer; z-index: 5; font-weight: bold; transition: 0.3s; }
-        .action-btn:hover { transform: scale(1.05); }
-        .rotating-svg { position: absolute; width: 160px; height: 160px; animation: rotate 20s linear infinite; pointer-events: none; }
+        /* Side Panel */
+        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #080808; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; overflow-y: auto; }
+        #side-panel.open { right: 0; box-shadow: -20px 0 50px rgba(0,0,0,0.8); }
+        
+        h3 { font-size: 0.9rem; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 40px; }
+        label { font-size: 0.55rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 25px; margin-bottom: 8px; opacity: 0.7; }
+        input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.75rem; outline: none; }
+        
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        .cb { border: 1px solid #222; padding: 10px; font-size: 0.6rem; color: #555; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
+        
+        .section-lock { padding: 20px; border: 1px dashed #222; text-align: center; color: #333; font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 30px; }
+        .btn-action { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
+        
+        /* Action + */
+        .action-container { position: fixed; bottom: 40px; right: 40px; z-index: 200; display: flex; justify-content: center; align-items: center; }
+        .action-btn { width: 60px; height: 60px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 1.8rem; cursor: pointer; z-index: 5; font-weight: bold; }
+        .rotating-svg { position: absolute; width: 130px; height: 130px; animation: rotate 20s linear infinite; pointer-events: none; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- REGISTRY FORM --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(30px); }
-        .panel { width: 520px; padding: 60px; background: #000; border: 1px solid var(--gold); box-shadow: 0 0 100px rgba(0,0,0,1); }
-        h3 { letter-spacing: 6px; font-size: 0.85rem; margin-bottom: 40px; color: var(--gold); text-align: center; text-transform: uppercase; }
-        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 10px; margin-top: 25px; opacity: 0.8; }
-        input, textarea, select { width: 100%; padding: 18px; background: #080808; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.85rem; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--gold); }
-        
-        .constraint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .check-box { display: flex; align-items: center; font-size: 0.65rem; color: #555; cursor: pointer; padding: 15px; border: 1px solid #111; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .check-box.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
-        .check-box input { display: none; }
-
-        .btn-submit { width: 100%; padding: 22px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 4px; margin-top: 40px; transition: 0.3s; }
-        .btn-submit:hover { background: #fff; }
+        /* Modal */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .modal-box { width: 450px; padding: 50px; border: 1px solid var(--gold); background: #000; }
     </style>
 </head>
-<body onmousemove="moveCrosshair(event)" onload="init()">
+<body onmousemove="updateCursor(event)" onclick="closePanel()">
 
     <div class="blueprint-bg"></div>
-    <div id="cursor-h"></div>
-    <div id="cursor-v"></div>
-    <div class="watermark-layer"><div class="watermark">PUBLIC LEDGER</div></div>
+    <div id="cursor-h"></div><div id="cursor-v"></div>
 
     <header>
-        <div class="meta-box" id="displayID">ID: --</div>
-        <div class="meta-box">MODE: SYSTEM_BLUEPRINT</div>
+        <div class="meta" id="displayID">ID: --</div>
+        <div class="meta">TECHNICAL REGISTRY v1.0</div>
     </header>
 
     <div id="registry"></div>
+
+    <div id="side-panel" onclick="event.stopPropagation()">
+        <h3 id="p-title">RECORD_TITLE</h3>
+        <p id="p-intent" style="font-size: 0.75rem; color: #777; line-height: 1.6; margin-bottom: 30px;"></p>
+        
+        <label>Refine Constraints</label>
+        <div class="con-grid" id="con-edit">
+            <div class="cb" data-val="Time">Time-Bound</div>
+            <div class="cb" data-val="Resource">Resource-Bound</div>
+            <div class="cb" data-val="Scope">Scope-Limited</div>
+            <div class="cb" data-val="Medium">Medium-Specified</div>
+        </div>
+
+        <div id="commission-section">
+            <label>Material / Medium</label>
+            <input type="text" id="m-mat" placeholder="e.g. 7075 ALUMINUM">
+            <label>Dimensions (X/Y/Z)</label>
+            <input type="text" id="m-dim" placeholder="e.g. 10x10x5mm">
+            <label>Evidence Reference</label>
+            <input type="text" id="m-ref" placeholder="URL OR ARCHIVE CODE">
+            <button class="btn-action" id="saveBtn" onclick="saveRefinement()">Commit Refinement</button>
+        </div>
+        <div id="lock-msg" class="section-lock" style="display:none;">Awaiting Clarity Definition</div>
+    </div>
 
     <div class="action-container">
         <svg class="rotating-svg" viewBox="0 0 100 100">
@@ -97,117 +103,130 @@
                 <textPath xlink:href="#circlePath">SPILL NEW INTENT • CREATE RECORD • </textPath>
             </text>
         </svg>
-        <button class="action-btn" onclick="openModal()">+</button>
+        <button class="action-btn" onclick="openModal(event)">+</button>
     </div>
 
     <div id="modal" class="overlay" onclick="closeModal()">
-        <div class="panel" onclick="event.stopPropagation()">
-            <h3>Intent Specification</h3>
-            
-            <label>Idea Title</label>
-            <input type="text" id="inTitle" placeholder="IDENTIFIER">
-            
-            <label>One-Line Intent</label>
-            <textarea id="inIntent" rows="2" placeholder="TECHNICAL LOGIC"></textarea>
-
-            <label>Constraints (Clarity Logic)</label>
-            <div class="constraint-grid">
-                <label class="check-box" id="c1"><input type="checkbox" class="con-check" value="Time"> Time-Bound</label>
-                <label class="check-box" id="c2"><input type="checkbox" class="con-check" value="Resource"> Resource-Bound</label>
-                <label class="check-box" id="c3"><input type="checkbox" class="con-check" value="Scope"> Scope-Limited</label>
-                <label class="check-box" id="c4"><input type="checkbox" class="con-check" value="Medium"> Medium-Specified</label>
-            </div>
-
-            <label>Physical Presence</label>
-            <select id="inPresence">
-                <option value="DIGITAL">DIGITAL</option>
-                <option value="PHYSICAL">PHYSICAL</option>
-                <option value="HYBRID">HYBRID</option>
-            </select>
-
-            <button class="btn-submit" onclick="saveRecord()">Commit Record</button>
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h3>New Intent Spill</h3>
+            <label>Title</label>
+            <input type="text" id="in-title">
+            <label>Intent Logic</label>
+            <textarea id="in-intent" rows="2"></textarea>
+            <label>Primary Presence</label>
+            <select id="in-pres"><option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option></select>
+            <button class="btn-action" onclick="createRecord()">Spill Intent</button>
         </div>
     </div>
 
     <script>
-        let records = JSON.parse(localStorage.getItem('tspill_registry')) || [];
+        let registry = JSON.parse(localStorage.getItem('tspill_archive')) || [];
+        let activeID = null;
 
         function init() {
             document.getElementById('displayID').innerText = `ID: ${sessionStorage.getItem('currentID') || 'GUEST-ID'}`;
             render();
-            setupCheckboxes();
+            setupCB();
         }
 
-        function moveCrosshair(e) {
+        function updateCursor(e) {
             document.getElementById('cursor-h').style.top = e.clientY + 'px';
             document.getElementById('cursor-v').style.left = e.clientX + 'px';
-        }
-
-        function setupCheckboxes() {
-            document.querySelectorAll('.check-box').forEach(cb => {
-                cb.onclick = () => {
-                    const input = cb.querySelector('input');
-                    input.checked = !input.checked;
-                    cb.classList.toggle('active', input.checked);
-                };
-            });
         }
 
         function render() {
             const reg = document.getElementById('registry');
             reg.innerHTML = '';
-            records.forEach(r => {
+            registry.forEach(r => {
                 const isDefined = r.constraints && r.constraints.length >= 2;
-                const chip = document.createElement('div');
-                chip.className = 'chip';
-                chip.innerHTML = `
-                    <div>
-                        <span class="chip-title">${r.title}</span>
-                        <div class="chip-id">REF: ${r.author} / ${r.id.toString().slice(-4)}</div>
+                const isReady = r.material && r.dim;
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.onclick = (e) => openPanel(e, r.id);
+                tile.innerHTML = `
+                    <div class="presence-tag">${r.presence[0]}</div>
+                    <div class="tile-title">${r.title}</div>
+                    <div class="tile-id">BY: ${r.author}</div>
+                    <div class="led-row">
+                        <div class="led ${isDefined?'active':''}"><div class="dot"></div>DEF</div>
+                        <div class="led ${isReady?'active':''}"><div class="dot"></div>ART</div>
+                        <div class="led"><div class="dot"></div>RDY</div>
                     </div>
-                    <div class="status-block">
-                        <div class="indicator ${isDefined ? 'active' : ''}"><div class="dot"></div>Clarity: ${isDefined ? 'Defined' : 'Draft'}</div>
-                        <div class="indicator"><div class="dot"></div>Artifact: Attached</div>
-                        <div class="indicator"><div class="dot"></div>Production: Ready</div>
-                    </div>
-                    <span class="presence-tag">${r.presence}</span>
                 `;
-                reg.appendChild(chip);
+                reg.appendChild(tile);
             });
         }
 
-        function saveRecord() {
-            const title = document.getElementById('inTitle').value.toUpperCase();
-            const intent = document.getElementById('inIntent').value;
-            const constraints = Array.from(document.querySelectorAll('.con-check:checked')).map(c => c.value);
-            const presence = document.getElementById('inPresence').value;
+        function openPanel(e, id) {
+            e.stopPropagation();
+            const r = registry.find(x => x.id === id);
+            const currentID = sessionStorage.getItem('currentID');
+            const isCreator = r.author === currentID;
+            activeID = id;
 
-            if(!title) { alert("Title Required"); return; }
+            document.getElementById('p-title').innerText = r.title;
+            document.getElementById('p-intent').innerText = r.intent;
+            document.getElementById('m-mat').value = r.material || '';
+            document.getElementById('m-dim').value = r.dim || '';
+            document.getElementById('m-ref').value = r.ref || '';
 
-            const newEntry = {
+            // Update UI for constraints
+            document.querySelectorAll('.cb').forEach(c => {
+                const val = c.getAttribute('data-val');
+                const active = r.constraints.includes(val);
+                c.classList.toggle('active', active);
+                c.style.pointerEvents = isCreator ? 'auto' : 'none';
+            });
+
+            // Clarity Lock logic
+            const isDefined = r.constraints.length >= 2;
+            document.getElementById('commission-section').style.display = (isDefined && isCreator) ? 'block' : 'none';
+            document.getElementById('lock-msg').style.display = (isDefined) ? 'none' : 'block';
+            if (!isCreator) {
+                document.getElementById('commission-section').style.display = 'none';
+                document.getElementById('lock-msg').innerText = "VIEWING ARCHIVE_READ_ONLY";
+                document.getElementById('lock-msg').style.display = 'block';
+            }
+
+            document.getElementById('side-panel').classList.add('open');
+        }
+
+        function saveRefinement() {
+            const rIdx = registry.findIndex(x => x.id === activeID);
+            const r = registry[rIdx];
+            r.constraints = Array.from(document.querySelectorAll('.cb.active')).map(c => c.getAttribute('data-val'));
+            r.material = document.getElementById('m-mat').value;
+            r.dim = document.getElementById('m-dim').value;
+            r.ref = document.getElementById('m-ref').value;
+
+            localStorage.setItem('tspill_archive', JSON.stringify(registry));
+            render(); closePanel();
+        }
+
+        function createRecord() {
+            const r = {
                 id: Date.now(),
-                title: title,
-                intent: intent,
-                author: sessionStorage.getItem('currentID') || 'ANON-USR',
-                constraints: constraints,
-                presence: presence
+                title: document.getElementById('in-title').value.toUpperCase(),
+                intent: document.getElementById('in-intent').value,
+                author: sessionStorage.getItem('currentID') || 'ANON',
+                presence: document.getElementById('in-pres').value,
+                constraints: []
             };
+            if(!r.title) return;
+            registry.push(r);
+            localStorage.setItem('tspill_archive', JSON.stringify(registry));
+            closeModal(); render();
+        }
 
-            records.push(newEntry);
-            localStorage.setItem('tspill_registry', JSON.stringify(records));
-            closeModal();
-            render();
-            // Clear form
-            document.getElementById('inTitle').value = '';
-            document.getElementById('inIntent').value = '';
-            document.querySelectorAll('.check-box').forEach(c => {
-                c.classList.remove('active');
-                c.querySelector('input').checked = false;
+        function setupCB() {
+            document.querySelectorAll('.cb').forEach(c => {
+                c.onclick = () => c.classList.toggle('active');
             });
         }
 
-        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function openModal(e) { e.stopPropagation(); document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
 </html>
