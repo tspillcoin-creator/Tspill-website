@@ -8,164 +8,156 @@
     <style>
         :root { --gold: #d4af37; --bg: #050505; --grid: rgba(212, 175, 55, 0.08); --border: rgba(212, 175, 55, 0.2); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
-
-        /* Background & Grid */
-        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
-        .watermark-layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; }
-        .watermark { font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; }
-        #cursor-h, #cursor-v { position: fixed; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
-        #cursor-h { left: 0; width: 100%; height: 1px; } #cursor-v { top: 0; width: 1px; height: 100%; }
-
-        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; z-index: 100; }
-        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* PRECISION GRID: 6 COLUMNS */
-        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
-
-        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; }
-        .tile:hover { border-color: var(--gold); }
-        .tile.finalized { border: 1px solid var(--gold); box-shadow: 0 0 15px rgba(212,175,55,0.1); }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; transition: background 0.5s; }
         
-        .tile-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 80%; overflow-wrap: break-word; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; margin-top: 5px; }
+        /* State Control */
+        body.gallery-mode { --grid: transparent; --border: rgba(255,255,255,0.05); }
+
+        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; transition: 0.5s; }
+        .watermark { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
         
-        .led-row { display: flex; gap: 8px; margin-top: 10px; }
-        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; text-transform: uppercase; font-weight: bold; }
+        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .meta-group { display: flex; gap: 10px; pointer-events: auto; }
+        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; cursor: default; }
+        .meta.clickable { cursor: pointer; transition: 0.3s; }
+        .meta.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; transition: 0.5s; }
+
+        /* Tile Styles */
+        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; overflow: hidden; }
+        .tile.finalized { border-color: var(--gold); }
+        .tile-img { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: 0.5s; z-index: -1; transform: scale(1.1); }
+        
+        /* Gallery Mode Transformations */
+        body.gallery-mode .tile:not(.finalized) { opacity: 0; transform: scale(0.9); pointer-events: none; }
+        body.gallery-mode .tile.finalized { border: none; background: #000; }
+        body.gallery-mode .tile.finalized .tile-img { opacity: 0.6; transform: scale(1); }
+        body.gallery-mode .tile.finalized:hover .tile-img { opacity: 1; }
+        body.gallery-mode .tile-title { font-size: 1rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        body.gallery-mode .led-row, body.gallery-mode .tile-id { display: none; }
+
+        /* Standard Components */
+        .tile-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; line-height: 1.2; z-index: 2; }
+        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; z-index: 2; }
+        .led-row { display: flex; gap: 8px; z-index: 2; }
+        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; font-weight: bold; }
         .led.active { color: var(--gold); }
         .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 4px; }
         .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
-        .presence-tag { position: absolute; top: 20px; right: 15px; font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 4px; }
-
+        
         /* Side Panel */
         #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 80px 40px; overflow-y: auto; }
-        #side-panel.open { right: 0; box-shadow: -20px 0 50px rgba(0,0,0,1); }
-        h3 { font-size: 1rem; letter-spacing: 5px; color: var(--gold); text-transform: uppercase; margin-bottom: 30px; }
-        .desc-text { font-size: 0.8rem; color: #888; line-height: 1.6; margin-bottom: 30px; }
-        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 30px; margin-bottom: 10px; }
-        input { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; outline: none; margin-bottom: 10px;}
-
-        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; cursor: pointer; text-transform: uppercase; text-align: center; }
-        .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
+        #side-panel.open { right: 0; }
+        input { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
+        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
         
-        .lock-notice { padding: 20px; border: 1px dashed #333; color: #444; font-size: 0.55rem; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
-        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
-        .btn-commission { background: #fff; color: #000; margin-top: 15px; }
-
         /* Action Button */
         .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; }
-        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; z-index: 5; }
-        .rotating-text { position: absolute; width: 160px; height: 160px; top: -45px; left: -45px; animation: rotate 20s linear infinite; pointer-events: none; filter: drop-shadow(0 0 5px var(--gold)); }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
         .modal-box { width: 500px; padding: 50px; border: 1px solid var(--gold); background: #000; }
     </style>
 </head>
 <body onmousemove="updateCursor(event)">
 
-    <div class="watermark-layer"><div class="watermark">PUBLIC LEDGER</div></div>
+    <div class="watermark">PUBLIC LEDGER</div>
     <div class="blueprint-bg"></div>
-    <div id="cursor-h"></div><div id="cursor-v"></div>
+    <div id="cursor-h" style="position:fixed; background:rgba(212,175,55,0.2); width:100%; height:1px; z-index:2; pointer-events:none;"></div>
+    <div id="cursor-v" style="position:fixed; background:rgba(212,175,55,0.2); width:1px; height:100%; z-index:2; pointer-events:none;"></div>
 
     <header>
         <div class="meta" id="displayID">ID: --</div>
-        <div class="meta">ARCHIVE_STATE: ACTIVE</div>
+        <div class="meta-group">
+            <div id="btn-hub" class="meta clickable active" onclick="setMode('hub')">Blueprint Hub</div>
+            <div id="btn-gal" class="meta clickable" onclick="setMode('gallery')">Artifact Gallery</div>
+        </div>
     </header>
 
     <div id="registry" onclick="closeSidePanel()"></div>
 
     <div id="side-panel">
-        <h3 id="p-title">--</h3>
-        <p class="desc-text" id="p-intent">--</p>
-        <label>Refine Constraints</label>
-        <div class="con-grid" id="refine-con-container">
-            <div class="cb" onclick="handleLogicToggle(this)" data-val="Time">Time-Bound</div>
-            <div class="cb" onclick="handleLogicToggle(this)" data-val="Resource">Resource-Bound</div>
-            <div class="cb" onclick="handleLogicToggle(this)" data-val="Scope">Scope-Limited</div>
-            <div class="cb" onclick="handleLogicToggle(this)" data-val="Medium">Medium-Specified</div>
+        <h3 id="p-title" style="color:var(--gold); letter-spacing:4px; margin-bottom:20px;">--</h3>
+        <p id="p-intent" style="font-size:0.8rem; color:#888; margin-bottom:40px;"></p>
+        
+        <label style="font-size:0.6rem; color:var(--gold); text-transform:uppercase; letter-spacing:2px;">Refine Constraints</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;" id="con-box">
+            <div class="cb" onclick="toggleLogic(this)" data-val="Time" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Time-Bound</div>
+            <div class="cb" onclick="toggleLogic(this)" data-val="Resource" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Resource-Bound</div>
+            <div class="cb" onclick="toggleLogic(this)" data-val="Scope" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Scope-Limited</div>
+            <div class="cb" onclick="toggleLogic(this)" data-val="Medium" style="border:1px solid #222; padding:12px; font-size:0.6rem; color:#555; text-align:center; cursor:pointer;">Medium-Specified</div>
         </div>
-        <div id="commission-form" style="display:none;">
-            <label>Material Composition</label><input type="text" id="m-mat">
-            <label>Dimensions (MM/G)</label><input type="text" id="m-dim">
-            <label>Evidence Link</label><input type="text" id="m-ref">
+
+        <div id="form-box" style="display:none; margin-top:30px;">
+            <label style="font-size:0.6rem; color:var(--gold);">Material</label><input type="text" id="m-mat" placeholder="e.g. TITANIUM">
+            <label style="font-size:0.6rem; color:var(--gold);">Dimensions</label><input type="text" id="m-dim" placeholder="100x100mm">
+            <label style="font-size:0.6rem; color:var(--gold);">Evidence URL (Image Link)</label><input type="text" id="m-img" placeholder="https://image.link">
             
-            <button class="btn-action" id="saveRefineBtn" onclick="saveRefinement()">Update Attributes</button>
-            <button class="btn-action btn-commission" id="commissionBtn" onclick="sealArtifact()" style="display:none;">Seal & Commission (RDY)</button>
+            <button class="btn-action" id="saveBtn" onclick="saveData()">Save Changes</button>
+            <button class="btn-action" id="sealBtn" onclick="sealRecord()" style="background:#fff; display:none;">Seal for Gallery (RDY)</button>
         </div>
-        <div id="lock-msg" class="lock-notice">Defining Intent Required</div>
+        <div id="lock-info" style="margin-top:20px; text-align:center; font-size:0.6rem; color:#444; border:1px dashed #333; padding:20px;">Awaiting Definition</div>
     </div>
 
-    <div class="action-container">
-        <svg class="rotating-text" viewBox="0 0 100 100">
-            <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
-            <text fill="#d4af37" style="font-size:4.5px; font-weight: 700; letter-spacing:3px; text-transform: uppercase;">
-                <textPath xlink:href="#circlePath">SPILL NEW INTENT • RECORD ARTIFACT • </textPath>
-            </text>
-        </svg>
-        <button class="action-btn" onclick="openCreateModal()">+</button>
-    </div>
+    <div class="action-container"><button class="action-btn" onclick="document.getElementById('c-modal').style.display='flex'">+</button></div>
 
-    <div id="create-modal" class="overlay" onclick="closeCreateModal()">
+    <div id="c-modal" class="overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <h3>Spill New Intent</h3>
-            <label>Title</label><input type="text" id="new-title" placeholder="IDENTIFIER">
-            <label>Intent One-Liner</label><input type="text" id="new-intent" placeholder="TECHNICAL LOGIC">
-            <label>Presence</label>
-            <select id="new-pres" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #222;">
+            <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
+            <input type="text" id="c-title" placeholder="IDENTIFIER">
+            <input type="text" id="c-intent" placeholder="INTENT LOGIC">
+            <select id="c-pres" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #222; margin-bottom:20px;">
                 <option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option>
             </select>
-            <button class="btn-action" onclick="commitNewIntent()">Commit</button>
+            <button class="btn-action" onclick="create()">Commence</button>
         </div>
     </div>
 
     <script>
-        let registry = JSON.parse(localStorage.getItem('tspill_v5')) || [];
+        let db = JSON.parse(localStorage.getItem('tspill_v6')) || [];
         let activeID = null;
 
         window.onload = () => {
-            document.getElementById('displayID').innerText = "ID: " + (sessionStorage.getItem('currentID') || "GUEST-ID");
+            document.getElementById('displayID').innerText = "ID: " + (sessionStorage.getItem('currentID') || "GUEST");
             render();
         };
+
+        function setMode(mode) {
+            document.body.classList.toggle('gallery-mode', mode === 'gallery');
+            document.getElementById('btn-hub').classList.toggle('active', mode === 'hub');
+            document.getElementById('btn-gal').classList.toggle('active', mode === 'gallery');
+        }
 
         function updateCursor(e) {
             document.getElementById('cursor-h').style.top = e.clientY + 'px';
             document.getElementById('cursor-v').style.left = e.clientX + 'px';
         }
 
-        function handleLogicToggle(el) {
-            if(el && el.classList) el.classList.toggle('active');
-            const record = registry.find(x => x.id === activeID);
-            if(!record || record.rdy) return; 
+        function toggleLogic(el) { el.classList.toggle('active'); checkGating(); }
 
-            const conCount = document.querySelectorAll('#refine-con-container .cb.active').length;
+        function checkGating() {
+            const count = document.querySelectorAll('#con-box .cb.active').length;
             const mat = document.getElementById('m-mat').value;
-            const dim = document.getElementById('m-dim').value;
-            const isCreator = record.author === sessionStorage.getItem('currentID');
+            const img = document.getElementById('m-img').value;
+            const r = db.find(x => x.id === activeID);
+            const isCreator = r.author === sessionStorage.getItem('currentID');
 
-            // DEF Logic
-            document.getElementById('lock-msg').style.display = (conCount >= 2) ? 'none' : 'block';
-            document.getElementById('commission-form').style.display = (conCount >= 2 && isCreator) ? 'block' : 'none';
-
-            // Commission Button Logic (Only if DEF and ATR are done)
-            if(conCount >= 2 && mat && dim) {
-                document.getElementById('commissionBtn').style.display = 'block';
-            } else {
-                document.getElementById('commissionBtn').style.display = 'none';
-            }
+            document.getElementById('form-box').style.display = (count >= 2 && isCreator) ? 'block' : 'none';
+            document.getElementById('lock-info').style.display = (count >= 2) ? 'none' : 'block';
+            document.getElementById('sealBtn').style.display = (count >= 2 && mat && img) ? 'block' : 'none';
         }
 
         function render() {
-            const reg = document.getElementById('registry'); reg.innerHTML = '';
-            registry.forEach(r => {
-                const isDef = r.constraints.length >= 2;
-                const isAtr = r.material && r.dim;
+            const container = document.getElementById('registry'); container.innerHTML = '';
+            db.forEach(r => {
+                const isDef = r.cons.length >= 2;
+                const isAtr = r.mat && r.img;
                 const tile = document.createElement('div');
                 tile.className = `tile ${r.rdy ? 'finalized' : ''}`;
-                tile.onclick = (e) => { e.stopPropagation(); openSidePanel(r.id); };
+                tile.onclick = (e) => { e.stopPropagation(); openPanel(r.id); };
                 tile.innerHTML = `
-                    <div class="presence-tag">${r.presence[0]}</div>
+                    <div class="tile-img" style="background-image:url('${r.img || ''}')"></div>
+                    <div class="presence-tag" style="position:absolute; top:20px; right:15px; font-size:0.5rem; border:1px solid var(--gold); padding:2px 4px; color:var(--gold);">${r.pres[0]}</div>
                     <div class="tile-title">${r.title}</div>
                     <div class="tile-id">BY: ${r.author} • ${r.date}</div>
                     <div class="led-row">
@@ -174,82 +166,58 @@
                         <div class="led ${r.rdy?'active':''}"><div class="dot"></div>RDY</div>
                     </div>
                 `;
-                reg.appendChild(tile);
+                container.appendChild(tile);
             });
         }
 
-        function openSidePanel(id) {
-            const r = registry.find(x => x.id === id);
-            activeID = id;
+        function openPanel(id) {
+            const r = db.find(x => x.id === id); activeID = id;
             document.getElementById('p-title').innerText = r.title;
             document.getElementById('p-intent').innerText = r.intent;
-            document.getElementById('m-mat').value = r.material || '';
+            document.getElementById('m-mat').value = r.mat || '';
             document.getElementById('m-dim').value = r.dim || '';
-            document.getElementById('m-ref').value = r.ref || '';
+            document.getElementById('m-img').value = r.img || '';
 
-            const isCreator = (r.author === sessionStorage.getItem('currentID'));
             const isLocked = r.rdy;
-
-            document.querySelectorAll('#refine-con-container .cb').forEach(c => {
-                c.classList.toggle('active', r.constraints.includes(c.getAttribute('data-val')));
-                c.style.pointerEvents = (isCreator && !isLocked) ? 'auto' : 'none';
+            document.querySelectorAll('#con-box .cb').forEach(c => {
+                c.classList.toggle('active', r.cons.includes(c.getAttribute('data-val')));
+                c.style.pointerEvents = isLocked ? 'none' : 'auto';
             });
             
-            // Read-only check for finalized artifacts
-            const inputs = document.querySelectorAll('#commission-form input');
-            inputs.forEach(i => i.disabled = isLocked);
-            document.getElementById('saveRefineBtn').style.display = isLocked ? 'none' : 'block';
-            
-            if(isLocked) {
-                document.getElementById('commission-form').style.display = 'block';
-                document.getElementById('commissionBtn').style.display = 'none';
-                document.getElementById('lock-msg').innerText = "ARTIFACT SEALED / GALLERY READY";
-                document.getElementById('lock-msg').style.display = 'block';
-            } else {
-                handleLogicToggle();
-            }
-
+            document.querySelectorAll('#form-box input').forEach(i => i.disabled = isLocked);
+            document.getElementById('saveBtn').style.display = isLocked ? 'none' : 'block';
+            checkGating();
             document.getElementById('side-panel').classList.add('open');
         }
 
-        function sealArtifact() {
-            if(!confirm("Seal record? This will lock the blueprint forever.")) return;
-            const idx = registry.findIndex(x => x.id === activeID);
-            registry[idx].rdy = true;
-            localStorage.setItem('tspill_v5', JSON.stringify(registry));
-            render();
-            closeSidePanel();
+        function sealRecord() {
+            const idx = db.findIndex(x => x.id === activeID);
+            db[idx].rdy = true;
+            localStorage.setItem('tspill_v6', JSON.stringify(db));
+            render(); closeSidePanel();
         }
 
-        function saveRefinement() {
-            const idx = registry.findIndex(x => x.id === activeID);
-            registry[idx].constraints = Array.from(document.querySelectorAll('#refine-con-container .cb.active')).map(c => c.getAttribute('data-val'));
-            registry[idx].material = document.getElementById('m-mat').value;
-            registry[idx].dim = document.getElementById('m-dim').value;
-            registry[idx].ref = document.getElementById('m-ref').value;
-            localStorage.setItem('tspill_v5', JSON.stringify(registry));
-            render();
-            handleLogicToggle();
+        function saveData() {
+            const idx = db.findIndex(x => x.id === activeID);
+            db[idx].cons = Array.from(document.querySelectorAll('#con-box .cb.active')).map(c => c.getAttribute('data-val'));
+            db[idx].mat = document.getElementById('m-mat').value;
+            db[idx].dim = document.getElementById('m-dim').value;
+            db[idx].img = document.getElementById('m-img').value;
+            localStorage.setItem('tspill_v6', JSON.stringify(db));
+            render(); checkGating();
         }
 
-        function commitNewIntent() {
+        function create() {
             const entry = {
-                id: Date.now(),
-                title: document.getElementById('new-title').value.toUpperCase(),
-                intent: document.getElementById('new-intent').value,
-                author: sessionStorage.getItem('currentID') || "GUEST-ID",
-                date: new Date().toLocaleDateString('en-GB'),
-                presence: document.getElementById('new-pres').value,
-                constraints: [], material: "", dim: "", ref: "", rdy: false
+                id: Date.now(), title: document.getElementById('c-title').value.toUpperCase(),
+                intent: document.getElementById('c-intent').value, author: sessionStorage.getItem('currentID'),
+                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('c-pres').value,
+                cons: [], mat: "", dim: "", img: "", rdy: false
             };
-            if(!entry.title) return;
-            registry.push(entry);
-            localStorage.setItem('tspill_v5', JSON.stringify(registry));
+            db.push(entry); localStorage.setItem('tspill_v6', JSON.stringify(db));
             location.reload();
         }
 
-        function openCreateModal() { document.getElementById('create-modal').style.display = 'flex'; }
-        function closeCreateModal() { document.getElementById('create-modal').style.display = 'none'; }
         function closeSidePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
