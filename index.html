@@ -20,9 +20,10 @@
             overflow: hidden; 
         }
 
-        /* Original Kinetic Background Style */
+        /* High Visibility Kinetic Background */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.9; }
 
+        /* THE MAIN WHITE CARD */
         .gate-card {
             position: relative;
             z-index: 10;
@@ -30,126 +31,185 @@
             padding: 80px 50px;
             background: var(--card-white);
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            border-radius: 2px;
         }
 
-        .logo-box { font-weight: 700; font-size: 28px; letter-spacing: 4px; margin-bottom: 40px; }
-        .input-group { margin-top: 30px; }
-        
+        .logo-area h1 { 
+            font-size: 3rem; 
+            letter-spacing: 12px; 
+            color: #000; 
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .caption {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            display: block;
+        }
+
+        .input-group label { 
+            font-size: 0.6rem; 
+            color: #999; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            margin-bottom: 15px; 
+            display: block; 
+        }
+
         input {
             width: 100%;
-            padding: 15px;
-            border: 1px solid #ddd;
             background: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 20px;
+            color: #000;
             font-family: inherit;
-            font-size: 16px;
-            margin-bottom: 15px;
+            font-size: 0.9rem;
             outline: none;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        button {
+        /* THE POPPED ID WINDOW (DARK THEME) */
+        #id-display {
+            margin-top: 10px;
+            padding: 40px 30px;
+            background: #0a0a0a; /* Dark Theme */
+            border: 2px dashed var(--gold); /* Golden Dotted Line */
+            display: none;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #fff;
+        }
+
+        @keyframes popIn { 
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); } 
+            100% { opacity: 1; transform: scale(1) translateY(0); } 
+        }
+
+        .id-label { font-size: 0.55rem; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; opacity: 0.8; }
+        .generated-id { 
+            font-size: 2rem; 
+            color: #fff; 
+            letter-spacing: 8px; 
+            font-weight: 700; 
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        /* BUTTONS */
+        .btn {
             width: 100%;
-            padding: 15px;
+            padding: 22px;
             background: #000;
             color: #fff;
             border: none;
-            cursor: pointer;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
             transition: 0.3s;
         }
-        button:hover { background: var(--gold); }
 
-        #id-display { display: none; margin-top: 30px; }
-        .tspill-id { font-size: 24px; font-weight: 700; color: var(--gold); margin: 20px 0; }
-        .status-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #888; }
+        .btn:hover { background: var(--gold); color: #000; }
+
+        .enter-btn {
+            background: var(--gold);
+            color: #000;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
     </style>
-
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
     <canvas id="bg-canvas"></canvas>
 
     <div class="gate-card">
-        <div class="logo-box">TSPILL</div>
-        <p style="font-size: 12px; color: #666; letter-spacing: 1px;">GENERATE YOUR PROTOCOL IDENTITY</p>
+        <div id="main-content">
+            <div class="logo-area">
+                <h1>TSPILL</h1>
+                <span class="caption">Production-Linked Ecosystem</span>
+            </div>
 
-        <div class="input-group">
-            <input type="text" id="name-input" placeholder="ENTER FULL NAME">
-            <input type="email" id="email-input" placeholder="ENTER EMAIL ADDRESS">
-            <button onclick="generateID()">INITIALIZE</button>
+            <div id="entry-form">
+                <div class="input-group">
+                    <label>Institutional Identifier</label>
+                    <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
+                </div>
+                <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
+            </div>
         </div>
 
         <div id="id-display">
-            <div class="status-tag">IDENTITY SECURED</div>
-            <div id="display-name" style="font-weight: 500; margin-top: 10px;"></div>
-            <div class="tspill-id" id="display-id"></div>
-            <button onclick="enterEcosystem()">ENTER ECOSYSTEM</button>
+            <span class="id-label">Protocol Access Mapped</span>
+            <div class="generated-id" id="tspillID">--</div>
+            <p style="font-size: 0.6rem; color: #555; letter-spacing: 1px; margin-bottom: 20px;">Identity persistent across all TSPILL nodes.</p>
+            <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
         </div>
     </div>
 
     <script>
-        // --- FIREBASE CONFIGURATION (YOUR PROJECT) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyC8ijxZRv6zPUctap5Ui75Jh0sCdW0C5Do",
-            authDomain: "tspill-registry.firebaseapp.com",
-            projectId: "tspill-registry",
-            storageBucket: "tspill-registry.firebasestorage.app",
-            messagingSenderId: "723181242600",
-            appId: "1:723181242600:web:8db3b828566c4c0845a15d",
-            measurementId: "G-JG5EGN4F90"
-        };
-
-        // Initialize Firebase and Firestore
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // --- IDENTITY GENERATION & CLOUD STORAGE ---
-        async function generateID() {
-            const name = document.getElementById('name-input').value;
-            const email = document.getElementById('email-input').value;
-
-            if (!name || !email) return alert("Please enter both Name and Email");
-
-            // Generate unique 8-digit TSPILL ID
-            const tspillId = "TS-" + Math.floor(10000000 + Math.random() * 90000000);
-
-            try {
-                // SAVE TO CLOUD FIRESTORE
-                // This records the user identity in your "identities" collection
-                await db.collection("identities").doc(tspillId).set({
-                    name: name,
-                    email: email,
-                    id: tspillId,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // Keep local session data
-                localStorage.setItem('tspill_user', JSON.stringify({ name, email, id: tspillId }));
-
-                // UI Transition to success display
-                document.getElementById('display-name').innerText = name;
-                document.getElementById('display-id').innerText = tspillId;
-                document.querySelector('.input-group').style.display = 'none';
-                document.getElementById('id-display').style.display = 'block';
-
-            } catch (error) {
-                console.error("Firebase Registry Error: ", error);
-                alert("Cloud connection failed. Check your Firestore 'Test Mode' settings.");
+        function generateFixedID(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
+            const finalNum = Math.abs(hash % 9000) + 1000;
+            return `TS-${finalNum}`;
+        }
+
+        function verifyIdentity() {
+            const credential = document.getElementById('credential').value.trim().toLowerCase();
+            if(!credential || credential.length < 5) {
+                alert("Please provide valid credentials.");
+                return;
+            }
+
+            const persistentID = generateFixedID(credential);
+            sessionStorage.setItem('currentID', persistentID);
+
+            // Hide form, show Dark ID Card
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('tspillID').innerText = persistentID;
+            document.getElementById('id-display').style.display = 'block';
         }
 
         function enterEcosystem() {
             window.location.href = 'home.html';
         }
 
-        // --- ORIGINAL KINETIC BACKGROUND ANIMATION ---
+        // --- BACKGROUND KINETIC ANIMATION ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
         function init() {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             nodes = [];
-            for(let i=0; i<85; i++) nodes
+            for(let i=0; i<85; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.7, vy:(Math.random()-0.5)*0.7});
+        }
+        function animate() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            nodes.forEach(n => {
+                n.x += n.vx; n.y += n.vy;
+                if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
+                if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
+                nodes.forEach(m => {
+                    let d = Math.hypot(n.x - m.x, n.y - m.y);
+                    if(d < 220) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.5 * (1 - d / 220)})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+        window.onresize = init;
+        init(); animate();
+    </script>
+</body>
+</html>
