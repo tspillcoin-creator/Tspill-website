@@ -10,218 +10,132 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
         
-        body.gallery-mode { --grid: transparent; }
+        /* Background & Canvas */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.5; }
         .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
-        
-        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .meta-group { display: flex; gap: 10px; }
-        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
-        .meta.clickable { cursor: pointer; }
-        .meta.active { background: var(--gold); color: #000; }
+        body.gallery-mode .blueprint-bg { display: none; }
 
-        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
-
-        /* Tiles */
-        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; transition: 0.4s; overflow: hidden; }
-        .tile.finalized { border-color: var(--gold); }
-        .tile-img-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; z-index: 0; transition: 0.5s; }
+        header { position: fixed; top: 0; left: 0; right: 0; padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid var(--border); background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); }
+        .logo { font-weight: 700; letter-spacing: 5px; color: var(--gold); }
         
-        body.gallery-mode .tile:not(.finalized) { display: none; }
-        body.gallery-mode .tile.finalized { border: none; }
-        body.gallery-mode .tile.finalized .tile-img-bg { opacity: 0.5; }
-        body.gallery-mode .tile.finalized:hover .tile-img-bg { opacity: 1; transform: scale(1.05); }
+        .mode-switch { display: flex; gap: 20px; }
+        .m-btn { background: none; border: 1px solid var(--border); color: #888; padding: 8px 16px; cursor: pointer; font-size: 11px; letter-spacing: 2px; transition: 0.3s; }
+        .m-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.05); }
 
-        .tile-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; z-index: 2; position: relative; width: 85%; overflow-wrap: break-word; }
-        .tile-info { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.7; z-index: 2; margin-top: 5px; }
-        
-        .led-row { display: flex; gap: 8px; z-index: 2; margin-top: 10px; }
-        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; font-weight: bold; }
-        .led.active { color: var(--gold); }
-        .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 4px; }
-        .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+        /* FAB & Animated Text */
+        .fab-container { position: fixed; bottom: 40px; right: 40px; z-index: 1000; display: flex; align-items: center; transition: 0.4s ease; }
+        .fab-text { 
+            color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: 2px; margin-right: 20px;
+            text-shadow: 0 0 10px var(--gold); animation: pulse-text 2s infinite; pointer-events: none;
+        }
+        @keyframes pulse-text { 0% { opacity: 0.4; } 50% { opacity: 1; text-shadow: 0 0 20px var(--gold); } 100% { opacity: 0.4; } }
 
-        /* Side Panel */
-        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; overflow-y: auto; }
-        #side-panel.open { right: 0; box-shadow: -20px 0 50px #000; }
-        
-        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; text-align: center; cursor: pointer; text-transform: uppercase; }
-        .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
-        
-        input, select { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
-        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
-        .btn-upload { background: #111; color: var(--gold); border: 1px solid var(--gold); font-size: 0.6rem; padding: 10px; margin-bottom: 20px; }
+        .fab { width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #000; cursor: pointer; box-shadow: 0 0 20px rgba(212,175,55,0.3); border: none; }
+        .fab:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--gold); }
 
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .modal-box { width: 450px; padding: 40px; border: 1px solid var(--gold); background: #000; }
+        /* Hide FAB in Gallery Mode */
+        body.gallery-mode .fab-container { display: none; }
+
+        /* Grid Layout */
+        main { position: relative; z-index: 10; padding: 120px 40px 40px; height: 100vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .artifact-card { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; cursor: pointer; transition: 0.4s; position: relative; overflow: hidden; }
+        .artifact-card:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.02); }
+
+        /* Side Panel (Simplified for clarity) */
+        .side-panel { position: fixed; top: 0; right: -500px; width: 500px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--border); z-index: 2000; transition: 0.5s; padding: 60px 40px; overflow-y: auto; }
+        .side-panel.open { right: 0; }
     </style>
 </head>
-<body>
+<body class="grid-mode">
 
+    <canvas id="bg-canvas"></canvas>
     <div class="blueprint-bg"></div>
 
     <header>
-        <div class="meta" id="displayID">ID: --</div>
-        <div class="meta-group">
-            <div id="m-hub" class="meta clickable active" onclick="switchMode('hub')">Blueprint</div>
-            <div id="m-gal" class="meta clickable" onclick="switchMode('gallery')">Gallery</div>
+        <div class="logo">TSPILL / HUB</div>
+        <div class="mode-switch">
+            <button class="m-btn active" onclick="setMode('grid')">GRID VIEW</button>
+            <button class="m-btn" onclick="setMode('gallery')">GALLERY</button>
         </div>
     </header>
 
-    <div id="registry" onclick="closePanel()"></div>
-
-    <div id="side-panel">
-        <h3 id="p-title" style="color:var(--gold); letter-spacing:3px;">--</h3>
-        <p id="p-intent" style="font-size:0.75rem; color:#777; margin: 15px 0 30px 0; line-height:1.5;"></p>
-        
-        <label style="font-size:0.55rem; color:var(--gold); text-transform:uppercase;">Constraints</label>
-        <div class="con-grid" id="con-list">
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Time">Time-Bound</div>
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Resource">Resource-Bound</div>
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Scope">Scope-Limited</div>
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Medium">Medium-Specified</div>
-        </div>
-
-        <div id="form-area" style="display:none;">
-            <label style="font-size:0.55rem; color:var(--gold);">Attributes</label>
-            <input type="text" id="in-mat" placeholder="MATERIAL">
-            <input type="text" id="in-dim" placeholder="DIMENSIONS">
-            
-            <label style="font-size:0.55rem; color:var(--gold);">Evidence (Media)</label>
-            <input type="text" id="in-img" placeholder="IMAGE URL">
-            <button class="btn-upload" onclick="document.getElementById('file-up').click()">+ UPLOAD LOCAL FILE</button>
-            <input type="file" id="file-up" hidden accept="image/*" onchange="handleUpload(this)">
-
-            <button class="btn-action" onclick="saveProgress()">Save Archive</button>
-            <button class="btn-action" id="seal-btn" style="background:#fff; display:none;" onclick="sealArtifact()">Commission to Gallery</button>
-        </div>
-        <div id="lock-msg" style="text-align:center; padding:30px; border:1px dashed #222; color:#333; font-size:0.6rem; text-transform:uppercase;">Definition Required</div>
+    <div class="fab-container" id="fab-wrap">
+        <span class="fab-text">SPILL NEW INTENT. CREATE RECORD</span>
+        <button class="fab" onclick="openCreator()">+</button>
     </div>
 
-    <div style="position:fixed; bottom:40px; right:40px; z-index:100;">
-        <button onclick="document.getElementById('new-modal').style.display='flex'" style="width:60px; height:60px; border-radius:50%; background:var(--gold); border:none; cursor:pointer; font-size:1.5rem;">+</button>
-    </div>
+    <main id="registry-grid">
+        </main>
 
-    <div id="new-modal" class="overlay" onclick="this.style.display='none'">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
-            <input type="text" id="new-t" placeholder="TITLE">
-            <input type="text" id="new-i" placeholder="INTENT LOGIC">
-            <select id="new-p"><option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option></select>
-            <button class="btn-action" onclick="createNew()">Commence</button>
-        </div>
+    <div class="side-panel" id="side-panel">
+        <h2 style="color:var(--gold); margin-bottom:30px;">NEW PROTOCOL INTENT</h2>
+        <input type="text" id="new-t" placeholder="ARTIFACT TITLE" style="width:100%; padding:15px; background:none; border:1px solid var(--border); color:#fff; margin-bottom:15px;">
+        <textarea id="new-i" placeholder="DESCRIBE INTENT..." style="width:100%; height:150px; padding:15px; background:none; border:1px solid var(--border); color:#fff; margin-bottom:30px;"></textarea>
+        <button onclick="createNew()" style="width:100%; padding:15px; background:var(--gold); color:#000; font-weight:700; border:none; cursor:pointer;">SEAL RECORD</button>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('tspill_final')) || [];
-        let activeID = null;
-
-        window.onload = () => {
-            document.getElementById('displayID').innerText = "ID: " + (sessionStorage.getItem('currentID') || "GUEST-ID");
-            render();
-        };
-
-        function switchMode(m) {
-            document.body.className = (m === 'gallery') ? 'gallery-mode' : '';
-            document.getElementById('m-hub').classList.toggle('active', m === 'hub');
-            document.getElementById('m-gal').classList.toggle('active', m === 'gallery');
-        }
-
-        function toggleConstraint(el) {
-            if(db.find(x => x.id === activeID).rdy) return;
-            el.classList.toggle('active');
-            updateUIState();
-        }
-
-        function handleUpload(input) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => { document.getElementById('in-img').value = reader.result; updateUIState(); };
-            if (file) reader.readAsDataURL(file);
-        }
-
-        function updateUIState() {
-            const cons = document.querySelectorAll('#con-list .cb.active').length;
-            const mat = document.getElementById('in-mat').value;
-            const dim = document.getElementById('in-dim').value;
-            const img = document.getElementById('in-img').value;
-
-            document.getElementById('form-area').style.display = (cons >= 2) ? 'block' : 'none';
-            document.getElementById('lock-msg').style.display = (cons >= 2) ? 'none' : 'block';
-            document.getElementById('seal-btn').style.display = (cons >= 2 && mat && dim && img) ? 'block' : 'none';
-        }
-
-        function render() {
-            const reg = document.getElementById('registry'); reg.innerHTML = '';
-            db.forEach(r => {
-                const tile = document.createElement('div');
-                tile.className = `tile ${r.rdy ? 'finalized' : ''}`;
-                tile.onclick = (e) => { e.stopPropagation(); openPanel(r.id); };
-                tile.innerHTML = `
-                    <div class="tile-img-bg" style="background-image:url('${r.img || ''}')"></div>
-                    <div class="presence-tag" style="position:absolute; top:20px; right:15px; font-size:0.5rem; border:1px solid var(--gold); padding:1px 4px; color:var(--gold); z-index:5;">${r.pres[0]}</div>
-                    <div class="tile-title">${r.title}</div>
-                    <div class="tile-info">BY: ${r.author} • ${r.date}</div>
-                    <div class="led-row">
-                        <div class="led ${r.cons.length >= 2 ? 'active' : ''}"><div class="dot"></div>DEF</div>
-                        <div class="led ${r.mat && r.img ? 'active' : ''}"><div class="dot"></div>ATR</div>
-                        <div class="led ${r.rdy ? 'active' : ''}"><div class="dot"></div>RDY</div>
-                    </div>
-                `;
-                reg.appendChild(tile);
-            });
-        }
-
-        function openPanel(id) {
-            const r = db.find(x => x.id === id); activeID = id;
-            document.getElementById('p-title').innerText = r.title;
-            document.getElementById('p-intent').innerText = r.intent;
-            document.getElementById('in-mat').value = r.mat || '';
-            document.getElementById('in-dim').value = r.dim || '';
-            document.getElementById('in-img').value = r.img || '';
-
-            document.querySelectorAll('#con-list .cb').forEach(c => {
-                c.classList.toggle('active', r.cons.includes(c.getAttribute('data-val')));
-            });
-
-            const isLocked = r.rdy;
-            document.querySelectorAll('#side-panel input, #side-panel .cb').forEach(el => {
-                el.style.pointerEvents = isLocked ? 'none' : 'auto';
-            });
+        // --- 1. MODE TOGGLE LOGIC ---
+        function setMode(mode) {
+            const body = document.body;
+            const btns = document.querySelectorAll('.m-btn');
+            btns.forEach(b => b.classList.remove('active'));
             
-            updateUIState();
-            document.getElementById('side-panel').classList.add('open');
+            if(mode === 'gallery') {
+                body.classList.add('gallery-mode');
+                btns[1].classList.add('active');
+            } else {
+                body.classList.remove('gallery-mode');
+                btns[0].classList.add('active');
+            }
         }
 
-        function saveProgress() {
-            const idx = db.findIndex(x => x.id === activeID);
-            db[idx].cons = Array.from(document.querySelectorAll('#con-list .cb.active')).map(c => c.getAttribute('data-val'));
-            db[idx].mat = document.getElementById('in-mat').value;
-            db[idx].dim = document.getElementById('in-dim').value;
-            db[idx].img = document.getElementById('in-img').value;
-            localStorage.setItem('tspill_final', JSON.stringify(db));
-            render();
-        }
+        function openCreator() { document.getElementById('side-panel').classList.add('open'); }
+        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
 
-        function sealArtifact() {
-            const idx = db.findIndex(x => x.id === activeID);
-            db[idx].rdy = true;
-            saveProgress();
-            closePanel();
+        // --- 2. KINETIC GOLD BACKGROUND (YOUR ORIGINAL CODE) ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let pts = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            pts = []; 
+            for(let i=0; i<60; i++) pts.push({
+                x: Math.random()*canvas.width, 
+                y: Math.random()*canvas.height, 
+                vx: (Math.random()-0.5)*0.3, 
+                vy: (Math.random()-0.5)*0.3
+            });
         }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            pts.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                for(let j=i+1; j<pts.length; j++) {
+                    let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
+                    if(d < 200) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.2 * (1 - d/200)})`;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(draw);
+        }
+        window.addEventListener('resize', init);
+        init(); draw();
 
+        // --- 3. DATA PERSISTENCE (LOCALSTORAGE) ---
         function createNew() {
-            const entry = {
-                id: Date.now(), title: document.getElementById('new-t').value.toUpperCase(),
-                intent: document.getElementById('new-i').value, author: sessionStorage.getItem('currentID') || "GUEST",
-                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('new-p').value,
-                cons: [], mat: "", dim: "", img: "", rdy: false
-            };
-            db.push(entry); localStorage.setItem('tspill_final', JSON.stringify(db));
+            const title = document.getElementById('new-t').value;
+            const intent = document.getElementById('new-i').value;
+            if(!title || !intent) return alert("Fill all fields");
+
+            const db = JSON.parse(localStorage.getItem('tspill_registry') || '[]');
+            db.push({ id: Date.now(), title, intent, date: new Date().toLocaleDateString() });
+            localStorage.setItem('tspill_registry', JSON.stringify(db));
             location.reload();
         }
-
-        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
 </html>
