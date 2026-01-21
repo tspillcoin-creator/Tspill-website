@@ -20,10 +20,9 @@
             overflow: hidden; 
         }
 
-        /* High Visibility Kinetic Background */
+        /* Original Kinetic Background Style */
         #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.9; }
 
-        /* THE MAIN WHITE CARD */
         .gate-card {
             position: relative;
             z-index: 10;
@@ -34,15 +33,9 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        .logo-box {
-            font-weight: 700;
-            font-size: 28px;
-            letter-spacing: 4px;
-            margin-bottom: 40px;
-        }
-
+        .logo-box { font-weight: 700; font-size: 28px; letter-spacing: 4px; margin-bottom: 40px; }
         .input-group { margin-top: 30px; }
-
+        
         input {
             width: 100%;
             padding: 15px;
@@ -65,7 +58,6 @@
             letter-spacing: 1px;
             transition: 0.3s;
         }
-
         button:hover { background: var(--gold); }
 
         #id-display { display: none; margin-top: 30px; }
@@ -86,6 +78,7 @@
 
         <div class="input-group">
             <input type="text" id="name-input" placeholder="ENTER FULL NAME">
+            <input type="email" id="email-input" placeholder="ENTER EMAIL ADDRESS">
             <button onclick="generateID()">INITIALIZE</button>
         </div>
 
@@ -98,7 +91,7 @@
     </div>
 
     <script>
-        // --- 2. YOUR FIREBASE CONFIGURATION ---
+        // --- FIREBASE CONFIGURATION (YOUR PROJECT) ---
         const firebaseConfig = {
             apiKey: "AIzaSyC8ijxZRv6zPUctap5Ui75Jh0sCdW0C5Do",
             authDomain: "tspill-registry.firebaseapp.com",
@@ -109,39 +102,42 @@
             measurementId: "G-JG5EGN4F90"
         };
 
-        // Initialize Firebase
+        // Initialize Firebase and Firestore
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- 3. UPDATED GENERATION FUNCTION WITH CLOUD SAVE ---
+        // --- IDENTITY GENERATION & CLOUD STORAGE ---
         async function generateID() {
             const name = document.getElementById('name-input').value;
-            if (!name) return alert("Please enter your name");
+            const email = document.getElementById('email-input').value;
 
-            // Generate an 8-digit TSPILL ID
+            if (!name || !email) return alert("Please enter both Name and Email");
+
+            // Generate unique 8-digit TSPILL ID
             const tspillId = "TS-" + Math.floor(10000000 + Math.random() * 90000000);
 
             try {
                 // SAVE TO CLOUD FIRESTORE
-                // This saves the name and ID to your "identities" collection
+                // This records the user identity in your "identities" collection
                 await db.collection("identities").doc(tspillId).set({
                     name: name,
+                    email: email,
                     id: tspillId,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }); //
+                });
 
-                // Still save to localStorage for session management
-                localStorage.setItem('tspill_user', JSON.stringify({ name, id: tspillId }));
+                // Keep local session data
+                localStorage.setItem('tspill_user', JSON.stringify({ name, email, id: tspillId }));
 
-                // Update the User Interface
+                // UI Transition to success display
                 document.getElementById('display-name').innerText = name;
                 document.getElementById('display-id').innerText = tspillId;
                 document.querySelector('.input-group').style.display = 'none';
                 document.getElementById('id-display').style.display = 'block';
 
             } catch (error) {
-                console.error("Cloud Connection Error: ", error);
-                alert("The System could not reach the Cloud. Ensure your Firestore is in 'Test Mode'.");
+                console.error("Firebase Registry Error: ", error);
+                alert("Cloud connection failed. Check your Firestore 'Test Mode' settings.");
             }
         }
 
@@ -149,34 +145,11 @@
             window.location.href = 'home.html';
         }
 
-        // --- BACKGROUND KINETIC ANIMATION (RESTORED FROM YOUR FILE) ---
+        // --- ORIGINAL KINETIC BACKGROUND ANIMATION ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
         function init() {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             nodes = [];
-            for(let i=0; i<85; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.7, vy:(Math.random()-0.5)*0.7});
-        }
-        function animate() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            nodes.forEach(n => {
-                n.x += n.vx; n.y += n.vy;
-                if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
-                if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
-                nodes.forEach(m => {
-                    let d = Math.hypot(n.x - m.x, n.y - m.y);
-                    if(d < 220) {
-                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.5 * (1 - d / 220)})`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
-                    }
-                });
-            });
-            requestAnimationFrame(animate);
-        }
-        window.addEventListener('resize', init);
-        init(); animate();
-    </script>
-</body>
-</html>
+            for(let i=0; i<85; i++) nodes
