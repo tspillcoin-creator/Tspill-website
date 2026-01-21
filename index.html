@@ -31,158 +31,125 @@
             padding: 80px 50px;
             background: var(--card-white);
             text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-            border-radius: 2px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        .logo-area h1 { 
-            font-size: 3rem; 
-            letter-spacing: 12px; 
-            color: #000; 
-            margin-bottom: 5px;
+        .logo-box {
             font-weight: 700;
-        }
-
-        .caption {
-            font-size: 0.7rem;
+            font-size: 28px;
             letter-spacing: 4px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 50px;
-            display: block;
+            margin-bottom: 40px;
         }
 
-        .input-group label { 
-            font-size: 0.6rem; 
-            color: #999; 
-            letter-spacing: 3px; 
-            text-transform: uppercase; 
-            margin-bottom: 15px; 
-            display: block; 
-        }
+        .input-group { margin-top: 30px; }
 
         input {
             width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
             background: #f9f9f9;
-            border: 1px solid #eee;
-            padding: 20px;
-            color: #000;
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 16px;
+            margin-bottom: 15px;
             outline: none;
-            text-align: center;
-            margin-bottom: 30px;
         }
 
-        /* THE POPPED ID WINDOW (DARK THEME) */
-        #id-display {
-            margin-top: 10px;
-            padding: 40px 30px;
-            background: #0a0a0a; /* Dark Theme */
-            border: 2px dashed var(--gold); /* Golden Dotted Line */
-            display: none;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            color: #fff;
-        }
-
-        @keyframes popIn { 
-            0% { opacity: 0; transform: scale(0.9) translateY(20px); } 
-            100% { opacity: 1; transform: scale(1) translateY(0); } 
-        }
-
-        .id-label { font-size: 0.55rem; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; opacity: 0.8; }
-        .generated-id { 
-            font-size: 2rem; 
-            color: #fff; 
-            letter-spacing: 8px; 
-            font-weight: 700; 
-            margin: 15px 0;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-        }
-
-        /* BUTTONS */
-        .btn {
+        button {
             width: 100%;
-            padding: 22px;
+            padding: 15px;
             background: #000;
             color: #fff;
             border: none;
-            font-weight: 700;
-            letter-spacing: 4px;
             cursor: pointer;
-            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
             transition: 0.3s;
         }
 
-        .btn:hover { background: var(--gold); color: #000; }
+        button:hover { background: var(--gold); }
 
-        .enter-btn {
-            background: var(--gold);
-            color: #000;
-            margin-top: 20px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-        }
+        #id-display { display: none; margin-top: 30px; }
+        .tspill-id { font-size: 24px; font-weight: 700; color: var(--gold); margin: 20px 0; }
+        .status-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #888; }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
     <canvas id="bg-canvas"></canvas>
 
     <div class="gate-card">
-        <div id="main-content">
-            <div class="logo-area">
-                <h1>TSPILL</h1>
-                <span class="caption">Production-Linked Ecosystem</span>
-            </div>
+        <div class="logo-box">TSPILL</div>
+        <p style="font-size: 12px; color: #666; letter-spacing: 1px;">GENERATE YOUR PROTOCOL IDENTITY</p>
 
-            <div id="entry-form">
-                <div class="input-group">
-                    <label>Institutional Identifier</label>
-                    <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
-                </div>
-                <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
-            </div>
+        <div class="input-group">
+            <input type="text" id="name-input" placeholder="ENTER FULL NAME">
+            <button onclick="generateID()">INITIALIZE</button>
         </div>
 
         <div id="id-display">
-            <span class="id-label">Protocol Access Mapped</span>
-            <div class="generated-id" id="tspillID">--</div>
-            <p style="font-size: 0.6rem; color: #555; letter-spacing: 1px; margin-bottom: 20px;">Identity persistent across all TSPILL nodes.</p>
-            <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
+            <div class="status-tag">IDENTITY SECURED</div>
+            <div id="display-name" style="font-weight: 500; margin-top: 10px;"></div>
+            <div class="tspill-id" id="display-id"></div>
+            <button onclick="enterEcosystem()">ENTER ECOSYSTEM</button>
         </div>
     </div>
 
     <script>
-        function generateFixedID(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        // --- 2. YOUR FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8ijxZRv6zPUctap5Ui75Jh0sCdW0C5Do",
+            authDomain: "tspill-registry.firebaseapp.com",
+            projectId: "tspill-registry",
+            storageBucket: "tspill-registry.firebasestorage.app",
+            messagingSenderId: "723181242600",
+            appId: "1:723181242600:web:8db3b828566c4c0845a15d",
+            measurementId: "G-JG5EGN4F90"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- 3. UPDATED GENERATION FUNCTION WITH CLOUD SAVE ---
+        async function generateID() {
+            const name = document.getElementById('name-input').value;
+            if (!name) return alert("Please enter your name");
+
+            // Generate an 8-digit TSPILL ID
+            const tspillId = "TS-" + Math.floor(10000000 + Math.random() * 90000000);
+
+            try {
+                // SAVE TO CLOUD FIRESTORE
+                // This saves the name and ID to your "identities" collection
+                await db.collection("identities").doc(tspillId).set({
+                    name: name,
+                    id: tspillId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }); //
+
+                // Still save to localStorage for session management
+                localStorage.setItem('tspill_user', JSON.stringify({ name, id: tspillId }));
+
+                // Update the User Interface
+                document.getElementById('display-name').innerText = name;
+                document.getElementById('display-id').innerText = tspillId;
+                document.querySelector('.input-group').style.display = 'none';
+                document.getElementById('id-display').style.display = 'block';
+
+            } catch (error) {
+                console.error("Cloud Connection Error: ", error);
+                alert("The System could not reach the Cloud. Ensure your Firestore is in 'Test Mode'.");
             }
-            const finalNum = Math.abs(hash % 9000) + 1000;
-            return `TS-${finalNum}`;
-        }
-
-        function verifyIdentity() {
-            const credential = document.getElementById('credential').value.trim().toLowerCase();
-            if(!credential || credential.length < 5) {
-                alert("Please provide valid credentials.");
-                return;
-            }
-
-            const persistentID = generateFixedID(credential);
-            sessionStorage.setItem('currentID', persistentID);
-
-            // Hide form, show Dark ID Card
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('tspillID').innerText = persistentID;
-            document.getElementById('id-display').style.display = 'block';
         }
 
         function enterEcosystem() {
             window.location.href = 'home.html';
         }
 
-        // --- BACKGROUND KINETIC ANIMATION ---
+        // --- BACKGROUND KINETIC ANIMATION (RESTORED FROM YOUR FILE) ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let nodes = [];
@@ -208,7 +175,7 @@
             });
             requestAnimationFrame(animate);
         }
-        window.onresize = init;
+        window.addEventListener('resize', init);
         init(); animate();
     </script>
 </body>
