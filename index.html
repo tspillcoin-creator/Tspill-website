@@ -3,182 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL | Where Ideas Become Products</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>TSPILL — Identity Protocol</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000000;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
+        :root { --gold: #d4af37; --bg: #050505; --card-white: #ffffff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background: var(--bg); 
+            color: #000; 
+            font-family: 'Space Grotesk', sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        header {
-            padding: 40px 0;
-            border-bottom: 1px solid #333;
-            margin-bottom: 60px;
-        }
-        .logo {
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: #d4af37;
-            letter-spacing: -0.5px;
-            margin-bottom: 10px;
-        }
-        .tagline {
-            color: #888;
-            font-size: 1.1rem;
-        }
-        .hero {
+
+        /* High Visibility Kinetic Background */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: 0.9; }
+
+        /* THE MAIN WHITE CARD */
+        .gate-card {
+            position: relative;
+            z-index: 10;
+            width: 440px;
+            padding: 80px 50px;
+            background: var(--card-white);
             text-align: center;
-            padding: 80px 0;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            border-radius: 2px;
         }
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #ffffff 30%, #d4af37 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .logo-area h1 { 
+            font-size: 3rem; 
+            letter-spacing: 12px; 
+            color: #000; 
+            margin-bottom: 5px;
+            font-weight: 700;
         }
-        .hero p {
-            font-size: 1.2rem;
-            color: #aaa;
-            max-width: 600px;
-            margin: 0 auto 40px;
+
+        .caption {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            display: block;
         }
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin: 60px 0;
+
+        .input-group label { 
+            font-size: 0.6rem; 
+            color: #999; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            margin-bottom: 15px; 
+            display: block; 
         }
-        .card {
-            background: #111;
-            border: 1px solid #222;
-            padding: 30px;
-            border-radius: 8px;
-            transition: transform 0.3s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: #d4af37;
-        }
-        .card h3 {
-            color: #d4af37;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        .card p {
-            color: #999;
-            margin-bottom: 20px;
-        }
-        .card a {
-            color: #d4af37;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .button {
-            display: inline-block;
-            background: transparent;
-            border: 2px solid #d4af37;
-            color: #d4af37;
-            padding: 12px 30px;
-            text-decoration: none;
-            font-weight: 500;
-            margin: 10px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-        .button:hover {
-            background: #d4af37;
-            color: #000;
-        }
-        .button-primary {
-            background: #d4af37;
-            color: #000;
-        }
-        .button-primary:hover {
-            background: transparent;
-            color: #d4af37;
-        }
-        .status-bar {
-            background: #111;
+
+        input {
+            width: 100%;
+            background: #f9f9f9;
+            border: 1px solid #eee;
             padding: 20px;
-            text-align: center;
-            border-top: 1px solid #222;
-            margin-top: 60px;
-            color: #666;
+            color: #000;
+            font-family: inherit;
             font-size: 0.9rem;
-        }
-        footer {
+            outline: none;
             text-align: center;
-            padding: 40px 0;
-            color: #666;
-            font-size: 0.9rem;
-            border-top: 1px solid #222;
+            margin-bottom: 30px;
         }
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .cards { grid-template-columns: 1fr; }
+
+        /* THE POPPED ID WINDOW (DARK THEME) */
+        #id-display {
+            margin-top: 10px;
+            padding: 40px 30px;
+            background: #0a0a0a; /* Dark Theme */
+            border: 2px dashed var(--gold); /* Golden Dotted Line */
+            display: none;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: #fff;
+        }
+
+        @keyframes popIn { 
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); } 
+            100% { opacity: 1; transform: scale(1) translateY(0); } 
+        }
+
+        .id-label { font-size: 0.55rem; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; opacity: 0.8; }
+        .generated-id { 
+            font-size: 2rem; 
+            color: #fff; 
+            letter-spacing: 8px; 
+            font-weight: 700; 
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        /* BUTTONS */
+        .btn {
+            width: 100%;
+            padding: 22px;
+            background: #000;
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            letter-spacing: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn:hover { background: var(--gold); color: #000; }
+
+        .enter-btn {
+            background: var(--gold);
+            color: #000;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">TSPILL</div>
-            <div class="tagline">Production-Linked Creative Ecosystem</div>
-        </header>
-        
-        <div class="hero">
-            <h1>Where Ideas Become Products</h1>
-            <p>A transparent ecosystem where creative concepts earn their path from validation to production.</p>
-            <div>
-                <a href="#explore" class="button">Explore the System</a>
-                <a href="/studio/gate.html" class="button button-primary">Enter Studio</a>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="gate-card">
+        <div id="main-content">
+            <div class="logo-area">
+                <h1>TSPILL</h1>
+                <span class="caption">Production-Linked Ecosystem</span>
+            </div>
+
+            <div id="entry-form">
+                <div class="input-group">
+                    <label>Institutional Identifier</label>
+                    <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
+                </div>
+                <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
             </div>
         </div>
-        
-        <div id="explore" class="cards">
-            <div class="card">
-                <h3>The Protocol</h3>
-                <p>Every idea starts as a public record. Validation comes before promotion. Transparency builds trust.</p>
-                <a href="/manifesto.html">Read Manifesto →</a>
-            </div>
-            
-            <div class="card">
-                <h3>Public Ledger</h3>
-                <p>See every concept submitted to TSPILL. Watch ideas progress from validation to production.</p>
-                <a href="/ledger.html">View Ledger →</a>
-            </div>
-            
-            <div class="card">
-                <h3>For Creators</h3>
-                <p>Submit concepts with execution intent. Track their journey. Learn from transparent feedback.</p>
-                <a href="/studio/gate.html">Enter Studio →</a>
-            </div>
-            
-            <div class="card">
-                <h3>Roadmap</h3>
-                <p>6 deliberate phases from foundation to global network. Each stage must prove viability.</p>
-                <a href="/roadmap.html">View Roadmap →</a>
-            </div>
-        </div>
-        
-        <div class="status-bar">
-            <strong>Phase 1 Active:</strong> Foundation & Public Record • No Token Trading • Public Record Only
+
+        <div id="id-display">
+            <span class="id-label">Protocol Access Mapped</span>
+            <div class="generated-id" id="tspillID">--</div>
+            <p style="font-size: 0.6rem; color: #555; letter-spacing: 1px; margin-bottom: 20px;">Identity persistent across all TSPILL nodes.</p>
+            <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
         </div>
     </div>
-    
-    <footer>
-        <p>TSPILL Protocol • tspill.fun • Concept #001 Active</p>
-        <p>Transparent Creative Infrastructure Since 2026</p>
-    </footer>
+
+    <script>
+        function generateFixedID(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const finalNum = Math.abs(hash % 9000) + 1000;
+            return `TS-${finalNum}`;
+        }
+
+        function verifyIdentity() {
+            const credential = document.getElementById('credential').value.trim().toLowerCase();
+            if(!credential || credential.length < 5) {
+                alert("Please provide valid credentials.");
+                return;
+            }
+
+            const persistentID = generateFixedID(credential);
+            sessionStorage.setItem('currentID', persistentID);
+
+            // Hide form, show Dark ID Card
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('tspillID').innerText = persistentID;
+            document.getElementById('id-display').style.display = 'block';
+        }
+
+        function enterEcosystem() {
+            window.location.href = 'home.html';
+        }
+
+        // --- BACKGROUND KINETIC ANIMATION ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let nodes = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            nodes = [];
+            for(let i=0; i<85; i++) nodes.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.7, vy:(Math.random()-0.5)*0.7});
+        }
+        function animate() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            nodes.forEach(n => {
+                n.x += n.vx; n.y += n.vy;
+                if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
+                if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
+                nodes.forEach(m => {
+                    let d = Math.hypot(n.x - m.x, n.y - m.y);
+                    if(d < 220) {
+                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.5 * (1 - d / 220)})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+        window.onresize = init;
+        init(); animate();
+    </script>
 </body>
 </html>
