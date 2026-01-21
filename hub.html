@@ -9,111 +9,119 @@
         :root { --gold: #d4af37; --bg: #050505; --grid: rgba(212, 175, 55, 0.08); --border: rgba(212, 175, 55, 0.2); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
-        
-        body.gallery-mode { --grid: transparent; }
-        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
-        
-        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .meta-group { display: flex; gap: 10px; }
-        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
-        .meta.clickable { cursor: pointer; }
-        .meta.active { background: var(--gold); color: #000; }
 
+        /* Background & Grid */
+        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
+        .watermark-layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0; pointer-events: none; }
+        .watermark { font-size: 10vw; font-weight: 700; color: rgba(212, 175, 55, 0.015); letter-spacing: 2vw; text-transform: uppercase; white-space: nowrap; }
+        #cursor-h, #cursor-v { position: fixed; background: rgba(212, 175, 55, 0.2); z-index: 2; pointer-events: none; }
+        #cursor-h { left: 0; width: 100%; height: 1px; } #cursor-v { top: 0; width: 1px; height: 100%; }
+
+        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; z-index: 100; }
+        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* PRECISION GRID: 6 COLUMNS */
         #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
 
-        /* Tiles */
-        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; transition: 0.4s; overflow: hidden; }
-        .tile.finalized { border-color: var(--gold); }
-        .tile-img-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; z-index: 0; transition: 0.5s; }
+        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; }
+        .tile:hover { border-color: var(--gold); }
+        .tile.finalized { border: 1px solid var(--gold); box-shadow: 0 0 15px rgba(212,175,55,0.1); }
         
-        body.gallery-mode .tile:not(.finalized) { display: none; }
-        body.gallery-mode .tile.finalized { border: none; }
-        body.gallery-mode .tile.finalized .tile-img-bg { opacity: 0.5; }
-        body.gallery-mode .tile.finalized:hover .tile-img-bg { opacity: 1; transform: scale(1.05); }
-
-        .tile-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; z-index: 2; position: relative; width: 85%; overflow-wrap: break-word; }
-        .tile-info { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.7; z-index: 2; margin-top: 5px; }
+        .tile-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 80%; overflow-wrap: break-word; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .tile-id { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.6; margin-top: 5px; }
         
-        .led-row { display: flex; gap: 8px; z-index: 2; margin-top: 10px; }
-        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; font-weight: bold; }
+        .led-row { display: flex; gap: 8px; margin-top: 10px; }
+        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; text-transform: uppercase; font-weight: bold; }
         .led.active { color: var(--gold); }
         .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 4px; }
         .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+        .presence-tag { position: absolute; top: 20px; right: 15px; font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 4px; }
 
         /* Side Panel */
-        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; overflow-y: auto; }
-        #side-panel.open { right: 0; box-shadow: -20px 0 50px #000; }
-        
-        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; text-align: center; cursor: pointer; text-transform: uppercase; }
+        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 80px 40px; overflow-y: auto; }
+        #side-panel.open { right: 0; box-shadow: -20px 0 50px rgba(0,0,0,1); }
+        h3 { font-size: 1rem; letter-spacing: 5px; color: var(--gold); text-transform: uppercase; margin-bottom: 30px; }
+        .desc-text { font-size: 0.8rem; color: #888; line-height: 1.6; margin-bottom: 30px; }
+        label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 30px; margin-bottom: 10px; }
+        input { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; outline: none; margin-bottom: 10px;}
+
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; cursor: pointer; text-transform: uppercase; text-align: center; }
         .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
         
-        input, select { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
-        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
-        .btn-upload { background: #111; color: var(--gold); border: 1px solid var(--gold); font-size: 0.6rem; padding: 10px; margin-bottom: 20px; }
+        .lock-notice { padding: 20px; border: 1px dashed #333; color: #444; font-size: 0.55rem; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; margin-top: 30px; }
+        .btn-commission { background: #fff; color: #000; margin-top: 15px; }
 
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .modal-box { width: 450px; padding: 40px; border: 1px solid var(--gold); background: #000; }
+        /* Action Button */
+        .action-container { position: fixed; bottom: 50px; right: 50px; z-index: 200; }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #000; border: none; font-size: 2.5rem; cursor: pointer; font-weight: bold; z-index: 5; }
+        .rotating-text { position: absolute; width: 160px; height: 160px; top: -45px; left: -45px; animation: rotate 20s linear infinite; pointer-events: none; filter: drop-shadow(0 0 5px var(--gold)); }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+        .modal-box { width: 500px; padding: 50px; border: 1px solid var(--gold); background: #000; }
     </style>
 </head>
-<body>
+<body onmousemove="updateCursor(event)">
 
+    <div class="watermark-layer"><div class="watermark">PUBLIC LEDGER</div></div>
     <div class="blueprint-bg"></div>
+    <div id="cursor-h"></div><div id="cursor-v"></div>
 
     <header>
         <div class="meta" id="displayID">ID: --</div>
-        <div class="meta-group">
-            <div id="m-hub" class="meta clickable active" onclick="switchMode('hub')">Blueprint</div>
-            <div id="m-gal" class="meta clickable" onclick="switchMode('gallery')">Gallery</div>
-        </div>
+        <div class="meta">ARCHIVE_STATE: ACTIVE</div>
     </header>
 
-    <div id="registry" onclick="closePanel()"></div>
+    <div id="registry" onclick="closeSidePanel()"></div>
 
     <div id="side-panel">
-        <h3 id="p-title" style="color:var(--gold); letter-spacing:3px;">--</h3>
-        <p id="p-intent" style="font-size:0.75rem; color:#777; margin: 15px 0 30px 0; line-height:1.5;"></p>
-        
-        <label style="font-size:0.55rem; color:var(--gold); text-transform:uppercase;">Constraints</label>
-        <div class="con-grid" id="con-list">
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Time">Time-Bound</div>
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Resource">Resource-Bound</div>
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Scope">Scope-Limited</div>
-            <div class="cb" onclick="toggleConstraint(this)" data-val="Medium">Medium-Specified</div>
+        <h3 id="p-title">--</h3>
+        <p class="desc-text" id="p-intent">--</p>
+        <label>Refine Constraints</label>
+        <div class="con-grid" id="refine-con-container">
+            <div class="cb" onclick="handleLogicToggle(this)" data-val="Time">Time-Bound</div>
+            <div class="cb" onclick="handleLogicToggle(this)" data-val="Resource">Resource-Bound</div>
+            <div class="cb" onclick="handleLogicToggle(this)" data-val="Scope">Scope-Limited</div>
+            <div class="cb" onclick="handleLogicToggle(this)" data-val="Medium">Medium-Specified</div>
         </div>
-
-        <div id="form-area" style="display:none;">
-            <label style="font-size:0.55rem; color:var(--gold);">Attributes</label>
-            <input type="text" id="in-mat" placeholder="MATERIAL">
-            <input type="text" id="in-dim" placeholder="DIMENSIONS">
+        <div id="commission-form" style="display:none;">
+            <label>Material Composition</label><input type="text" id="m-mat">
+            <label>Dimensions (MM/G)</label><input type="text" id="m-dim">
+            <label>Evidence Link</label><input type="text" id="m-ref">
             
-            <label style="font-size:0.55rem; color:var(--gold);">Evidence (Media)</label>
-            <input type="text" id="in-img" placeholder="IMAGE URL">
-            <button class="btn-upload" onclick="document.getElementById('file-up').click()">+ UPLOAD LOCAL FILE</button>
-            <input type="file" id="file-up" hidden accept="image/*" onchange="handleUpload(this)">
-
-            <button class="btn-action" onclick="saveProgress()">Save Archive</button>
-            <button class="btn-action" id="seal-btn" style="background:#fff; display:none;" onclick="sealArtifact()">Commission to Gallery</button>
+            <button class="btn-action" id="saveRefineBtn" onclick="saveRefinement()">Update Attributes</button>
+            <button class="btn-action btn-commission" id="commissionBtn" onclick="sealArtifact()" style="display:none;">Seal & Commission (RDY)</button>
         </div>
-        <div id="lock-msg" style="text-align:center; padding:30px; border:1px dashed #222; color:#333; font-size:0.6rem; text-transform:uppercase;">Definition Required</div>
+        <div id="lock-msg" class="lock-notice">Defining Intent Required</div>
     </div>
 
-    <div style="position:fixed; bottom:40px; right:40px; z-index:100;">
-        <button onclick="document.getElementById('new-modal').style.display='flex'" style="width:60px; height:60px; border-radius:50%; background:var(--gold); border:none; cursor:pointer; font-size:1.5rem;">+</button>
+    <div class="action-container">
+        <svg class="rotating-text" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" fill="transparent"/>
+            <text fill="#d4af37" style="font-size:4.5px; font-weight: 700; letter-spacing:3px; text-transform: uppercase;">
+                <textPath xlink:href="#circlePath">SPILL NEW INTENT • RECORD ARTIFACT • </textPath>
+            </text>
+        </svg>
+        <button class="action-btn" onclick="openCreateModal()">+</button>
     </div>
 
-    <div id="new-modal" class="overlay" onclick="this.style.display='none'">
+    <div id="create-modal" class="overlay" onclick="closeCreateModal()">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
-            <input type="text" id="new-t" placeholder="TITLE">
-            <input type="text" id="new-i" placeholder="INTENT LOGIC">
-            <select id="new-p"><option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option></select>
-            <button class="btn-action" onclick="createNew()">Commence</button>
+            <h3>Spill New Intent</h3>
+            <label>Title</label><input type="text" id="new-title" placeholder="IDENTIFIER">
+            <label>Intent One-Liner</label><input type="text" id="new-intent" placeholder="TECHNICAL LOGIC">
+            <label>Presence</label>
+            <select id="new-pres" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #222;">
+                <option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option>
+            </select>
+            <button class="btn-action" onclick="commitNewIntent()">Commit</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('tspill_final')) || [];
+        let registry = JSON.parse(localStorage.getItem('tspill_v5')) || [];
         let activeID = null;
 
         window.onload = () => {
@@ -121,107 +129,128 @@
             render();
         };
 
-        function switchMode(m) {
-            document.body.className = (m === 'gallery') ? 'gallery-mode' : '';
-            document.getElementById('m-hub').classList.toggle('active', m === 'hub');
-            document.getElementById('m-gal').classList.toggle('active', m === 'gallery');
+        function updateCursor(e) {
+            document.getElementById('cursor-h').style.top = e.clientY + 'px';
+            document.getElementById('cursor-v').style.left = e.clientX + 'px';
         }
 
-        function toggleConstraint(el) {
-            if(db.find(x => x.id === activeID).rdy) return;
-            el.classList.toggle('active');
-            updateUIState();
-        }
+        function handleLogicToggle(el) {
+            if(el && el.classList) el.classList.toggle('active');
+            const record = registry.find(x => x.id === activeID);
+            if(!record || record.rdy) return; 
 
-        function handleUpload(input) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => { document.getElementById('in-img').value = reader.result; updateUIState(); };
-            if (file) reader.readAsDataURL(file);
-        }
+            const conCount = document.querySelectorAll('#refine-con-container .cb.active').length;
+            const mat = document.getElementById('m-mat').value;
+            const dim = document.getElementById('m-dim').value;
+            const isCreator = record.author === sessionStorage.getItem('currentID');
 
-        function updateUIState() {
-            const cons = document.querySelectorAll('#con-list .cb.active').length;
-            const mat = document.getElementById('in-mat').value;
-            const dim = document.getElementById('in-dim').value;
-            const img = document.getElementById('in-img').value;
+            // DEF Logic
+            document.getElementById('lock-msg').style.display = (conCount >= 2) ? 'none' : 'block';
+            document.getElementById('commission-form').style.display = (conCount >= 2 && isCreator) ? 'block' : 'none';
 
-            document.getElementById('form-area').style.display = (cons >= 2) ? 'block' : 'none';
-            document.getElementById('lock-msg').style.display = (cons >= 2) ? 'none' : 'block';
-            document.getElementById('seal-btn').style.display = (cons >= 2 && mat && dim && img) ? 'block' : 'none';
+            // Commission Button Logic (Only if DEF and ATR are done)
+            if(conCount >= 2 && mat && dim) {
+                document.getElementById('commissionBtn').style.display = 'block';
+            } else {
+                document.getElementById('commissionBtn').style.display = 'none';
+            }
         }
 
         function render() {
             const reg = document.getElementById('registry'); reg.innerHTML = '';
-            db.forEach(r => {
+            registry.forEach(r => {
+                const isDef = r.constraints.length >= 2;
+                const isAtr = r.material && r.dim;
                 const tile = document.createElement('div');
                 tile.className = `tile ${r.rdy ? 'finalized' : ''}`;
-                tile.onclick = (e) => { e.stopPropagation(); openPanel(r.id); };
+                tile.onclick = (e) => { e.stopPropagation(); openSidePanel(r.id); };
                 tile.innerHTML = `
-                    <div class="tile-img-bg" style="background-image:url('${r.img || ''}')"></div>
-                    <div class="presence-tag" style="position:absolute; top:20px; right:15px; font-size:0.5rem; border:1px solid var(--gold); padding:1px 4px; color:var(--gold); z-index:5;">${r.pres[0]}</div>
+                    <div class="presence-tag">${r.presence[0]}</div>
                     <div class="tile-title">${r.title}</div>
-                    <div class="tile-info">BY: ${r.author} • ${r.date}</div>
+                    <div class="tile-id">BY: ${r.author} • ${r.date}</div>
                     <div class="led-row">
-                        <div class="led ${r.cons.length >= 2 ? 'active' : ''}"><div class="dot"></div>DEF</div>
-                        <div class="led ${r.mat && r.img ? 'active' : ''}"><div class="dot"></div>ATR</div>
-                        <div class="led ${r.rdy ? 'active' : ''}"><div class="dot"></div>RDY</div>
+                        <div class="led ${isDef?'active':''}"><div class="dot"></div>DEF</div>
+                        <div class="led ${isAtr?'active':''}"><div class="dot"></div>ATR</div>
+                        <div class="led ${r.rdy?'active':''}"><div class="dot"></div>RDY</div>
                     </div>
                 `;
                 reg.appendChild(tile);
             });
         }
 
-        function openPanel(id) {
-            const r = db.find(x => x.id === id); activeID = id;
+        function openSidePanel(id) {
+            const r = registry.find(x => x.id === id);
+            activeID = id;
             document.getElementById('p-title').innerText = r.title;
             document.getElementById('p-intent').innerText = r.intent;
-            document.getElementById('in-mat').value = r.mat || '';
-            document.getElementById('in-dim').value = r.dim || '';
-            document.getElementById('in-img').value = r.img || '';
+            document.getElementById('m-mat').value = r.material || '';
+            document.getElementById('m-dim').value = r.dim || '';
+            document.getElementById('m-ref').value = r.ref || '';
 
-            document.querySelectorAll('#con-list .cb').forEach(c => {
-                c.classList.toggle('active', r.cons.includes(c.getAttribute('data-val')));
-            });
-
+            const isCreator = (r.author === sessionStorage.getItem('currentID'));
             const isLocked = r.rdy;
-            document.querySelectorAll('#side-panel input, #side-panel .cb').forEach(el => {
-                el.style.pointerEvents = isLocked ? 'none' : 'auto';
+
+            document.querySelectorAll('#refine-con-container .cb').forEach(c => {
+                c.classList.toggle('active', r.constraints.includes(c.getAttribute('data-val')));
+                c.style.pointerEvents = (isCreator && !isLocked) ? 'auto' : 'none';
             });
             
-            updateUIState();
+            // Read-only check for finalized artifacts
+            const inputs = document.querySelectorAll('#commission-form input');
+            inputs.forEach(i => i.disabled = isLocked);
+            document.getElementById('saveRefineBtn').style.display = isLocked ? 'none' : 'block';
+            
+            if(isLocked) {
+                document.getElementById('commission-form').style.display = 'block';
+                document.getElementById('commissionBtn').style.display = 'none';
+                document.getElementById('lock-msg').innerText = "ARTIFACT SEALED / GALLERY READY";
+                document.getElementById('lock-msg').style.display = 'block';
+            } else {
+                handleLogicToggle();
+            }
+
             document.getElementById('side-panel').classList.add('open');
         }
 
-        function saveProgress() {
-            const idx = db.findIndex(x => x.id === activeID);
-            db[idx].cons = Array.from(document.querySelectorAll('#con-list .cb.active')).map(c => c.getAttribute('data-val'));
-            db[idx].mat = document.getElementById('in-mat').value;
-            db[idx].dim = document.getElementById('in-dim').value;
-            db[idx].img = document.getElementById('in-img').value;
-            localStorage.setItem('tspill_final', JSON.stringify(db));
-            render();
-        }
-
         function sealArtifact() {
-            const idx = db.findIndex(x => x.id === activeID);
-            db[idx].rdy = true;
-            saveProgress();
-            closePanel();
+            if(!confirm("Seal record? This will lock the blueprint forever.")) return;
+            const idx = registry.findIndex(x => x.id === activeID);
+            registry[idx].rdy = true;
+            localStorage.setItem('tspill_v5', JSON.stringify(registry));
+            render();
+            closeSidePanel();
         }
 
-        function createNew() {
+        function saveRefinement() {
+            const idx = registry.findIndex(x => x.id === activeID);
+            registry[idx].constraints = Array.from(document.querySelectorAll('#refine-con-container .cb.active')).map(c => c.getAttribute('data-val'));
+            registry[idx].material = document.getElementById('m-mat').value;
+            registry[idx].dim = document.getElementById('m-dim').value;
+            registry[idx].ref = document.getElementById('m-ref').value;
+            localStorage.setItem('tspill_v5', JSON.stringify(registry));
+            render();
+            handleLogicToggle();
+        }
+
+        function commitNewIntent() {
             const entry = {
-                id: Date.now(), title: document.getElementById('new-t').value.toUpperCase(),
-                intent: document.getElementById('new-i').value, author: sessionStorage.getItem('currentID') || "GUEST",
-                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('new-p').value,
-                cons: [], mat: "", dim: "", img: "", rdy: false
+                id: Date.now(),
+                title: document.getElementById('new-title').value.toUpperCase(),
+                intent: document.getElementById('new-intent').value,
+                author: sessionStorage.getItem('currentID') || "GUEST-ID",
+                date: new Date().toLocaleDateString('en-GB'),
+                presence: document.getElementById('new-pres').value,
+                constraints: [], material: "", dim: "", ref: "", rdy: false
             };
-            db.push(entry); localStorage.setItem('tspill_final', JSON.stringify(db));
+            if(!entry.title) return;
+            registry.push(entry);
+            localStorage.setItem('tspill_v5', JSON.stringify(registry));
             location.reload();
         }
 
-        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
+        function openCreateModal() { document.getElementById('create-modal').style.display = 'flex'; }
+        function closeCreateModal() { document.getElementById('create-modal').style.display = 'none'; }
+        function closeSidePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
 </html>
