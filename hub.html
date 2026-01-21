@@ -10,10 +10,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
         
-        /* Background & Canvas */
-        #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.5; }
+        body.gallery-mode { --grid: transparent; }
         .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
-        body.gallery-mode .blueprint-bg { display: none; }
+        
+        /* Kinetic Background */
+        #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
         header { position: fixed; top: 0; left: 0; right: 0; padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid var(--border); background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); }
         .logo { font-weight: 700; letter-spacing: 5px; color: var(--gold); }
@@ -22,120 +23,7 @@
         .m-btn { background: none; border: 1px solid var(--border); color: #888; padding: 8px 16px; cursor: pointer; font-size: 11px; letter-spacing: 2px; transition: 0.3s; }
         .m-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.05); }
 
-        /* FAB & Animated Text */
-        .fab-container { position: fixed; bottom: 40px; right: 40px; z-index: 1000; display: flex; align-items: center; transition: 0.4s ease; }
-        .fab-text { 
-            color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: 2px; margin-right: 20px;
-            text-shadow: 0 0 10px var(--gold); animation: pulse-text 2s infinite; pointer-events: none;
-        }
-        @keyframes pulse-text { 0% { opacity: 0.4; } 50% { opacity: 1; text-shadow: 0 0 20px var(--gold); } 100% { opacity: 0.4; } }
-
-        .fab { width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #000; cursor: pointer; box-shadow: 0 0 20px rgba(212,175,55,0.3); border: none; }
-        .fab:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--gold); }
-
-        /* Hide FAB in Gallery Mode */
-        body.gallery-mode .fab-container { display: none; }
-
-        /* Grid Layout */
-        main { position: relative; z-index: 10; padding: 120px 40px 40px; height: 100vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
-        .artifact-card { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; cursor: pointer; transition: 0.4s; position: relative; overflow: hidden; }
-        .artifact-card:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.02); }
-
-        /* Side Panel (Simplified for clarity) */
-        .side-panel { position: fixed; top: 0; right: -500px; width: 500px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--border); z-index: 2000; transition: 0.5s; padding: 60px 40px; overflow-y: auto; }
-        .side-panel.open { right: 0; }
-    </style>
-</head>
-<body class="grid-mode">
-
-    <canvas id="bg-canvas"></canvas>
-    <div class="blueprint-bg"></div>
-
-    <header>
-        <div class="logo">TSPILL / HUB</div>
-        <div class="mode-switch">
-            <button class="m-btn active" onclick="setMode('grid')">GRID VIEW</button>
-            <button class="m-btn" onclick="setMode('gallery')">GALLERY</button>
-        </div>
-    </header>
-
-    <div class="fab-container" id="fab-wrap">
-        <span class="fab-text">SPILL NEW INTENT. CREATE RECORD</span>
-        <button class="fab" onclick="openCreator()">+</button>
-    </div>
-
-    <main id="registry-grid">
-        </main>
-
-    <div class="side-panel" id="side-panel">
-        <h2 style="color:var(--gold); margin-bottom:30px;">NEW PROTOCOL INTENT</h2>
-        <input type="text" id="new-t" placeholder="ARTIFACT TITLE" style="width:100%; padding:15px; background:none; border:1px solid var(--border); color:#fff; margin-bottom:15px;">
-        <textarea id="new-i" placeholder="DESCRIBE INTENT..." style="width:100%; height:150px; padding:15px; background:none; border:1px solid var(--border); color:#fff; margin-bottom:30px;"></textarea>
-        <button onclick="createNew()" style="width:100%; padding:15px; background:var(--gold); color:#000; font-weight:700; border:none; cursor:pointer;">SEAL RECORD</button>
-    </div>
-
-    <script>
-        // --- 1. MODE TOGGLE LOGIC ---
-        function setMode(mode) {
-            const body = document.body;
-            const btns = document.querySelectorAll('.m-btn');
-            btns.forEach(b => b.classList.remove('active'));
-            
-            if(mode === 'gallery') {
-                body.classList.add('gallery-mode');
-                btns[1].classList.add('active');
-            } else {
-                body.classList.remove('gallery-mode');
-                btns[0].classList.add('active');
-            }
-        }
-
-        function openCreator() { document.getElementById('side-panel').classList.add('open'); }
-        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
-
-        // --- 2. KINETIC GOLD BACKGROUND (YOUR ORIGINAL CODE) ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        function init() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            pts = []; 
-            for(let i=0; i<60; i++) pts.push({
-                x: Math.random()*canvas.width, 
-                y: Math.random()*canvas.height, 
-                vx: (Math.random()-0.5)*0.3, 
-                vy: (Math.random()-0.5)*0.3
-            });
-        }
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pts.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                for(let j=i+1; j<pts.length; j++) {
-                    let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
-                    if(d < 200) {
-                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.2 * (1 - d/200)})`;
-                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(draw);
-        }
-        window.addEventListener('resize', init);
-        init(); draw();
-
-        // --- 3. DATA PERSISTENCE (LOCALSTORAGE) ---
-        function createNew() {
-            const title = document.getElementById('new-t').value;
-            const intent = document.getElementById('new-i').value;
-            if(!title || !intent) return alert("Fill all fields");
-
-            const db = JSON.parse(localStorage.getItem('tspill_registry') || '[]');
-            db.push({ id: Date.now(), title, intent, date: new Date().toLocaleDateString() });
-            localStorage.setItem('tspill_registry', JSON.stringify(db));
-            location.reload();
-        }
-    </script>
-</body>
-</html>
+        /* CIRCULAR ROTATING BUTTON CONTAINER */
+        .fab-container { 
+            position: fixed; bottom: 60px; right: 60px; z-index: 1000; 
+            display
