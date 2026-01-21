@@ -10,202 +10,187 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
         
-        /* Blueprint Grid */
-        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; transition: opacity 0.5s; }
-        body.gallery-mode .blueprint-bg { opacity: 0; }
+        body.gallery-mode { --grid: transparent; }
+        .blueprint-bg { position: fixed; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: 1; pointer-events: none; }
         
-        /* Kinetic Background - Z-INDEX 0 TO PREVENT BLACK SCREEN */
-        #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .meta-group { display: flex; gap: 10px; }
+        .meta { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--gold); border: 1px solid var(--border); padding: 10px 15px; background: #000; text-transform: uppercase; letter-spacing: 1px; }
+        .meta.clickable { cursor: pointer; }
+        .meta.active { background: var(--gold); color: #000; }
 
-        header { position: fixed; top: 0; left: 0; right: 0; padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid var(--border); background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); }
-        .logo { font-weight: 700; letter-spacing: 5px; color: var(--gold); }
+        #registry { position: absolute; inset: 0; padding: 120px 40px; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 180px; gap: 15px; overflow-y: auto; z-index: 10; scrollbar-width: none; }
+
+        /* Tiles */
+        .tile { background: rgba(10,10,10,0.95); border: 1px solid var(--border); padding: 20px; cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 180px; transition: 0.4s; overflow: hidden; }
+        .tile.finalized { border-color: var(--gold); }
+        .tile-img-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; z-index: 0; transition: 0.5s; }
         
-        .mode-switch { display: flex; gap: 20px; }
-        .m-btn { background: none; border: 1px solid var(--border); color: #888; padding: 8px 16px; cursor: pointer; font-size: 11px; letter-spacing: 2px; transition: 0.3s; }
-        .m-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.05); }
+        body.gallery-mode .tile:not(.finalized) { display: none; }
+        body.gallery-mode .tile.finalized { border: none; }
+        body.gallery-mode .tile.finalized .tile-img-bg { opacity: 0.5; }
+        body.gallery-mode .tile.finalized:hover .tile-img-bg { opacity: 1; transform: scale(1.05); }
 
-        /* CIRCULAR ROTATING BUTTON */
-        .fab-container { 
-            position: fixed; bottom: 60px; right: 60px; z-index: 1000; 
-            display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.5s, visibility 0.5s;
-        }
-
-        /* HIDE BUTTON IN GALLERY MODE */
-        body.gallery-mode .fab-container { opacity: 0; visibility: hidden; }
-
-        .rotating-svg {
-            position: absolute;
-            width: 160px; height: 160px;
-            animation: rotateText 12s linear infinite;
-        }
-
-        @keyframes rotateText {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .rotating-svg text {
-            fill: var(--gold);
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            filter: drop-shadow(0 0 5px var(--gold));
-        }
-
-        .fab { 
-            width: 65px; height: 65px; background: var(--gold); border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 30px; color: #000; cursor: pointer; 
-            box-shadow: 0 0 20px rgba(212,175,55,0.4); 
-            border: none; position: relative; z-index: 1001;
-            transition: transform 0.3s;
-        }
-        .fab:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--gold); }
-
-        /* ALL ORIGINAL STYLES PRESERVED */
-        main { position: relative; z-index: 10; padding: 120px 40px 40px; height: 100vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-        .artifact-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 35px; cursor: pointer; transition: 0.4s; position: relative; }
-        .artifact-card:hover { border-color: var(--gold); background: rgba(212,175,55,0.05); }
-        .card-id { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); margin-bottom: 15px; display: block; }
-        .card-title { font-size: 1.2rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase; }
-        .card-author { font-size: 9px; text-transform: uppercase; color: #666; letter-spacing: 1px; }
-
-        .side-panel { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: #080808; border-left: 1px solid var(--border); z-index: 2000; transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1); padding: 80px 50px; overflow-y: auto; }
-        .side-panel.open { right: 0; }
-        .panel-close { position: absolute; top: 30px; left: 40px; background: none; border: none; color: #444; cursor: pointer; font-size: 20px; }
+        .tile-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; z-index: 2; position: relative; width: 85%; overflow-wrap: break-word; }
+        .tile-info { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: var(--gold); opacity: 0.7; z-index: 2; margin-top: 5px; }
         
-        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .cb { padding: 12px; border: 1px solid #222; font-size: 10px; cursor: pointer; text-align: center; color: #555; }
+        .led-row { display: flex; gap: 8px; z-index: 2; margin-top: 10px; }
+        .led { display: flex; align-items: center; font-size: 0.45rem; color: #333; font-weight: bold; }
+        .led.active { color: var(--gold); }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: #222; margin-right: 4px; }
+        .led.active .dot { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+
+        /* Side Panel */
+        #side-panel { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: #0a0a0a; border-left: 1px solid var(--gold); z-index: 1000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; overflow-y: auto; }
+        #side-panel.open { right: 0; box-shadow: -20px 0 50px #000; }
+        
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .cb { border: 1px solid #222; padding: 12px; font-size: 0.6rem; color: #555; text-align: center; cursor: pointer; text-transform: uppercase; }
         .cb.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.05); }
         
-        input, textarea { width: 100%; background: #0f0f0f; border: 1px solid #222; color: #fff; padding: 15px; font-family: inherit; margin-bottom: 20px; outline: none; }
-        input:focus, textarea:focus { border-color: var(--gold); }
+        input, select { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #fff; font-family: inherit; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
+        .btn-action { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
+        .btn-upload { background: #111; color: var(--gold); border: 1px solid var(--gold); font-size: 0.6rem; padding: 10px; margin-bottom: 20px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .modal-box { width: 450px; padding: 40px; border: 1px solid var(--gold); background: #000; }
     </style>
 </head>
-<body class="grid-mode">
+<body>
 
-    <canvas id="bg-canvas"></canvas>
     <div class="blueprint-bg"></div>
 
     <header>
-        <div class="logo">TSPILL / REGISTRY</div>
-        <div class="mode-switch">
-            <button class="m-btn active" id="btn-grid" onclick="setMode('grid')">SYSTEM GRID</button>
-            <button class="m-btn" id="btn-gal" onclick="setMode('gallery')">GALLERY VIEW</button>
+        <div class="meta" id="displayID">ID: --</div>
+        <div class="meta-group">
+            <div id="m-hub" class="meta clickable active" onclick="switchMode('hub')">Blueprint</div>
+            <div id="m-gal" class="meta clickable" onclick="switchMode('gallery')">Gallery</div>
         </div>
     </header>
 
-    <div class="fab-container">
-        <svg class="rotating-svg" viewBox="0 0 200 200">
-            <defs>
-                <path id="textCircle" d="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
-            </defs>
-            <text>
-                <textPath href="#textCircle">
-                    SPILL NEW INTENT • CREATE RECORD • SPILL NEW INTENT • CREATE RECORD • 
-                </textPath>
-            </text>
-        </svg>
-        <button class="fab" onclick="openCreator()">+</button>
-    </div>
+    <div id="registry" onclick="closePanel()"></div>
 
-    <main id="registry-grid"></main>
-
-    <div class="side-panel" id="side-panel">
-        <button class="panel-close" onclick="closePanel()">×</button>
-        <div id="creator-view">
-            <h2 style="font-size: 0.8rem; color: var(--gold); letter-spacing: 4px; margin-bottom: 40px;">NEW PROTOCOL ENTRY</h2>
-            <input type="text" id="new-t" placeholder="ARTIFACT NOMENCLATURE">
-            <textarea id="new-i" placeholder="CORE INTENT / TECHNICAL SPECIFICATION" style="height: 120px;"></textarea>
-            <input type="text" id="new-p" placeholder="PRIMARY PRESENTATION URL">
-            <button onclick="createNew()" style="width: 100%; padding: 20px; background: var(--gold); border: none; font-weight: 700; letter-spacing: 2px; cursor: pointer;">COMMENCE ENTRY</button>
+    <div id="side-panel">
+        <h3 id="p-title" style="color:var(--gold); letter-spacing:3px;">--</h3>
+        <p id="p-intent" style="font-size:0.75rem; color:#777; margin: 15px 0 30px 0; line-height:1.5;"></p>
+        
+        <label style="font-size:0.55rem; color:var(--gold); text-transform:uppercase;">Constraints</label>
+        <div class="con-grid" id="con-list">
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Time">Time-Bound</div>
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Resource">Resource-Bound</div>
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Scope">Scope-Limited</div>
+            <div class="cb" onclick="toggleConstraint(this)" data-val="Medium">Medium-Specified</div>
         </div>
 
-        <div id="editor-view" style="display: none;">
-            <h2 id="ed-title" style="font-size: 1.5rem; margin-bottom: 10px; color: var(--gold);"></h2>
-            <p id="ed-intent" style="font-size: 0.9rem; color: #888; margin-bottom: 30px;"></p>
-            <div class="con-grid" id="con-list">
-                <div class="cb" data-val="AV">AUDIO/VISUAL</div>
-                <div class="cb" data-val="CD">CODEBASE</div>
-                <div class="cb" data-val="TX">TEXTILE</div>
-                <div class="cb" data-val="MT">MATERIAL</div>
-            </div>
-            <input type="text" id="in-mat" placeholder="MATERIAL COMPOSITION">
-            <input type="text" id="in-dim" placeholder="DIMENSIONS / SCALE">
-            <input type="text" id="in-img" placeholder="DOCUMENTATION IMAGE URL">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-                <button onclick="saveProgress()" style="padding: 15px; background: #111; color: #fff; border: 1px solid #333; cursor: pointer;">SAVE PROGRESS</button>
-                <button onclick="sealArtifact()" style="padding: 15px; background: var(--gold); color: #000; border: none; font-weight: 700; cursor: pointer;">SEAL RECORD</button>
-            </div>
+        <div id="form-area" style="display:none;">
+            <label style="font-size:0.55rem; color:var(--gold);">Attributes</label>
+            <input type="text" id="in-mat" placeholder="MATERIAL">
+            <input type="text" id="in-dim" placeholder="DIMENSIONS">
+            
+            <label style="font-size:0.55rem; color:var(--gold);">Evidence (Media)</label>
+            <input type="text" id="in-img" placeholder="IMAGE URL">
+            <button class="btn-upload" onclick="document.getElementById('file-up').click()">+ UPLOAD LOCAL FILE</button>
+            <input type="file" id="file-up" hidden accept="image/*" onchange="handleUpload(this)">
+
+            <button class="btn-action" onclick="saveProgress()">Save Archive</button>
+            <button class="btn-action" id="seal-btn" style="background:#fff; display:none;" onclick="sealArtifact()">Commission to Gallery</button>
+        </div>
+        <div id="lock-msg" style="text-align:center; padding:30px; border:1px dashed #222; color:#333; font-size:0.6rem; text-transform:uppercase;">Definition Required</div>
+    </div>
+
+    <div style="position:fixed; bottom:40px; right:40px; z-index:100;">
+        <button onclick="document.getElementById('new-modal').style.display='flex'" style="width:60px; height:60px; border-radius:50%; background:var(--gold); border:none; cursor:pointer; font-size:1.5rem;">+</button>
+    </div>
+
+    <div id="new-modal" class="overlay" onclick="this.style.display='none'">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h3 style="color:var(--gold); margin-bottom:20px;">NEW INTENT</h3>
+            <input type="text" id="new-t" placeholder="TITLE">
+            <input type="text" id="new-i" placeholder="INTENT LOGIC">
+            <select id="new-p"><option>DIGITAL</option><option>PHYSICAL</option><option>HYBRID</option></select>
+            <button class="btn-action" onclick="createNew()">Commence</button>
         </div>
     </div>
 
     <script>
-        // ORIGINAL DB LOGIC
-        let db = JSON.parse(localStorage.getItem('tspill_final') || '[]');
+        let db = JSON.parse(localStorage.getItem('tspill_final')) || [];
         let activeID = null;
 
-        // MODE TOGGLE WITH FAB VISIBILITY
-        function setMode(mode) {
-            const body = document.body;
-            const bGrid = document.getElementById('btn-grid');
-            const bGal = document.getElementById('btn-gal');
-            if (mode === 'gallery') {
-                body.classList.add('gallery-mode');
-                bGrid.classList.remove('active'); bGal.classList.add('active');
-            } else {
-                body.classList.remove('gallery-mode');
-                bGrid.classList.add('active'); bGal.classList.remove('active');
-            }
+        window.onload = () => {
+            document.getElementById('displayID').innerText = "ID: " + (sessionStorage.getItem('currentID') || "GUEST-ID");
+            render();
+        };
+
+        function switchMode(m) {
+            document.body.className = (m === 'gallery') ? 'gallery-mode' : '';
+            document.getElementById('m-hub').classList.toggle('active', m === 'hub');
+            document.getElementById('m-gal').classList.toggle('active', m === 'gallery');
         }
 
-        // ORIGINAL RENDER & INTERACTION LOGIC
+        function toggleConstraint(el) {
+            if(db.find(x => x.id === activeID).rdy) return;
+            el.classList.toggle('active');
+            updateUIState();
+        }
+
+        function handleUpload(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => { document.getElementById('in-img').value = reader.result; updateUIState(); };
+            if (file) reader.readAsDataURL(file);
+        }
+
+        function updateUIState() {
+            const cons = document.querySelectorAll('#con-list .cb.active').length;
+            const mat = document.getElementById('in-mat').value;
+            const dim = document.getElementById('in-dim').value;
+            const img = document.getElementById('in-img').value;
+
+            document.getElementById('form-area').style.display = (cons >= 2) ? 'block' : 'none';
+            document.getElementById('lock-msg').style.display = (cons >= 2) ? 'none' : 'block';
+            document.getElementById('seal-btn').style.display = (cons >= 2 && mat && dim && img) ? 'block' : 'none';
+        }
+
         function render() {
-            const grid = document.getElementById('registry-grid');
-            grid.innerHTML = db.map(item => `
-                <div class="artifact-card" onclick="openEditor(${item.id})">
-                    <span class="card-id">${item.id} // ${item.rdy ? 'SEALED' : 'DRAFT'}</span>
-                    <h3 class="card-title">${item.title}</h3>
-                    <p class="card-author">ORIGIN: ${item.author} — ${item.date}</p>
-                </div>
-            `).join('');
-        }
-
-        function openCreator() {
-            document.getElementById('creator-view').style.display = 'block';
-            document.getElementById('editor-view').style.display = 'none';
-            document.getElementById('side-panel').classList.add('open');
-        }
-
-        function openEditor(id) {
-            activeID = id;
-            const item = db.find(x => x.id === id);
-            document.getElementById('creator-view').style.display = 'none';
-            document.getElementById('editor-view').style.display = 'block';
-            document.getElementById('ed-title').innerText = item.title;
-            document.getElementById('ed-intent').innerText = item.intent;
-            document.getElementById('in-mat').value = item.mat || '';
-            document.getElementById('in-dim').value = item.dim || '';
-            document.getElementById('in-img').value = item.img || '';
-            document.querySelectorAll('.cb').forEach(c => {
-                c.classList.toggle('active', item.cons.includes(c.getAttribute('data-val')));
+            const reg = document.getElementById('registry'); reg.innerHTML = '';
+            db.forEach(r => {
+                const tile = document.createElement('div');
+                tile.className = `tile ${r.rdy ? 'finalized' : ''}`;
+                tile.onclick = (e) => { e.stopPropagation(); openPanel(r.id); };
+                tile.innerHTML = `
+                    <div class="tile-img-bg" style="background-image:url('${r.img || ''}')"></div>
+                    <div class="presence-tag" style="position:absolute; top:20px; right:15px; font-size:0.5rem; border:1px solid var(--gold); padding:1px 4px; color:var(--gold); z-index:5;">${r.pres[0]}</div>
+                    <div class="tile-title">${r.title}</div>
+                    <div class="tile-info">BY: ${r.author} • ${r.date}</div>
+                    <div class="led-row">
+                        <div class="led ${r.cons.length >= 2 ? 'active' : ''}"><div class="dot"></div>DEF</div>
+                        <div class="led ${r.mat && r.img ? 'active' : ''}"><div class="dot"></div>ATR</div>
+                        <div class="led ${r.rdy ? 'active' : ''}"><div class="dot"></div>RDY</div>
+                    </div>
+                `;
+                reg.appendChild(tile);
             });
-            document.getElementById('side-panel').classList.add('open');
         }
 
-        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
+        function openPanel(id) {
+            const r = db.find(x => x.id === id); activeID = id;
+            document.getElementById('p-title').innerText = r.title;
+            document.getElementById('p-intent').innerText = r.intent;
+            document.getElementById('in-mat').value = r.mat || '';
+            document.getElementById('in-dim').value = r.dim || '';
+            document.getElementById('in-img').value = r.img || '';
 
-        function createNew() {
-            const entry = {
-                id: Date.now(), title: document.getElementById('new-t').value.toUpperCase(),
-                intent: document.getElementById('new-i').value, author: sessionStorage.getItem('tspill_user') ? JSON.parse(sessionStorage.getItem('tspill_user')).name : "GUEST",
-                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('new-p').value,
-                cons: [], mat: "", dim: "", img: "", rdy: false
-            };
-            db.push(entry); localStorage.setItem('tspill_final', JSON.stringify(db));
-            location.reload();
+            document.querySelectorAll('#con-list .cb').forEach(c => {
+                c.classList.toggle('active', r.cons.includes(c.getAttribute('data-val')));
+            });
+
+            const isLocked = r.rdy;
+            document.querySelectorAll('#side-panel input, #side-panel .cb').forEach(el => {
+                el.style.pointerEvents = isLocked ? 'none' : 'auto';
+            });
+            
+            updateUIState();
+            document.getElementById('side-panel').classList.add('open');
         }
 
         function saveProgress() {
@@ -225,33 +210,18 @@
             closePanel();
         }
 
-        // ORIGINAL KINETIC BACKGROUND ANIMATION (RESTORED)
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        function init() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            pts = []; for(let i=0; i<60; i++) pts.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3});
-        }
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pts.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                for(let j=i+1; j<pts.length; j++) {
-                    let q = pts[j]; let d = Math.hypot(p.x-q.x, p.y-q.y);
-                    if(d < 200) {
-                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.2 * (1 - d/200)})`;
-                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(draw);
+        function createNew() {
+            const entry = {
+                id: Date.now(), title: document.getElementById('new-t').value.toUpperCase(),
+                intent: document.getElementById('new-i').value, author: sessionStorage.getItem('currentID') || "GUEST",
+                date: new Date().toLocaleDateString('en-GB'), pres: document.getElementById('new-p').value,
+                cons: [], mat: "", dim: "", img: "", rdy: false
+            };
+            db.push(entry); localStorage.setItem('tspill_final', JSON.stringify(db));
+            location.reload();
         }
 
-        document.querySelectorAll('.cb').forEach(c => { c.onclick = () => c.classList.toggle('active'); });
-        window.onresize = init;
-        init(); draw(); render();
+        function closePanel() { document.getElementById('side-panel').classList.remove('open'); }
     </script>
 </body>
 </html>
