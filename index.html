@@ -1,160 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Identity Protocol</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TSPILL — Identity Protocol</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --gold: #d4af37;
-            --bg: #050505;
-            --card-white: #ffffff;
-        }
+<!-- Firebase (COMPAT for simple copy-paste use) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: var(--bg);
-            font-family: 'Space Grotesk', sans-serif;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        /* BACKGROUND */
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            opacity: 0.9;
-        }
-
-        /* GATE CARD */
-        .gate-card {
-            position: relative;
-            z-index: 10;
-            width: 440px;
-            padding: 60px 50px 80px;
-            background: var(--card-white);
-            text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-            border-radius: 2px;
-        }
-
-        /* LOGO SEAL */
-        .logo-seal {
-            width: 72px;
-            margin: 0 auto 25px;
-            opacity: 0.95;
-        }
-
-        .logo-seal img {
-            width: 100%;
-            display: block;
-        }
-
-        .logo-area h1 {
-            font-size: 2.8rem;
-            letter-spacing: 10px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: #000;
-        }
-
-        .caption {
-            font-size: 0.65rem;
-            letter-spacing: 4px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 45px;
-            display: block;
-        }
-
-        .input-group label {
-            font-size: 0.6rem;
-            color: #999;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-            display: block;
-        }
-
-        input {
-            width: 100%;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-            padding: 20px;
-            font-size: 0.9rem;
-            outline: none;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        /* ID DISPLAY */
-        #id-display {
-            margin-top: 10px;
-            padding: 40px 30px;
-            background: #0a0a0a;
-            border: 2px dashed var(--gold);
-            display: none;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            color: #fff;
-        }
-
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.92) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .id-label {
-            font-size: 0.55rem;
-            color: var(--gold);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-
-        .generated-id {
-            font-size: 2rem;
-            letter-spacing: 8px;
-            font-weight: 700;
-            margin: 15px 0;
-            text-shadow: 0 0 15px rgba(212,175,55,0.5);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 22px;
-            background: #000;
-            color: #fff;
-            border: none;
-            font-weight: 700;
-            letter-spacing: 4px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background: var(--gold);
-            color: #000;
-        }
-
-        .enter-btn {
-            background: var(--gold);
-            color: #000;
-            margin-top: 20px;
-        }
-    </style>
+<style>
+:root {
+  --gold:#d4af37;
+  --bg:#050505;
+  --card:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);
+  font-family:'Space Grotesk',sans-serif;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+#bg-canvas{position:fixed;inset:0;z-index:1;}
+.gate-card{
+  position:relative;
+  z-index:10;
+  width:440px;
+  padding:60px 50px 80px;
+  background:var(--card);
+  text-align:center;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6);
+}
+.logo-seal{width:72px;margin:0 auto 25px;}
+.logo-seal img{width:100%;}
+h1{font-size:2.8rem;letter-spacing:10px;margin-bottom:6px;}
+.caption{
+  font-size:.65rem;
+  letter-spacing:4px;
+  color:#666;
+  margin-bottom:45px;
+  display:block;
+}
+label{
+  font-size:.6rem;
+  letter-spacing:3px;
+  color:#999;
+  margin-bottom:14px;
+  display:block;
+}
+input{
+  width:100%;
+  padding:20px;
+  text-align:center;
+  margin-bottom:30px;
+  border:1px solid #eee;
+  background:#f9f9f9;
+}
+.btn{
+  width:100%;
+  padding:22px;
+  background:#000;
+  color:#fff;
+  border:none;
+  font-weight:700;
+  letter-spacing:4px;
+  cursor:pointer;
+}
+.btn:hover{background:var(--gold);color:#000;}
+.enter-btn{background:var(--gold);color:#000;margin-top:20px;}
+#id-display{
+  display:none;
+  margin-top:10px;
+  padding:40px;
+  background:#0a0a0a;
+  border:2px dashed var(--gold);
+  color:#fff;
+}
+.generated-id{
+  font-size:2rem;
+  letter-spacing:8px;
+  margin:15px 0;
+}
+</style>
 </head>
 
 <body>
@@ -163,107 +96,123 @@
 
 <div class="gate-card">
 
-    <div id="main-content">
+<div id="main-content">
+  <div class="logo-seal">
+    <img src="tspill-logo.png" alt="TSPILL Seal">
+  </div>
 
-        <!-- LOGO SEAL -->
-        <div class="logo-seal">
-            <img src="tspill-logo.png" alt="TSPILL Seal">
-        </div>
+  <h1>TSPILL</h1>
+  <span class="caption">Production-Linked Ecosystem</span>
 
-        <div class="logo-area">
-            <h1>TSPILL</h1>
-            <span class="caption">Production-Linked Ecosystem</span>
-        </div>
+  <label>Institutional Identifier</label>
+  <input id="credential" placeholder="Email or Wallet Address">
 
-        <div class="input-group">
-            <label>Institutional Identifier</label>
-            <input type="text" id="credential" placeholder="Email or Wallet Address" autocomplete="off">
-        </div>
+  <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
+</div>
 
-        <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
-
-    </div>
-
-    <div id="id-display">
-        <span class="id-label">Protocol Access Mapped</span>
-        <div class="generated-id" id="tspillID">--</div>
-        <p style="font-size:0.6rem;color:#666;margin-bottom:20px;">
-            Identity persists across all TSPILL nodes.
-        </p>
-        <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
-    </div>
+<div id="id-display">
+  <span style="font-size:.55rem;color:var(--gold);letter-spacing:4px;">
+    PROTOCOL ACCESS MAPPED
+  </span>
+  <div class="generated-id" id="tspillID"></div>
+  <p style="font-size:.6rem;color:#666;">
+    Identity persists across all TSPILL nodes.
+  </p>
+  <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
+</div>
 
 </div>
 
 <script>
-    function generateFixedID(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return `TS-${Math.abs(hash % 9000) + 1000}`;
-    }
+/* 🔐 FIREBASE CONFIG — FINAL */
+firebase.initializeApp({
+  apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
+  authDomain: "tspill-protocol.firebaseapp.com",
+  projectId: "tspill-protocol",
+  appId: "1:863753676409:web:ae3957d697c68d877556a8"
+});
 
-    function verifyIdentity() {
-        const credential = document.getElementById('credential').value.trim().toLowerCase();
-        if (!credential || credential.length < 5) {
-            alert("Please provide a valid identifier.");
-            return;
-        }
+const db = firebase.firestore();
 
-        const tspillID = generateFixedID(credential);
-        sessionStorage.setItem('TSPILL_ID', tspillID);
+/* 🔑 ID LOGIC */
+function hashAnchor(str){
+  let h=0;
+  for(let i=0;i<str.length;i++){
+    h = str.charCodeAt(i) + ((h << 5) - h);
+  }
+  return Math.abs(h).toString(16);
+}
 
-        document.getElementById('main-content').style.display = 'none';
-        document.getElementById('tspillID').innerText = tspillID;
-        document.getElementById('id-display').style.display = 'block';
-    }
+function generateTspillID(hash){
+  return "TS-" + hash.slice(0,4).toUpperCase();
+}
 
-    function enterEcosystem() {
-        window.location.href = 'home.html';
-    }
+async function verifyIdentity(){
+  const input = document.getElementById("credential").value.trim().toLowerCase();
+  if(input.length < 5){
+    alert("Please enter a valid identifier.");
+    return;
+  }
 
-    /* BACKGROUND MOTION */
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let nodes = [];
+  const anchorHash = hashAnchor(input);
+  const tspillID = generateTspillID(anchorHash);
 
-    function init() {
-        canvas.width = innerWidth;
-        canvas.height = innerHeight;
-        nodes = Array.from({ length: 85 }, () => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.7,
-            vy: (Math.random() - 0.5) * 0.7
-        }));
-    }
+  const ref = db.collection("identities").doc(tspillID);
+  const snap = await ref.get();
 
-    function animate() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        nodes.forEach(n => {
-            n.x += n.vx;
-            n.y += n.vy;
-            if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
-            if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+  if(!snap.exists){
+    await ref.set({
+      tspill_id: tspillID,
+      anchor_hash: anchorHash,
+      created_at: firebase.firestore.FieldValue.serverTimestamp(),
+      protocol_version: "v0.1"
+    });
+  }
 
-            nodes.forEach(m => {
-                const d = Math.hypot(n.x - m.x, n.y - m.y);
-                if (d < 220) {
-                    ctx.strokeStyle = `rgba(212,175,55,${0.5*(1-d/220)})`;
-                    ctx.beginPath();
-                    ctx.moveTo(n.x,n.y);
-                    ctx.lineTo(m.x,m.y);
-                    ctx.stroke();
-                }
-            });
-        });
-        requestAnimationFrame(animate);
-    }
+  localStorage.setItem("TSPILL_ID", tspillID);
 
-    window.onresize = init;
-    init();
-    animate();
+  document.getElementById("main-content").style.display="none";
+  document.getElementById("tspillID").innerText = tspillID;
+  document.getElementById("id-display").style.display="block";
+}
+
+function enterEcosystem(){
+  window.location.href = "home.html";
+}
+
+/* BACKGROUND MOTION */
+const c=document.getElementById("bg-canvas"),x=c.getContext("2d");
+let n=[];
+function init(){
+  c.width=innerWidth;
+  c.height=innerHeight;
+  n=[...Array(80)].map(()=>({
+    x:Math.random()*c.width,
+    y:Math.random()*c.height,
+    vx:(Math.random()-.5),
+    vy:(Math.random()-.5)
+  }));
+}
+function loop(){
+  x.clearRect(0,0,c.width,c.height);
+  n.forEach(a=>{
+    a.x+=a.vx;a.y+=a.vy;
+    if(a.x<0||a.x>c.width)a.vx*=-1;
+    if(a.y<0||a.y>c.height)a.vy*=-1;
+    n.forEach(b=>{
+      let d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<220){
+        x.strokeStyle=`rgba(212,175,55,${0.4*(1-d/220)})`;
+        x.beginPath();
+        x.moveTo(a.x,a.y);
+        x.lineTo(b.x,b.y);
+        x.stroke();
+      }
+    });
+  });
+  requestAnimationFrame(loop);
+}
+init();loop();
 </script>
 
 </body>
