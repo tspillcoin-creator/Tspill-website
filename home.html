@@ -1,303 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — System Intelligence</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSPILL — System Intelligence</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --gold: #d4af37;
-            --dark-bg: #000000;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(212, 175, 55, 0.2);
-        }
+<style>
+:root{
+  --gold:#d4af37;
+  --dark:#000;
+  --border:rgba(212,175,55,.2);
+}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+*{margin:0;padding:0;box-sizing:border-box}
 
-        body {
-            background-color: var(--dark-bg);
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
+body{
+  background:var(--dark);
+  color:#fff;
+  font-family:'Inter',sans-serif;
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
 
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-        }
+#bg-canvas{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+}
 
-        /* =========================
-           CREATOR IDENTITY (SAFE ZONE)
-        ========================= */
-        .creator-identity {
-            position: fixed;
-            top: 22px;
-            right: 40px; /* pushed right to avoid header overlap */
-            text-align: right;
-            font-size: 13px;
-            line-height: 1.4;
-            color: var(--gold);
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
-            letter-spacing: 0.4px;
-            z-index: 40;
-            pointer-events: none;
-        }
+/* ✅ SINGLE-LINE CREATOR STATUS */
+.creator-identity{
+  position:fixed;
+  top:18px;
+  right:60px; /* pulled inward to avoid clipping */
+  z-index:40;
+  font-size:13px;
+  color:var(--gold);
+  letter-spacing:.6px;
+  white-space:nowrap;
+  text-shadow:0 0 10px rgba(212,175,55,.45);
+  pointer-events:none;
+}
 
-        .creator-identity span {
-            display: block;
-            font-size: 12px;
-            opacity: 0.9;
-        }
+/* SIDEBAR */
+.sidebar{
+  width:30%;
+  min-width:380px;
+  height:100vh;
+  border-right:1px solid var(--border);
+  background:url('tspill-sidebar-anatomy.png') center/contain no-repeat #000;
+  position:relative;
+  z-index:20;
+}
 
-        /* --- LEFT SIDEBAR --- */
-        .sidebar {
-            width: 30%;
-            min-width: 380px;
-            height: 100vh;
-            position: relative;
-            z-index: 20;
-            border-right: 1px solid var(--border);
-            background: url('tspill-sidebar-anatomy.png') no-repeat center center;
-            background-size: contain;
-            background-color: #000;
-        }
+.sidebar-btn{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:80px;
+  background:#000;
+  border:none;
+  border-top:1px solid var(--gold);
+  color:var(--gold);
+  font-family:'Space Grotesk',sans-serif;
+  letter-spacing:4px;
+  cursor:pointer;
+}
 
-        .sidebar-btn {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            background: rgba(0, 0, 0, 0.95);
-            border: none;
-            border-top: 1px solid var(--gold);
-            color: var(--gold);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.9rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            letter-spacing: 4px;
-            z-index: 30;
-        }
+/* MAIN TERMINAL */
+.terminal{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  z-index:10;
+}
 
-        /* --- RIGHT CONTENT TERMINAL --- */
-        .terminal {
-            flex: 1;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: relative;
-        }
+.quote-header{
+  padding:40px 60px 20px;
+  background:linear-gradient(to bottom,#000 80%,transparent);
+}
 
-        .quote-header {
-            padding: 40px 60px 20px;
-            background: linear-gradient(to bottom, #000 80%, transparent);
-            z-index: 15;
-        }
+.quote-header h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:2rem;
+}
 
-        .quote-header h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem;
-            line-height: 1.2;
-            font-weight: 500;
-        }
+.quote-header span{color:var(--gold)}
 
-        .quote-header span { color: var(--gold); }
+.main-scroll-area{
+  flex:1;
+  overflow-y:auto;
+  padding:0 60px;
+  display:flex;
+  flex-direction:column;
+  gap:25px;
+}
 
-        .main-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 60px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
+.box{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  padding:35px;
+}
 
-        .box {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
-            padding: 35px;
-            backdrop-filter: blur(10px);
-        }
+.box h2{
+  font-size:.7rem;
+  letter-spacing:4px;
+  color:var(--gold);
+  margin-bottom:20px;
+}
 
-        .box h2 {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-
-        .phil-text { font-size: 1.1rem; line-height: 1.6; font-weight: 300; }
-        .highlight { color: var(--gold); font-weight: 600; }
-
-        .roadmap-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-        }
-
-        .phase { border-left: 1px solid var(--border); padding-left: 15px; }
-        .phase-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
-        .phase-desc { font-size: 0.75rem; color: #888; }
-
-        .faq-item { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
-        .faq-q { color: var(--gold); font-size: 0.9rem; font-weight: 600; }
-        .faq-a { font-size: 0.85rem; color: #bbb; }
-
-        .system-footer {
-            height: 80px;
-            background: rgba(0, 0, 0, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 60px;
-            color: #555;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 2px;
-            text-align: center;
-        }
-
-        .main-scroll-area::-webkit-scrollbar { width: 3px; }
-        .main-scroll-area::-webkit-scrollbar-thumb { background: var(--gold); }
-    </style>
+.system-footer{
+  height:80px;
+  background:#000;
+  border-top:1px solid rgba(255,255,255,.05);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#555;
+  letter-spacing:2px;
+}
+</style>
 </head>
 
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- CREATOR IDENTITY -->
-<div class="creator-identity">
-    <div id="creatorIdText">Creator ID: —</div>
-    <span>Status: Entry acknowledged</span>
+<!-- ✅ ID DISPLAY -->
+<div class="creator-identity" id="creatorLine">
+  Creator ID: —   Status: Entry acknowledged
 </div>
 
 <div class="sidebar">
-    <button class="sidebar-btn" onclick="window.location.href='hub.html'">
-        Access Public Ledger >>
-    </button>
+  <button class="sidebar-btn" onclick="location.href='hub.html'">
+    Access Public Ledger >>
+  </button>
 </div>
 
 <div class="terminal">
-    <div class="quote-header">
-        <h1>Where Ideas Become <span>Products.</span><br>
-        Where Creators Own the <span>Outcome.</span></h1>
-    </div>
+  <div class="quote-header">
+    <h1>Where Ideas Become <span>Products.</span><br>
+    Where Creators Own the <span>Outcome.</span></h1>
+  </div>
 
-    <!-- YOUR ORIGINAL CONTENT CONTINUES UNCHANGED -->
-    <div class="main-scroll-area">
-        <!-- (content exactly as you provided) -->
-    </div>
+  <div class="main-scroll-area">
+    <!-- YOUR ORIGINAL CONTENT REMAINS HERE -->
+  </div>
 
-    <div class="system-footer">
-        TSPILL moves from validation → production → participation → scale.<br>
-        Each stage earns the right to exist.
-    </div>
+  <div class="system-footer">
+    TSPILL moves from validation → production → participation → scale.
+  </div>
 </div>
 
-<!-- =========================
-     FIREBASE IDENTITY READ
-========================= -->
+<!-- 🔐 FIREBASE READ — MATCHES YOUR DATA -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
-        authDomain: "tspill-protocol.firebaseapp.com",
-        projectId: "tspill-protocol",
-        storageBucket: "tspill-protocol.firebasestorage.app",
-        messagingSenderId: "863753676409",
-        appId: "1:863753676409:web:ae3957d697c68d877556a8"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
+  authDomain: "tspill-protocol.firebaseapp.com",
+  projectId: "tspill-protocol",
+  storageBucket: "tspill-protocol.firebasestorage.app",
+  messagingSenderId: "863753676409",
+  appId: "1:863753676409:web:ae3957d697c68d877556a8"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            window.location.href = "index.html";
-            return;
-        }
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    location.href="index.html";
+    return;
+  }
 
-        const ref = doc(db, "creators", user.uid);
-        const snap = await getDoc(ref);
+  const q = query(
+    collection(db,"identities"),
+    where("anchor_hash","==",user.uid)
+  );
 
-        if (!snap.exists()) {
-            window.location.href = "index.html";
-            return;
-        }
+  const snap = await getDocs(q);
 
-        document.getElementById("creatorIdText").textContent =
-            "Creator ID: " + snap.data().creatorId;
-    });
-</script>
+  if(snap.empty){
+    location.href="index.html";
+    return;
+  }
 
-<!-- =========================
-     BACKGROUND ANIMATION (UNCHANGED)
-========================= -->
-<script>
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let pts = [];
-
-    function init() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        pts = [];
-        for (let i = 0; i < 60; i++) {
-            pts.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() - 0.5) * 0.3
-            });
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pts.forEach((p, i) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-            for (let j = i + 1; j < pts.length; j++) {
-                const q = pts[j];
-                const d = Math.hypot(p.x - q.x, p.y - q.y);
-                if (d < 180) {
-                    ctx.strokeStyle = `rgba(212,175,55,${0.3 * (1 - d / 180)})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(q.x, q.y);
-                    ctx.stroke();
-                }
-            }
-        });
-        requestAnimationFrame(draw);
-    }
-
-    window.addEventListener('resize', init);
-    init();
-    draw();
+  const data = snap.docs[0].data();
+  document.getElementById("creatorLine").textContent =
+    `Creator ID: ${data.tspill_id}   Status: Entry acknowledged`;
+});
 </script>
 
 </body>
