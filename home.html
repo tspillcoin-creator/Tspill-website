@@ -7,17 +7,22 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
+<!-- Firebase (Firestore only — NO AUTH) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
 :root{
   --gold:#d4af37;
-  --dark:#000;
+  --dark-bg:#000;
+  --card-bg:rgba(255,255,255,.03);
   --border:rgba(212,175,55,.2);
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
-  background:var(--dark);
+  background:var(--dark-bg);
   color:#fff;
   font-family:'Inter',sans-serif;
   display:flex;
@@ -25,18 +30,13 @@ body{
   overflow:hidden;
 }
 
-#bg-canvas{
-  position:fixed;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-}
+#bg-canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 
-/* ✅ SINGLE-LINE CREATOR STATUS */
+/* ✅ CREATOR ID LINE */
 .creator-identity{
   position:fixed;
   top:18px;
-  right:60px; /* pulled inward to avoid clipping */
+  right:60px;
   z-index:40;
   font-size:13px;
   color:var(--gold);
@@ -71,7 +71,7 @@ body{
   cursor:pointer;
 }
 
-/* MAIN TERMINAL */
+/* TERMINAL */
 .terminal{
   flex:1;
   display:flex;
@@ -101,7 +101,7 @@ body{
 }
 
 .box{
-  background:rgba(255,255,255,.03);
+  background:var(--card-bg);
   border:1px solid rgba(255,255,255,.08);
   padding:35px;
 }
@@ -132,7 +132,7 @@ body{
 
 <!-- ✅ ID DISPLAY -->
 <div class="creator-identity" id="creatorLine">
-  Creator ID: —   Status: Entry acknowledged
+  Creator ID: —   |   Status: Entry acknowledged
 </div>
 
 <div class="sidebar">
@@ -148,7 +148,7 @@ body{
   </div>
 
   <div class="main-scroll-area">
-    <!-- YOUR ORIGINAL CONTENT REMAINS HERE -->
+    <!-- 🔒 YOUR ORIGINAL CONTENT REMAINS UNCHANGED -->
   </div>
 
   <div class="system-footer">
@@ -156,47 +156,64 @@ body{
   </div>
 </div>
 
-<!-- 🔐 FIREBASE READ — MATCHES YOUR DATA -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
+<script>
+/* 🔐 FIREBASE INIT (SAME AS GATE) */
+firebase.initializeApp({
   apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
   authDomain: "tspill-protocol.firebaseapp.com",
   projectId: "tspill-protocol",
-  storageBucket: "tspill-protocol.firebasestorage.app",
-  messagingSenderId: "863753676409",
   appId: "1:863753676409:web:ae3957d697c68d877556a8"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-onAuthStateChanged(auth, async (user)=>{
-  if(!user){
-    location.href="index.html";
-    return;
-  }
-
-  const q = query(
-    collection(db,"identities"),
-    where("anchor_hash","==",user.uid)
-  );
-
-  const snap = await getDocs(q);
-
-  if(snap.empty){
-    location.href="index.html";
-    return;
-  }
-
-  const data = snap.docs[0].data();
-  document.getElementById("creatorLine").textContent =
-    `Creator ID: ${data.tspill_id}   Status: Entry acknowledged`;
 });
+const db = firebase.firestore();
+
+/* 🔑 ID HANDOFF (SOURCE OF TRUTH) */
+const tspillID = localStorage.getItem("TSPILL_ID");
+
+if(!tspillID){
+  window.location.href = "index.html";
+}
+
+/* DISPLAY ID */
+document.getElementById("creatorLine").textContent =
+  `Creator ID: ${tspillID}   |   Status: Entry acknowledged`;
+
+/* OPTIONAL: verify existence in Firestore (NO redirect) */
+db.collection("identities").doc(tspillID).get()
+  .then(snap=>{
+    if(!snap.exists){
+      console.warn("TSPILL: ID not found in Firestore (non-fatal)");
+    }
+  });
+
+/* BACKGROUND MOTION (UNCHANGED) */
+const c=document.getElementById("bg-canvas"),x=c.getContext("2d");
+let n=[];
+function init(){
+  c.width=innerWidth;c.height=innerHeight;
+  n=[...Array(60)].map(()=>({
+    x:Math.random()*c.width,
+    y:Math.random()*c.height,
+    vx:(Math.random()-.5)*.3,
+    vy:(Math.random()-.5)*.3
+  }));
+}
+function loop(){
+  x.clearRect(0,0,c.width,c.height);
+  n.forEach((a,i)=>{
+    a.x+=a.vx;a.y+=a.vy;
+    if(a.x<0||a.x>c.width)a.vx*=-1;
+    if(a.y<0||a.y>c.height)a.vy*=-1;
+    n.slice(i+1).forEach(b=>{
+      let d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<180){
+        x.strokeStyle=`rgba(212,175,55,${.3*(1-d/180)})`;
+        x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();
+      }
+    });
+  });
+  requestAnimationFrame(loop);
+}
+init();loop();
 </script>
 
 </body>
