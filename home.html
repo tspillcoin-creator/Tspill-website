@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSPILL — System Intelligence</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -14,7 +15,11 @@
             --border: rgba(212, 175, 55, 0.2);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             background-color: var(--dark-bg);
@@ -33,9 +38,9 @@
             pointer-events: none;
         }
 
-        /* ========================= */
-        /* CREATOR IDENTITY (TOP RIGHT) */
-        /* ========================= */
+        /* =========================
+           CREATOR IDENTITY (TOP RIGHT)
+        ========================= */
         .creator-identity {
             position: fixed;
             top: 18px;
@@ -88,7 +93,7 @@
             z-index: 30;
         }
 
-        /* --- RIGHT CONTENT TERMINAL --- */
+        /* --- RIGHT CONTENT --- */
         .terminal {
             flex: 1;
             z-index: 10;
@@ -111,7 +116,9 @@
             font-weight: 500;
         }
 
-        .quote-header span { color: var(--gold); }
+        .quote-header span {
+            color: var(--gold);
+        }
 
         .main-scroll-area {
             flex: 1;
@@ -144,52 +151,9 @@
             font-weight: 300;
         }
 
-        .highlight { color: var(--gold); font-weight: 600; }
-
-        .roadmap-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-        }
-
-        .phase {
-            border-left: 1px solid var(--border);
-            padding-left: 15px;
-        }
-
-        .phase-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #fff;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .phase-desc {
-            font-size: 0.75rem;
-            color: #888;
-            line-height: 1.4;
-        }
-
-        .faq-item {
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 15px;
-        }
-
-        .faq-q {
+        .highlight {
             color: var(--gold);
-            font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .faq-a {
-            font-size: 0.85rem;
-            color: #bbb;
-            line-height: 1.6;
         }
 
         .system-footer {
@@ -208,8 +172,13 @@
             text-align: center;
         }
 
-        .main-scroll-area::-webkit-scrollbar { width: 3px; }
-        .main-scroll-area::-webkit-scrollbar-thumb { background: var(--gold); }
+        .main-scroll-area::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .main-scroll-area::-webkit-scrollbar-thumb {
+            background: var(--gold);
+        }
     </style>
 </head>
 
@@ -231,15 +200,14 @@
 
 <div class="terminal">
     <div class="quote-header">
-        <h1>Where Ideas Become <span>Products.</span><br>
+        <h1>
+            Where Ideas Become <span>Products.</span><br>
             Where Creators Own the <span>Outcome.</span>
         </h1>
     </div>
 
     <div class="main-scroll-area">
-
-        <!-- EXISTING CONTENT UNCHANGED -->
-
+        <!-- YOUR EXISTING CONTENT CONTINUES -->
         <div class="box">
             <h2>01 / The Core</h2>
             <p class="phil-text">
@@ -248,22 +216,33 @@
                 <span class="highlight">validated intent</span>.
             </p>
         </div>
-
-        <!-- Remaining content untouched -->
-
     </div>
 
     <div class="system-footer">
-        TSPILL moves from validation → production → participation → scale.<br>
-        Each stage earns the right to exist.
+        TSPILL moves from validation → production → participation → scale.
     </div>
 </div>
 
+<!-- =========================
+     CREATOR ID RESOLUTION LOGIC
+========================= -->
 <script>
-    /* =========================
-       CREATOR ID CONTINUITY
-    ========================= */
-    const creatorId = localStorage.getItem("tspill_creator_id");
+    const possibleKeys = [
+        "tspill_creator_id",
+        "creatorId",
+        "TSPILL_ID",
+        "tspillId"
+    ];
+
+    let creatorId = null;
+
+    for (const key of possibleKeys) {
+        const value = localStorage.getItem(key);
+        if (value) {
+            creatorId = value;
+            break;
+        }
+    }
 
     if (!creatorId) {
         window.location.href = "index.html";
@@ -273,17 +252,20 @@
     }
 </script>
 
+<!-- =========================
+     BACKGROUND ANIMATION
+========================= -->
 <script>
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let pts = [];
+    const canvas = document.getElementById("bg-canvas");
+    const ctx = canvas.getContext("2d");
+    let points = [];
 
     function init() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        pts = [];
+        points = [];
         for (let i = 0; i < 60; i++) {
-            pts.push({
+            points.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
                 vx: (Math.random() - 0.5) * 0.3,
@@ -292,17 +274,19 @@
         }
     }
 
-    function draw() {
+    function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pts.forEach((p, i) => {
+
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
             p.x += p.vx;
             p.y += p.vy;
 
             if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
             if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
 
-            for (let j = i + 1; j < pts.length; j++) {
-                const q = pts[j];
+            for (let j = i + 1; j < points.length; j++) {
+                const q = points[j];
                 const d = Math.hypot(p.x - q.x, p.y - q.y);
                 if (d < 180) {
                     ctx.strokeStyle = `rgba(212,175,55,${0.3 * (1 - d / 180)})`;
@@ -313,13 +297,13 @@
                     ctx.stroke();
                 }
             }
-        });
-        requestAnimationFrame(draw);
+        }
+        requestAnimationFrame(animate);
     }
 
-    window.addEventListener('resize', init);
+    window.addEventListener("resize", init);
     init();
-    draw();
+    animate();
 </script>
 
 </body>
