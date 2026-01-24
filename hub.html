@@ -133,13 +133,13 @@ let intentCounter = 0;
 function render(){
   const g = document.getElementById("grid");
   g.innerHTML = "";
-
   if(intents.length === 0){
     g.innerHTML = "No intents yet.";
     return;
   }
 
   intents.forEach((i, idx) => {
+    const constraints = getStageConstraints(intent.stage);
 
     evaluateStage(i);   // stage engine heartbeat
 
@@ -243,6 +243,16 @@ function evaluateStage(intent){
   // Refresh UI
   render();
 }
+
+  function getStageConstraints(stage){
+  return {
+    canEdit: stage === 1,
+    canSignal: stage >= 2 && stage <= 3,
+    canExecute: stage === 4,
+    isReadOnly: stage === 5
+  };
+}
+
 
 </script>
 
