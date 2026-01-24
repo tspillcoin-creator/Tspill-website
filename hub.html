@@ -202,52 +202,30 @@ function stageLabel(stage){
   ][stage] || "Unknown";
 }
 function evaluateStage(intent){
-  const now = Date.now();
-  const age = now - intent.createdAt;
+  let progressed = true;
 
-  // Stage 0 → 1 (system log)
-  if(intent.stage === 0){
-    intent.stage = 1;
-    return;
+  while(progressed){
+    progressed = false;
+    const now = Date.now();
+    const age = now - intent.createdAt;
+
+    if(intent.stage === 0){
+      intent.stage = 1;
+      progressed = true;
+    }
+    else if(intent.stage === 1 && age > 3000){
+      intent.stage = 2;
+      progressed = true;
+    }
+    else if(intent.stage === 2 && intent.signals > 0){
+      intent.stage = 3;
+      progressed = true;
+    }
+    else if(intent.stage === 3 && intent.signals >= 3){
+      intent.stage = 4;
+      progressed = true;
+    }
   }
-
-  // Stage 1 → 2 (after short presence)
-  if(intent.stage === 1 && age > 3000){
-    intent.stage = 2;
-    return;
-  }
-
-  // Stage 2 → 3 (external signal)
-  if(intent.stage === 2 && intent.signals > 0){
-    intent.stage = 3;
-    return;
-  }
-
-  // Stage 3 → 4 (sustained interest)
-  if(intent.stage === 3 && intent.signals >= 3){
-    intent.stage = 4;
-    return;
-  }
-
-  // Stage 4 → 5 (manual later)
-}
-function registerExternalSignal(intentId, source="external"){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent) return;
-
-  // prevent duplicate rapid signals from same source
-  const last = intent.signalLog[intent.signalLog.length - 1];
-  if(last && last.source === source && Date.now() - last.time < 3000){
-    return;
-  }
-
-  intent.signals++;
-  intent.signalLog.push({
-    source,
-    time: Date.now()
-  });
-
-  render();
 }
 
 </script>
