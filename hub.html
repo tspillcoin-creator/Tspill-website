@@ -228,6 +228,22 @@ function evaluateStage(intent){
   }
 }
 
+  function registerExternalSignal(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent){
+    console.warn("Intent not found:", intentId);
+    return;
+  }
+
+  intent.signals++;
+
+  // Resolve stage immediately
+  evaluateStage(intent);
+
+  // Refresh UI
+  render();
+}
+
 </script>
 
 </body>
