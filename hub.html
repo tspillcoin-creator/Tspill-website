@@ -4,25 +4,113 @@
 <meta charset="UTF-8">
 <title>TSPILL Hub Test</title>
 <style>
-body{background:black;color:white;font-family:sans-serif}
-#grid{margin:100px}
-.intent{border:1px solid gold;padding:10px;margin-bottom:10px}
-button{padding:10px}
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Inter,system-ui,sans-serif;
+  overflow:hidden;
+}
+
+#top{
+  position:fixed;
+  top:20px;
+  right:40px;
+  font-size:12px;
+  letter-spacing:1px;
+  color:#d4af37;
+  z-index:5;
+}
+
+#grid{
+  height:100vh;
+  padding:120px 80px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:24px;
+  overflow-y:auto;
+}
+
+.intent{
+  height:120px;
+  border:1px solid rgba(255,255,255,.08);
+  background:#0b0b0b;
+  padding:14px;
+  cursor:pointer;
+}
+
+.intent:hover{
+  border-color:#d4af37;
+}
+
+.intent-id{
+  font-size:11px;
+  color:#aaa;
+}
+
+.plus-btn{
+  position:fixed;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:1px solid #d4af37;
+  background:transparent;
+  color:#d4af37;
+  font-size:28px;
+  cursor:pointer;
+}
+
+#modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
+
+#modal-box{
+  width:360px;
+  background:#050505;
+  border:1px solid rgba(212,175,55,.3);
+  padding:24px;
+}
+
+#modal-box input,
+#modal-box textarea{
+  width:100%;
+  background:#000;
+  border:1px solid #333;
+  color:#fff;
+  padding:8px;
+  margin-bottom:12px;
+}
 </style>
+
 </head>
 
 <body>
 
-<div id="top">Creator: <span id="cid"></span></div>
+<div id="top">Creator: <span id="cid"></span> | Status: Active | Signals: 0</div>
 
 <div id="grid"></div>
 
-<button onclick="openModal()">+</button>
+<button class="plus-btn" onclick="openModal()">+</button>
 
-<div id="modal" style="display:none">
-  <p>MODAL OPENED</p>
-  <button onclick="addIntent()">Add Intent</button>
+<div id="modal" onclick="if(event.target.id==='modal')this.style.display='none'">
+  <div id="modal-box">
+    <h3 style="margin-bottom:12px">Declare Intent</h3>
+    <input id="intentTitle" placeholder="Intent title">
+    <textarea id="intentDesc" placeholder="Intent description"></textarea>
+    <button onclick="addIntent()">Log Intent</button>
+  </div>
 </div>
+
+</body>
 
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
@@ -43,10 +131,10 @@ let intents=[];
 function render(){
   const g=document.getElementById("grid");
   g.innerHTML="";
-  intents.forEach(i=>{
+  intents.forEach((i,idx)=>{
     const d=document.createElement("div");
     d.className="intent";
-    d.textContent=i;
+    d.innerHTML=`<div class="intent-id">INT-${(idx+1).toString().padStart(3,"0")}</div>`;
     g.appendChild(d);
   });
 }
