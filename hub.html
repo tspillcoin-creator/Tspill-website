@@ -131,30 +131,33 @@ let intents=[];
 let intentCounter = 0;
 
 function render(){
-  const g=document.getElementById("grid");
-  g.innerHTML="";
+  const g = document.getElementById("grid");
+  g.innerHTML = "";
 
-  if(intents.length===0){
-    g.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        color:#555;
-        font-size:14px;
-        letter-spacing:1px;
-      ">
-        No intents declared yet. Press + to log your first signal.
-      </div>`;
+  if(intents.length === 0){
+    g.innerHTML = "No intents yet.";
     return;
   }
 
-  intents.forEach((i,idx)=>{
-    evaluateStage(i);
-    const d=document.createElement("div");
-    d.className="intent";
-    d.innerHTML=`
+  intents.forEach((i, idx) => {
+
+    evaluateStage(i);   // stage engine heartbeat
+
+    const d = document.createElement("div");
+    d.className = "intent";
+
+    d.innerHTML = `
       <div class="intent-id">
-        INT-${(idx+1).toString().padStart(3,"0")}
-      </div>`;
+        ${i.id}
+      </div>
+      <div style="font-size:11px; opacity:.7; margin-top:6px;">
+        Stage: ${stageLabel(i.stage)}
+      </div>
+      <div style="font-size:11px; opacity:.6;">
+        Signals: ${i.signals}
+      </div>
+    `;
+
     g.appendChild(d);
   });
 }
