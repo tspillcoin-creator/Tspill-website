@@ -1,144 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>TSPILL Hub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>TSPILL Hub — Step 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0b0b0b;
-    color: #e6d18a;
-    overflow: hidden;
-  }
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#e6d18a;
+  font-family:Arial, sans-serif;
+  overflow:hidden;
+}
 
-  /* Top Bar */
-  .top-bar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    padding: 14px 20px;
-    text-align: right;
-    font-size: 13px;
-    z-index: 10;
-  }
+/* Top identity */
+.top-bar{
+  position:fixed;
+  top:16px;
+  right:20px;
+  text-align:right;
+  font-size:13px;
+}
 
-  /* Plus Button */
-  .plus-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    border: 1px solid #e6d18a;
-    background: transparent;
-    color: #e6d18a;
-    font-size: 36px;
-    cursor: pointer;
-    z-index: 10;
-  }
+/* Grid */
+.grid{
+  position:absolute;
+  top:70px;
+  left:0;
+  right:0;
+  bottom:120px;
+  padding:30px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
+  gap:24px;
+  overflow-y:auto;
+}
 
-  /* Grid */
-  .grid {
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 22px;
-    overflow-y: auto;
-  }
+/* Intent Stamp */
+.intent-card{
+  border:1px solid rgba(230,209,138,0.6);
+  padding:16px;
+  min-height:160px;
+  background:rgba(0,0,0,0.45);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
 
-  /* Intent Card (STAMP STYLE) */
-  .intent-card {
-    border: 1px solid rgba(230,209,138,0.55);
-    background: rgba(0,0,0,0.45);
-    padding: 16px;
-    min-height: 150px;
-    font-size: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+.intent-id{
+  font-weight:bold;
+  letter-spacing:1px;
+  font-size:14px;
+  border-bottom:1px solid rgba(230,209,138,0.3);
+  padding-bottom:6px;
+}
 
-  .intent-id {
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 1px;
-    border-bottom: 1px solid rgba(230,209,138,0.3);
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-  }
+.intent-label{
+  font-size:12px;
+  opacity:0.85;
+}
 
-  .intent-meta {
-    font-size: 12px;
-    line-height: 1.4;
-  }
+/* Plus button */
+.plus-btn{
+  position:fixed;
+  bottom:32px;
+  left:50%;
+  transform:translateX(-50%);
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  border:1px solid #e6d18a;
+  background:transparent;
+  color:#e6d18a;
+  font-size:36px;
+  cursor:pointer;
+}
 
-  .intent-status {
-    font-size: 11px;
-    opacity: 0.85;
-    margin-top: 10px;
-  }
+/* Modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
 
-  /* Modal */
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-  }
+.modal-box{
+  width:320px;
+  border:1px solid #e6d18a;
+  padding:20px;
+  background:#0b0b0b;
+}
 
-  .modal-box {
-    border: 1px solid #e6d18a;
-    padding: 20px;
-    width: 320px;
-    background: #0b0b0b;
-  }
+.modal-box input,
+.modal-box textarea{
+  width:100%;
+  margin-bottom:12px;
+  background:#000;
+  border:1px solid #444;
+  color:#e6d18a;
+  padding:8px;
+}
 
-  .modal-box input,
-  .modal-box textarea {
-    width: 100%;
-    margin-bottom: 10px;
-    background: #000;
-    border: 1px solid #444;
-    color: #e6d18a;
-    padding: 8px;
-    font-size: 13px;
-  }
-
-  .modal-box button {
-    width: 100%;
-    background: transparent;
-    border: 1px solid #e6d18a;
-    color: #e6d18a;
-    padding: 8px;
-    cursor: pointer;
-  }
+.modal-box button{
+  width:100%;
+  background:transparent;
+  border:1px solid #e6d18a;
+  color:#e6d18a;
+  padding:8px;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
 <div class="top-bar">
-  Creator ID: TS-5F42<br>
+  Creator ID: TS-XXXXXX<br>
   Status: Entry acknowledged
 </div>
 
-<button class="plus-btn" onclick="openModal()">+</button>
-
 <div class="grid" id="grid"></div>
 
-<!-- Modal -->
+<button class="plus-btn" onclick="openModal()">+</button>
+
 <div class="modal" id="modal">
   <div class="modal-box">
     <input id="intentTitle" placeholder="Intent title">
@@ -148,85 +135,27 @@
 </div>
 
 <script>
-/* ------------------ STATE ------------------ */
+/* STEP 1 STATE */
 let intents = [];
 let intentCounter = 1;
 
-/* ------------------ HELPERS ------------------ */
-function stageLabel(stage){
-  return {
-    1: "Declared",
-    2: "Under Observation",
-    3: "External Interest Detected",
-    4: "Execution Path Open",
-    5: "Archived"
-  }[stage] || "Unknown";
-}
-
-function stageMessage(stage){
-  return {
-    2: "Status: Observing external response",
-    3: "Status: External signal registered",
-    4: "Status: Ready for execution path",
-    5: "Status: Archived"
-  }[stage] || "";
-}
-
-function getStageConstraints(stage){
-  return {
-    canEdit: stage === 1,
-    canSignal: stage >= 2 && stage <= 3,
-    canExecute: stage === 4,
-    isReadOnly: stage === 5
-  };
-}
-
-/* ------------------ STAGE ENGINE ------------------ */
-function evaluateStage(intent){
-  if(intent.stage === 1){
-    intent.stage = 2;
-  }
-  else if(intent.stage === 2 && intent.signals > 0){
-    intent.stage = 3;
-  }
-  else if(intent.stage === 3 && intent.signals >= 3){
-    intent.stage = 4;
-  }
-}
-
-/* ------------------ EXTERNAL SIGNAL ------------------ */
-function registerExternalSignal(intentId){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent) return;
-
-  intent.signals++;
-  evaluateStage(intent);
-  render();
-}
-
-/* ------------------ UI ------------------ */
+/* UI FUNCTIONS */
 function openModal(){
-  document.getElementById("modal").style.display = "flex";
+  modal.style.display = "flex";
 }
 
 function closeModal(){
-  document.getElementById("modal").style.display = "none";
+  modal.style.display = "none";
 }
 
 function createIntent(){
   const title = intentTitle.value.trim();
   if(!title) return;
 
-  const intent = {
-    id: "INT-" + String(intentCounter++).padStart(3, "0"),
-    title,
-    desc: intentDesc.value,
-    stage: 1,
-    signals: 0
-  };
-
-  intents.push(intent);
-  evaluateStage(intent);
+  intents.push({
+    id: "INT-" + String(intentCounter++).padStart(3,"0"),
+    title
+  });
 
   intentTitle.value = "";
   intentDesc.value = "";
@@ -235,32 +164,17 @@ function createIntent(){
 }
 
 function render(){
-  const grid = document.getElementById("grid");
   grid.innerHTML = "";
-
-  intents.forEach(intent => {
+  intents.forEach(intent=>{
     const card = document.createElement("div");
     card.className = "intent-card";
-
     card.innerHTML = `
-      <div>
-        <div class="intent-id">${intent.id}</div>
-        <div class="intent-meta">
-          Stage: ${stageLabel(intent.stage)}<br>
-          Signals: ${intent.signals}
-        </div>
-      </div>
-      <div class="intent-status">
-        ${stageMessage(intent.stage)}
-      </div>
+      <div class="intent-id">${intent.id}</div>
+      <div class="intent-label">Declared Intent</div>
     `;
-
     grid.appendChild(card);
   });
 }
-
-/* Initial render */
-render();
 </script>
 
 </body>
