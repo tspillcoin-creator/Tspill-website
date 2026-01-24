@@ -177,6 +177,7 @@ function addIntent(){
     desc,
     stage: 0,
     signals: 0,
+    signalLog: [],
     createdAt: Date.now(),
     locked: false
   });
@@ -226,6 +227,24 @@ function evaluateStage(intent){
   }
 
   // Stage 4 → 5 (manual later)
+}
+function registerExternalSignal(intentId, source="external"){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent) return;
+
+  // prevent duplicate rapid signals from same source
+  const last = intent.signalLog[intent.signalLog.length - 1];
+  if(last && last.source === source && Date.now() - last.time < 3000){
+    return;
+  }
+
+  intent.signals++;
+  intent.signalLog.push({
+    source,
+    time: Date.now()
+  });
+
+  render();
 }
 
 </script>
