@@ -1,250 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>TSPILL Hub Test</title>
+<meta charset="UTF-8" />
+<title>TSPILL Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <style>
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:Inter,system-ui,sans-serif;
-  overflow:hidden;
-}
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+    color: #e6d18a;
+    overflow: hidden;
+  }
 
-#top{
-  position:fixed;
-  top:20px;
-  right:40px;
-  font-size:12px;
-  letter-spacing:1px;
-  color:#d4af37;
-  z-index:5;
-}
+  /* Top Bar */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 14px 20px;
+    text-align: right;
+    font-size: 13px;
+    z-index: 10;
+  }
 
-#grid{
-  height:100vh;
-  padding:120px 80px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:24px;
-  overflow-y:auto;
-  min-height:100vh;
-}
+  /* Plus Button */
+  .plus-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1px solid #e6d18a;
+    background: transparent;
+    color: #e6d18a;
+    font-size: 36px;
+    cursor: pointer;
+    z-index: 10;
+  }
 
-.intent{
-  height:120px;
-  border:1px solid rgba(255,255,255,.08);
-  background:#0b0b0b;
-  padding:14px;
-  cursor:pointer;
-}
+  /* Grid */
+  .grid {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+    overflow-y: auto;
+  }
 
-.intent:hover{
-  border-color:#d4af37;
-}
+  /* Intent Card */
+  .intent-card {
+    border: 1px solid rgba(230,209,138,0.4);
+    padding: 14px;
+    font-size: 12px;
+    background: rgba(0,0,0,0.4);
+  }
 
-.intent-id{
-  font-size:11px;
-  color:#aaa;
-}
+  /* Modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  }
 
-.plus-btn{
-  position:fixed;
-  bottom:40px;
-  left:50%;
-  transform:translateX(-50%);
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  border:1px solid #d4af37;
-  background:transparent;
-  color:#d4af37;
-  font-size:28px;
-  cursor:pointer;
-}
+  .modal-box {
+    border: 1px solid #e6d18a;
+    padding: 20px;
+    width: 320px;
+    background: #0b0b0b;
+  }
 
-#modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.85);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-}
+  .modal-box input,
+  .modal-box textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    background: #000;
+    border: 1px solid #444;
+    color: #e6d18a;
+    padding: 8px;
+    font-size: 13px;
+  }
 
-#modal-box{
-  width:360px;
-  background:#050505;
-  border:1px solid rgba(212,175,55,.3);
-  padding:24px;
-}
-
-#modal-box input,
-#modal-box textarea{
-  width:100%;
-  background:#000;
-  border:1px solid #333;
-  color:#fff;
-  padding:8px;
-  margin-bottom:12px;
-}
+  .modal-box button {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #e6d18a;
+    color: #e6d18a;
+    padding: 8px;
+    cursor: pointer;
+  }
 </style>
-
 </head>
 
 <body>
 
-<div id="top">Creator: <span id="cid"></span> | Status: Active | Signals: 0</div>
-
-<div id="grid"></div>
+<div class="top-bar">
+  Creator ID: TS-5F42<br>
+  Status: Entry acknowledged
+</div>
 
 <button class="plus-btn" onclick="openModal()">+</button>
 
-<div id="modal" onclick="if(event.target.id==='modal')this.style.display='none'">
-  <div id="modal-box">
-    <h3 style="margin-bottom:12px">Declare Intent</h3>
+<div class="grid" id="grid"></div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-box">
     <input id="intentTitle" placeholder="Intent title">
     <textarea id="intentDesc" placeholder="Intent description"></textarea>
-    <button onclick="addIntent()">Log Intent</button>
+    <button onclick="createIntent()">Declare Intent</button>
   </div>
 </div>
 
-</body>
-
 <script>
-document.addEventListener("DOMContentLoaded",()=>{
-  console.log("JS RUNNING");
+/* ------------------ STATE ------------------ */
+let intents = [];
+let intentCounter = 1;
 
-  const cid = localStorage.getItem("TSPILL_ID");
-  if(!cid){
-    alert("No ID, returning to gate");
-    location.href="index.html";
-  }
-
-  document.getElementById("cid").textContent = cid;
-  render();
-});
-
-let intents=[];
-let intentCounter = 0;
-
-function render(){
-  const g = document.getElementById("grid");
-  g.innerHTML = "";
-  if(intents.length === 0){
-    g.innerHTML = "No intents yet.";
-    return;
-  }
-
-  intents.forEach((i, idx) => {
-    const constraints = getStageConstraints(intent.stage);
-
-    evaluateStage(i);   // stage engine heartbeat
-
-    const d = document.createElement("div");
-    d.className = "intent";
-
-    d.innerHTML = `
-      <div class="intent-id">
-        ${i.id}
-      </div>
-      <div style="font-size:11px; opacity:.7; margin-top:6px;">
-        Stage: ${stageLabel(i.stage)}
-      </div>
-      <div style="font-size:11px; opacity:.6;">
-        Signals: ${i.signals}
-      </div>
-    `;
-
-    g.appendChild(d);
-  });
-}
-
-function openModal(){
-  console.log("PLUS CLICKED");
-  document.getElementById("modal").style.display="block";
-}
-
-function addIntent(){
-  const title = document.getElementById("intentTitle").value.trim();
-  const desc  = document.getElementById("intentDesc").value.trim();
-  if(!title || !desc) return;
-
-  intentCounter++;
-
-  intents.push({
-    id: "INT-" + intentCounter.toString().padStart(3,"0"),
-    title,
-    desc,
-    stage: 0,
-    signals: 0,
-    signalLog: [],
-    createdAt: Date.now(),
-    locked: false
-  });
-
-  document.getElementById("intentTitle").value="";
-  document.getElementById("intentDesc").value="";
-  document.getElementById("modal").style.display="none";
-
-  render();
-}
+/* ------------------ HELPERS ------------------ */
 function stageLabel(stage){
-  return [
-    "Declared",
-    "Logged",
-    "Under Observation",
-    "External Interest Detected",
-    "Execution Path Open",
-    "Archived"
-  ][stage] || "Unknown";
-}
-function evaluateStage(intent){
-  let progressed = true;
-
-  while(progressed){
-    progressed = false;
-    const now = Date.now();
-    const age = now - intent.createdAt;
-
-    if(intent.stage === 0){
-      intent.stage = 1;
-      progressed = true;
-    }
-    else if(intent.stage === 1 && age > 3000){
-      intent.stage = 2;
-      progressed = true;
-    }
-    else if(intent.stage === 2 && intent.signals > 0){
-      intent.stage = 3;
-      progressed = true;
-    }
-    else if(intent.stage === 3 && intent.signals >= 3){
-      intent.stage = 4;
-      progressed = true;
-    }
-  }
+  return {
+    1: "Declared",
+    2: "Under Observation",
+    3: "External Interest Detected",
+    4: "Execution Path Open",
+    5: "Archived"
+  }[stage] || "Unknown";
 }
 
-  function registerExternalSignal(intentId){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent){
-    console.warn("Intent not found:", intentId);
-    return;
-  }
-
-  intent.signals++;
-
-  // Resolve stage immediately
-  evaluateStage(intent);
-
-  // Refresh UI
-  render();
-}
-
-  function getStageConstraints(stage){
+function getStageConstraints(stage){
   return {
     canEdit: stage === 1,
     canSignal: stage >= 2 && stage <= 3,
@@ -253,7 +148,80 @@ function evaluateStage(intent){
   };
 }
 
+/* ------------------ STAGE ENGINE ------------------ */
+function evaluateStage(intent){
+  if(intent.stage === 1){
+    intent.stage = 2;
+  }
+  else if(intent.stage === 2 && intent.signals > 0){
+    intent.stage = 3;
+  }
+  else if(intent.stage === 3 && intent.signals >= 3){
+    intent.stage = 4;
+  }
+}
 
+/* ------------------ EXTERNAL SIGNAL ------------------ */
+function registerExternalSignal(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent) return;
+
+  intent.signals++;
+  evaluateStage(intent);
+  render();
+}
+
+/* ------------------ UI ------------------ */
+function openModal(){
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display = "none";
+}
+
+function createIntent(){
+  const title = intentTitle.value.trim();
+  if(!title) return;
+
+  const intent = {
+    id: "INT-" + String(intentCounter++).padStart(3, "0"),
+    title,
+    desc: intentDesc.value,
+    stage: 1,
+    signals: 0
+  };
+
+  intents.push(intent);
+  evaluateStage(intent);
+
+  intentTitle.value = "";
+  intentDesc.value = "";
+  closeModal();
+  render();
+}
+
+function render(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  intents.forEach(intent => {
+    const constraints = getStageConstraints(intent.stage);
+
+    const card = document.createElement("div");
+    card.className = "intent-card";
+    card.innerHTML = `
+      <strong>${intent.id}</strong><br>
+      Stage: ${stageLabel(intent.stage)}<br>
+      Signals: ${intent.signals}
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+/* Initial render */
+render();
 </script>
 
 </body>
