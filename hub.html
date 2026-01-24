@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 let intents=[];
+let intentCounter = 0;
 
 function render(){
   const g=document.getElementById("grid");
@@ -147,6 +148,7 @@ function render(){
   }
 
   intents.forEach((i,idx)=>{
+    evaluateStage(i);
     const d=document.createElement("div");
     d.className="intent";
     d.innerHTML=`
@@ -163,10 +165,69 @@ function openModal(){
 }
 
 function addIntent(){
-  intents.push("Intent "+(intents.length+1));
+  const title = document.getElementById("intentTitle").value.trim();
+  const desc  = document.getElementById("intentDesc").value.trim();
+  if(!title || !desc) return;
+
+  intentCounter++;
+
+  intents.push({
+    id: "INT-" + intentCounter.toString().padStart(3,"0"),
+    title,
+    desc,
+    stage: 0,
+    signals: 0,
+    createdAt: Date.now(),
+    locked: false
+  });
+
+  document.getElementById("intentTitle").value="";
+  document.getElementById("intentDesc").value="";
   document.getElementById("modal").style.display="none";
+
   render();
 }
+function stageLabel(stage){
+  return [
+    "Declared",
+    "Logged",
+    "Under Observation",
+    "External Interest Detected",
+    "Execution Path Open",
+    "Archived"
+  ][stage] || "Unknown";
+}
+function evaluateStage(intent){
+  const now = Date.now();
+  const age = now - intent.createdAt;
+
+  // Stage 0 → 1 (system log)
+  if(intent.stage === 0){
+    intent.stage = 1;
+    return;
+  }
+
+  // Stage 1 → 2 (after short presence)
+  if(intent.stage === 1 && age > 3000){
+    intent.stage = 2;
+    return;
+  }
+
+  // Stage 2 → 3 (external signal)
+  if(intent.stage === 2 && intent.signals > 0){
+    intent.stage = 3;
+    return;
+  }
+
+  // Stage 3 → 4 (sustained interest)
+  if(intent.stage === 3 && intent.signals >= 3){
+    intent.stage = 4;
+    return;
+  }
+
+  // Stage 4 → 5 (manual later)
+}
+
 </script>
 
 </body>
