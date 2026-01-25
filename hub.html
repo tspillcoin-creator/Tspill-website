@@ -19,8 +19,8 @@ body{
   position:fixed;
   top:16px;
   right:20px;
-  text-align:right;
   font-size:13px;
+  white-space:nowrap;
 }
 
 /* Grid */
@@ -40,8 +40,8 @@ body{
 /* Intent Stamp */
 .intent-card{
   border:1px solid rgba(230,209,138,0.6);
-  padding:16px;
-  min-height:160px;
+  padding:14px;
+  min-height:120px; /* refined height */
   background:rgba(0,0,0,0.45);
   display:flex;
   flex-direction:column;
@@ -117,10 +117,7 @@ body{
 
 <body>
 
-<div class="top-bar">
-  Creator ID: TS-XXXXXX<br>
-  Status: Entry acknowledged
-</div>
+<div class="top-bar" id="identityBar"></div>
 
 <div class="grid" id="grid"></div>
 
@@ -138,6 +135,11 @@ body{
 /* STEP 1 STATE */
 let intents = [];
 let intentCounter = 1;
+
+/* Identity detection */
+const creatorId = localStorage.getItem("creatorId") || "TS-UNASSIGNED";
+document.getElementById("identityBar").innerText =
+  `Creator ID: ${creatorId} | Status: Entry acknowledged`;
 
 /* UI FUNCTIONS */
 function openModal(){
