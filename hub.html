@@ -360,6 +360,32 @@ ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
     grid.appendChild(card);
   });
 }
+  
+const sidePanel = document.getElementById("sidePanel");
+const overlay = document.getElementById("overlay");
+const sidePanelTitle = document.getElementById("sidePanelTitle");
+const sidePanelMeta = document.getElementById("sidePanelMeta");
+
+function openSidePanel(intent){
+  sidePanelTitle.textContent = intent.id;
+  sidePanelMeta.textContent = `Creator: ${intent.creatorId} | Stage 4 — Execution Path Open`;
+
+  sidePanel.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+
+  requestAnimationFrame(() => {
+    sidePanel.classList.add("open");
+  });
+}
+
+function closeSidePanel(){
+  sidePanel.classList.remove("open");
+  overlay.classList.add("hidden");
+
+  setTimeout(() => {
+    sidePanel.classList.add("hidden");
+  }, 300);
+}
 
 </script>
 
