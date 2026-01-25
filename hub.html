@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSPILL Hub — Step 4</title>
+<title>TSPILL Hub — Stage 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -30,7 +30,7 @@ body{
   bottom:120px;
   padding:30px;
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
+  grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
   gap:24px;
   overflow-y:auto;
 }
@@ -38,23 +38,24 @@ body{
 .intent-card{
   border:1px solid rgba(230,209,138,0.6);
   padding:14px;
-  min-height:120px;
   background:rgba(0,0,0,0.45);
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
 }
 
 .intent-id{
   font-weight:bold;
   font-size:14px;
-  border-bottom:1px solid rgba(230,209,138,0.3);
-  padding-bottom:6px;
+  margin-bottom:6px;
 }
 
-.intent-label{
-  font-size:12px;
+.intent-title{
+  font-size:13px;
+  margin-bottom:12px;
+}
+
+.intent-meta{
+  font-size:11px;
   opacity:0.85;
+  line-height:1.4;
 }
 
 .plus-btn{
@@ -121,7 +122,7 @@ body{
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <input id="intentTitle" placeholder="Intent title">
+    <input id="intentTitle" placeholder="Intent title" />
     <textarea id="intentDesc" placeholder="Intent description"></textarea>
     <button onclick="createIntent()">Declare Intent</button>
   </div>
@@ -141,14 +142,16 @@ function closeModal(){
 
 function createIntent(){
   const title = intentTitle.value.trim();
-  if(!title) return;
+  const desc  = intentDesc.value.trim();
+  if(!title || !desc) return;
 
   intents.push({
     id: "INT-" + String(intentCounter++).padStart(3,"0"),
     title,
+    description: desc,
     stage: 2,
-    signals: 0,
-    executionOpen: false
+    creatorId: "TS-UNASSIGNED",
+    createdAt: new Date().toLocaleDateString()
   });
 
   intentTitle.value = "";
@@ -157,60 +160,18 @@ function createIntent(){
   render();
 }
 
-/* STEP 3 */
-function registerExternalSignal(intentId){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent) return;
-
-  intent.signals++;
-  if(intent.stage === 2 && intent.signals > 0){
-    intent.stage = 3;
-  }
-  render();
-}
-
-/* STEP 4 */
-function openExecutionPath(intentId){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent) return;
-
-  if(intent.stage === 3){
-    intent.executionOpen = true;
-    intent.stage = 4;
-  }
-
-  render();
-}
-
-  function anchorIntent(intentId, type, reference){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent) return;
-
-  if(intent.stage === 4){
-    intent.anchor = {
-      type,
-      reference,
-      timestamp: Date.now()
-    };
-    intent.stage = 5;
-  }
-
-  render();
-}
-
 function render(){
   grid.innerHTML = "";
   intents.forEach(intent=>{
-    let label = "Under Observation";
-    if(intent.stage === 3) label = "External Interest Detected";
-    if(intent.stage === 4) label = "Execution Path Open";
-    if(intent.stage === 5) label = "Anchored in Reality";
-
     const card = document.createElement("div");
     card.className = "intent-card";
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
-      <div class="intent-label">${label}</div>
+      <div class="intent-title">Title: ${intent.title}</div>
+      <div class="intent-meta">
+        Creator: ${intent.creatorId} | Under Observation<br/>
+        Date: ${intent.createdAt}
+      </div>
     `;
     grid.appendChild(card);
   });
