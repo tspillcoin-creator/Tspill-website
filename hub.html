@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSPILL Hub — Step 1</title>
+<title>TSPILL Hub — Step 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -41,7 +41,7 @@ body{
 .intent-card{
   border:1px solid rgba(230,209,138,0.6);
   padding:14px;
-  min-height:120px; /* refined height */
+  min-height:120px;
   background:rgba(0,0,0,0.45);
   display:flex;
   flex-direction:column;
@@ -132,16 +132,16 @@ body{
 </div>
 
 <script>
-/* STEP 1 STATE */
+/* STATE */
 let intents = [];
 let intentCounter = 1;
 
-/* Identity detection */
-const creatorId = localStorage.getItem("creatorId") || "TS-UNASSIGNED";
+/* Identity (unassigned for now) */
+const creatorId = "TS-UNASSIGNED";
 document.getElementById("identityBar").innerText =
   `Creator ID: ${creatorId} | Status: Entry acknowledged`;
 
-/* UI FUNCTIONS */
+/* UI */
 function openModal(){
   modal.style.display = "flex";
 }
@@ -150,14 +150,18 @@ function closeModal(){
   modal.style.display = "none";
 }
 
+/* STEP 2 LOGIC */
 function createIntent(){
   const title = intentTitle.value.trim();
   if(!title) return;
 
-  intents.push({
+  const intent = {
     id: "INT-" + String(intentCounter++).padStart(3,"0"),
-    title
-  });
+    title,
+    stage: 2   // ← Under Observation
+  };
+
+  intents.push(intent);
 
   intentTitle.value = "";
   intentDesc.value = "";
@@ -172,7 +176,7 @@ function render(){
     card.className = "intent-card";
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
-      <div class="intent-label">Declared Intent</div>
+      <div class="intent-label">Under Observation</div>
     `;
     grid.appendChild(card);
   });
