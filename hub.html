@@ -334,7 +334,9 @@ if(intent.stage === 3){
     card.onclick = () => openExecutionPath(intent.id);
   }
 }
-
+if(intent.stage === 4){
+  card.onclick = () => openSidePanel(intent);
+}
 
     let contextText = "Context: Not defined";
     if(intent.contextLocked){
