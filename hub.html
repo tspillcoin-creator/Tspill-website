@@ -182,12 +182,29 @@ function openExecutionPath(intentId){
   render();
 }
 
+  function anchorIntent(intentId, type, reference){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent) return;
+
+  if(intent.stage === 4){
+    intent.anchor = {
+      type,
+      reference,
+      timestamp: Date.now()
+    };
+    intent.stage = 5;
+  }
+
+  render();
+}
+
 function render(){
   grid.innerHTML = "";
   intents.forEach(intent=>{
     let label = "Under Observation";
     if(intent.stage === 3) label = "External Interest Detected";
     if(intent.stage === 4) label = "Execution Path Open";
+    if(intent.stage === 5) label = "Anchored in Reality";
 
     const card = document.createElement("div");
     card.className = "intent-card";
