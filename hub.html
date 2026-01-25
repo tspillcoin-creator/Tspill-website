@@ -142,7 +142,9 @@ body{
 </div>
 
 <script>
-let intents = [];
+window.intents = window.intents || [];
+const intents = window.intents;
+  
 let intentCounter = 1;
 let activeIntent = null;
 
@@ -217,6 +219,7 @@ function saveContext(){
 
 function openExecutionPath(intentId){
   const intent = intents.find(i => i.id === intentId);
+  console.log("openExecutionPath fired", intent);
   if(!intent) return;
 
   // Stage 4 constraint check
