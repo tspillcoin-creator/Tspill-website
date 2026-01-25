@@ -211,6 +211,22 @@ function saveContext(){
   render();
 }
 
+function openExecutionPath(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent) return;
+
+  // Stage 4 constraint check
+  if(
+    intent.stage === 3 &&
+    intent.contextLocked === true &&
+    intent.signals >= 1
+  ){
+    intent.executionOpen = true;
+    intent.stage = 4;
+    render();
+  }
+}
+  
 function render(){
   grid.innerHTML = "";
   intents.forEach(intent=>{
@@ -228,11 +244,16 @@ ${intent.domain || "-"} | ${intent.intentNature || "-"}
 ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
     }
 
+    let stageLabel = "Under Observation";
+    if(intent.stage === 3) stageLabel = "External Interest Detected";
+    if(intent.stage === 4) stageLabel = "Execution Path Open";
+    if(intent.stage === 5) stageLabel = "Anchored";
+
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
       <div class="intent-title">Title: ${intent.title}</div>
       <div class="intent-meta">
-        Creator: ${intent.creatorId} | ${intent.stage === 3 ? "External Interest Detected" : "Under Observation"}<br/>
+        Creator: ${intent.creatorId} | ${stageLabel}<br/>
         Date: ${intent.createdAt}<br/>
         ${contextText}
       </div>
@@ -240,6 +261,7 @@ ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
     grid.appendChild(card);
   });
 }
+
 </script>
 
 </body>
