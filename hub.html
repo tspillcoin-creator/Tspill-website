@@ -112,7 +112,27 @@ body{
 </head>
 
 <body>
+  
+  <!-- Stage 4 Side Panel -->
+<div id="sidePanel" class="side-panel hidden">
+  <div class="side-panel-header">
+    <div id="sidePanelTitle">Intent</div>
+    <button class="close-btn" onclick="closeSidePanel()">×</button>
+  </div>
 
+  <div class="side-panel-content">
+    <p id="sidePanelMeta"></p>
+
+    <!-- Placeholder content (Step 1 only) -->
+    <div class="panel-placeholder">
+      Execution workspace will appear here.
+    </div>
+  </div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay hidden" onclick="closeSidePanel()"></div>
+ 
 <div class="top-bar">
   Creator ID: TS-UNASSIGNED | Status: Entry acknowledged
 </div>
