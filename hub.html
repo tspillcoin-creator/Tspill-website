@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSPILL Hub — Stage 2</title>
+<title>TSPILL Hub — Stage 3</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -39,6 +39,7 @@ body{
   border:1px solid rgba(230,209,138,0.6);
   padding:14px;
   background:rgba(0,0,0,0.45);
+  cursor:pointer;
 }
 
 .intent-id{
@@ -49,7 +50,7 @@ body{
 
 .intent-title{
   font-size:13px;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 
 .intent-meta{
@@ -83,7 +84,7 @@ body{
 }
 
 .modal-box{
-  width:320px;
+  width:340px;
   border:1px solid #e6d18a;
   padding:20px;
   background:#0b0b0b;
@@ -92,7 +93,7 @@ body{
 .modal-box input,
 .modal-box textarea{
   width:100%;
-  margin-bottom:12px;
+  margin-bottom:10px;
   background:#000;
   border:1px solid #444;
   color:#e6d18a;
@@ -118,26 +119,46 @@ body{
 
 <div class="grid" id="grid"></div>
 
-<button class="plus-btn" onclick="openModal()">+</button>
+<button class="plus-btn" onclick="openCreateModal()">+</button>
 
-<div class="modal" id="modal">
+<!-- Stage 2 create -->
+<div class="modal" id="createModal">
   <div class="modal-box">
-    <input id="intentTitle" placeholder="Intent title" />
+    <input id="intentTitle" placeholder="Intent title">
     <textarea id="intentDesc" placeholder="Intent description"></textarea>
     <button onclick="createIntent()">Declare Intent</button>
+  </div>
+</div>
+
+<!-- Stage 3 context -->
+<div class="modal" id="contextModal">
+  <div class="modal-box">
+    <input id="domain" placeholder="Domain">
+    <input id="nature" placeholder="Intent nature">
+    <textarea id="purpose" placeholder="Context purpose"></textarea>
+    <input id="serve" placeholder="Context serve">
+    <button onclick="saveContext()">Save Context</button>
   </div>
 </div>
 
 <script>
 let intents = [];
 let intentCounter = 1;
+let activeIntent = null;
 
-function openModal(){
-  modal.style.display = "flex";
+function openCreateModal(){
+  createModal.style.display = "flex";
 }
 
-function closeModal(){
-  modal.style.display = "none";
+function openContextModal(intent){
+  if(intent.stage !== 3 || intent.contextLocked) return;
+  activeIntent = intent;
+  contextModal.style.display = "flex";
+}
+
+function closeModals(){
+  createModal.style.display = "none";
+  contextModal.style.display = "none";
 }
 
 function createIntent(){
@@ -151,12 +172,42 @@ function createIntent(){
     description: desc,
     stage: 2,
     creatorId: "TS-UNASSIGNED",
-    createdAt: new Date().toLocaleDateString()
+    createdAt: new Date().toLocaleDateString(),
+    contextLocked: false
   });
 
   intentTitle.value = "";
   intentDesc.value = "";
-  closeModal();
+  closeModals();
+  render();
+}
+
+/* External signal → Stage 3 */
+function registerExternalSignal(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent) return;
+
+  if(intent.stage === 2){
+    intent.stage = 3;
+  }
+  render();
+}
+
+function saveContext(){
+  if(!activeIntent) return;
+
+  activeIntent.domain = domain.value.trim();
+  activeIntent.intentNature = nature.value.trim();
+  activeIntent.contextPurpose = purpose.value.trim();
+  activeIntent.contextServe = serve.value.trim();
+  activeIntent.contextLocked = true;
+
+  domain.value = "";
+  nature.value = "";
+  purpose.value = "";
+  serve.value = "";
+
+  closeModals();
   render();
 }
 
@@ -165,12 +216,25 @@ function render(){
   intents.forEach(intent=>{
     const card = document.createElement("div");
     card.className = "intent-card";
+
+    if(intent.stage === 3 && !intent.contextLocked){
+      card.onclick = () => openContextModal(intent);
+    }
+
+    let contextText = "Context: Not defined";
+    if(intent.contextLocked){
+      contextText = `Context:
+${intent.domain || "-"} | ${intent.intentNature || "-"}
+${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
+    }
+
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
       <div class="intent-title">Title: ${intent.title}</div>
       <div class="intent-meta">
-        Creator: ${intent.creatorId} | Under Observation<br/>
-        Date: ${intent.createdAt}
+        Creator: ${intent.creatorId} | ${intent.stage === 3 ? "External Interest Detected" : "Under Observation"}<br/>
+        Date: ${intent.createdAt}<br/>
+        ${contextText}
       </div>
     `;
     grid.appendChild(card);
