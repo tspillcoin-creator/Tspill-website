@@ -187,7 +187,11 @@ function registerExternalSignal(intentId){
   const intent = intents.find(i => i.id === intentId);
   if(!intent) return;
 
-  if(intent.stage === 2){
+  // 🔒 Do NOT downgrade stage if execution already opened
+  if(intent.stage >= 4) return;
+
+  intent.signals++;
+  if(intent.signals >= 1){
     intent.stage = 3;
   }
   render();
