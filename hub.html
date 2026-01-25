@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSPILL Hub — Step 2</title>
+<title>TSPILL Hub — Step 3</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -117,7 +117,9 @@ body{
 
 <body>
 
-<div class="top-bar" id="identityBar"></div>
+<div class="top-bar">
+  Creator ID: TS-UNASSIGNED | Status: Entry acknowledged
+</div>
 
 <div class="grid" id="grid"></div>
 
@@ -136,11 +138,6 @@ body{
 let intents = [];
 let intentCounter = 1;
 
-/* Identity (unassigned for now) */
-const creatorId = "TS-UNASSIGNED";
-document.getElementById("identityBar").innerText =
-  `Creator ID: ${creatorId} | Status: Entry acknowledged`;
-
 /* UI */
 function openModal(){
   modal.style.display = "flex";
@@ -150,18 +147,17 @@ function closeModal(){
   modal.style.display = "none";
 }
 
-/* STEP 2 LOGIC */
+/* STEP 3 CORE LOGIC */
 function createIntent(){
   const title = intentTitle.value.trim();
   if(!title) return;
 
-  const intent = {
+  intents.push({
     id: "INT-" + String(intentCounter++).padStart(3,"0"),
     title,
-    stage: 2   // ← Under Observation
-  };
-
-  intents.push(intent);
+    stage: 2,     // Under Observation
+    signals: 0
+  });
 
   intentTitle.value = "";
   intentDesc.value = "";
@@ -169,14 +165,33 @@ function createIntent(){
   render();
 }
 
+/* External signal entry */
+function registerExternalSignal(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if(!intent) return;
+
+  intent.signals++;
+
+  if(intent.stage === 2 && intent.signals > 0){
+    intent.stage = 3;
+  }
+
+  render();
+}
+
 function render(){
   grid.innerHTML = "";
   intents.forEach(intent=>{
+    const label =
+      intent.stage === 3
+        ? "External Interest Detected"
+        : "Under Observation";
+
     const card = document.createElement("div");
     card.className = "intent-card";
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
-      <div class="intent-label">Under Observation</div>
+      <div class="intent-label">${label}</div>
     `;
     grid.appendChild(card);
   });
