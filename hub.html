@@ -173,6 +173,7 @@ function createIntent(){
     title,
     description: desc,
     stage: 2,
+    signals: 0,
     creatorId: "TS-UNASSIGNED",
     createdAt: new Date().toLocaleDateString(),
     contextLocked: false
@@ -213,6 +214,8 @@ function saveContext(){
   purpose.value = "";
   serve.value = "";
 
+  registerExternalSignal(activeIntent.id);
+
   closeModals();
   render();
 }
@@ -240,9 +243,14 @@ function render(){
     const card = document.createElement("div");
     card.className = "intent-card";
 
-    if(intent.stage === 3 && !intent.contextLocked){
-      card.onclick = () => openContextModal(intent);
-    }
+if(intent.stage === 3){
+  if(!intent.contextLocked){
+    card.onclick = () => openContextModal(intent);
+  } else {
+    card.onclick = () => openExecutionPath(intent.id);
+  }
+}
+
 
     let contextText = "Context: Not defined";
     if(intent.contextLocked){
