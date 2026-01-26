@@ -494,6 +494,20 @@ if(anchorInput){
   anchorInput.value = intent.anchor || "";
 }
 }
+  
+function openReadonlyPanel(intent){
+  activeIntent = intent;
+  panelMode = "readonly";
+
+  populateReadonlyPanel(intent);
+
+  sidePanel.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+
+  requestAnimationFrame(() => {
+    sidePanel.classList.add("open");
+  });
+}
 
 function saveExecutionNote(){
   if(!activeIntent) return;
