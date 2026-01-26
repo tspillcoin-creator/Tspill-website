@@ -225,7 +225,21 @@ body{
   gap: 8px;
   margin-top: 16px;
 }
+  
+.anchor-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
 
+.anchor-section input {
+  background: #000;
+  border: 1px solid rgba(245,214,122,0.3);
+  color: #f5d67a;
+  padding: 8px;
+}
+  
 </style>
 </head>
 
@@ -263,6 +277,20 @@ body{
 
     <div id="imagePreview" class="image-preview hidden"></div>
   </div>
+    
+    <!-- Anchor -->
+<div class="anchor-section">
+  <label class="panel-label">Anchor (optional)</label>
+  <input
+    type="text"
+    id="anchorInput"
+    placeholder="Reference, link, or execution anchor"
+  />
+
+  <button class="panel-save-btn" onclick="saveAnchor()">
+    Save anchor
+  </button>
+</div>
   </div>
 </div>
 
@@ -457,6 +485,11 @@ function openSidePanel(intent){
     sidePanel.classList.add("open");
   });
   renderImagePreview(intent.image);
+  
+  const anchorInput = document.getElementById("anchorInput");
+if(anchorInput){
+  anchorInput.value = intent.anchor || "";
+}
 }
 
 function saveExecutionNote(){
@@ -497,7 +530,17 @@ function renderImagePreview(image){
     preview.classList.add("hidden");
   }
 }
+  
+function saveAnchor(){
+  if(!activeIntent) return;
 
+  const anchorValue =
+    document.getElementById("anchorInput").value.trim();
+
+  activeIntent.anchor = anchorValue;
+
+  console.log("Anchor saved:", anchorValue);
+}
 
 function closeSidePanel(){
   sidePanel.classList.remove("open");
