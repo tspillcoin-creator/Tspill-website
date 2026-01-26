@@ -473,6 +473,13 @@ const sidePanelMeta = document.getElementById("sidePanelMeta");
 
 function openSidePanel(intent){
   activeIntent = intent;
+  panelMode = "edit";
+
+  const content = document.querySelector(".side-panel-content");
+  if(content){
+    content.innerHTML = "";
+  }
+
   sidePanelTitle.textContent = intent.id;
   sidePanelMeta.textContent = `Creator: ${intent.creatorId} | Stage 4 — Execution Path Open`;
 
