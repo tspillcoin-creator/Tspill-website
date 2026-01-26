@@ -199,6 +199,23 @@ body{
   padding: 8px;
   cursor: pointer;
 }
+
+  .image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.image-preview img {
+  max-width: 100%;
+  border: 1px solid rgba(245,214,122,0.3);
+}
+
+.image-preview.hidden {
+  display: none;
+}
+
 </style>
 </head>
 
@@ -226,6 +243,17 @@ body{
   </button>
 </div>
   </div>
+</div>
+
+  <div class="image-section">
+  <label class="panel-label">Intent image (optional)</label>
+
+  <input type="file"
+         id="intentImageInput"
+         accept="image/*"
+         onchange="handleImageUpload(event)" />
+
+  <div id="imagePreview" class="image-preview hidden"></div>
 </div>
 
 <!-- Overlay -->
@@ -418,7 +446,9 @@ function openSidePanel(intent){
   requestAnimationFrame(() => {
     sidePanel.classList.add("open");
   });
+  renderImagePreview(intent.image);
 }
+
 function saveExecutionNote(){
   if(!activeIntent) return;
 
@@ -427,6 +457,38 @@ function saveExecutionNote(){
 
   console.log("Execution note saved:", note);
 }
+  
+function handleImageUpload(event){
+  if(!activeIntent) return;
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    activeIntent.image = {
+      type: "local",
+      src: reader.result
+    };
+    renderImagePreview(activeIntent.image);
+    console.log("Image attached to intent");
+  };
+  reader.readAsDataURL(file);
+}
+function renderImagePreview(image){
+  const preview = document.getElementById("imagePreview");
+  if(!preview) return;
+
+  if(image && image.src){
+    preview.innerHTML = `<img src="${image.src}" />`;
+    preview.classList.remove("hidden");
+  } else {
+    preview.innerHTML = "";
+    preview.classList.add("hidden");
+  }
+}
+
+
 function closeSidePanel(){
   sidePanel.classList.remove("open");
   overlay.classList.add("hidden");
