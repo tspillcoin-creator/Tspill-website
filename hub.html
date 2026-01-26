@@ -216,6 +216,13 @@ body{
   display: none;
 }
 
+.image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
 </style>
 </head>
 
@@ -242,18 +249,18 @@ body{
     Save execution note
   </button>
 </div>
-  </div>
-</div>
-
+    <!-- Image Upload (Stage 4 only) -->
   <div class="image-section">
-  <label class="panel-label">Intent image (optional)</label>
+    <label class="panel-label">Intent image (optional)</label>
 
-  <input type="file"
-         id="intentImageInput"
-         accept="image/*"
-         onchange="handleImageUpload(event)" />
+    <input type="file"
+           id="intentImageInput"
+           accept="image/*"
+           onchange="handleImageUpload(event)" />
 
-  <div id="imagePreview" class="image-preview hidden"></div>
+    <div id="imagePreview" class="image-preview hidden"></div>
+  </div>
+  </div>
 </div>
 
 <!-- Overlay -->
