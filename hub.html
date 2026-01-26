@@ -568,6 +568,45 @@ function closeSidePanel(){
   }, 300);
 }
 
+function populateReadonlyPanel(intent){
+  const content = document.querySelector(".side-panel-content");
+
+  content.innerHTML = `
+    <div class="readonly-header">
+      <div class="intent-id">${intent.id}</div>
+      <div class="intent-title">${intent.title}</div>
+      <div class="anchor-badge">ANCHOR</div>
+      <div class="stage-path">
+        Draft → Observed → Interest → Execution → ● Anchored
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div>Created: ${intent.createdAt}</div>
+      <div>Anchored: ${intent.anchoredAt || "-"}</div>
+    </div>
+
+    <div class="context-snapshot">
+      <strong>Context</strong><br/>
+      ${intent.domain || "-"} | ${intent.intentNature || "-"}<br/>
+      ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}
+    </div>
+
+    ${intent.image?.src ? `
+      <div class="anchor-evidence">
+        <img src="${intent.image.src}" />
+        <div class="anchor-ref">${intent.anchor || ""}</div>
+      </div>
+    ` : ""}
+
+    <div class="execution-trace">
+      <strong>Execution note</strong>
+      <div>${intent.executionNote || "-"}</div>
+      <div class="signal-count">Signals: ${intent.signals || 0}</div>
+    </div>
+  `;
+}
+
 </script>
 
 </body>
