@@ -494,11 +494,13 @@ ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
 
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
-      <div class="intent-title">Title: ${intent.title}</div>
+      <div class="intent-title">${intent.title}</div>
       <div class="intent-meta">
-        Creator: ${intent.creatorId} | ${stageLabel}<br/>
-        Date: ${intent.createdAt}<br/>
-        ${contextText}
+      ${intent.creatorId || "TS-UNASSIGNED"} | ${stageLabel}
+      </div>
+      <div class="intent-footer">
+      <span>Signals: ${intent.signals || 0}</span>
+      ${intent.stage === 5 ? `<span class="anchor-badge">ANCHOR</span>` : ""}
       </div>
     `;
     grid.appendChild(card);
