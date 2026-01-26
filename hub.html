@@ -437,6 +437,9 @@ if(intent.stage === 3){
 if(intent.stage === 4){
   card.onclick = () => openSidePanel(intent);
 }
+if(intent.stage === 5){
+  card.onclick = () => openReadonlyPanel(intent);
+}
 
     let contextText = "Context: Not defined";
     if(intent.contextLocked){
