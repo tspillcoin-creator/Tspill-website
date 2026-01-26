@@ -172,6 +172,33 @@ body{
 .overlay.hidden {
   display: none;
 }
+.execution-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-label {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.execution-section textarea {
+  min-height: 80px;
+  background: #000;
+  border: 1px solid rgba(245,214,122,0.3);
+  color: #f5d67a;
+  padding: 8px;
+  resize: vertical;
+}
+
+.panel-save-btn {
+  background: transparent;
+  border: 1px solid #f5d67a;
+  color: #f5d67a;
+  padding: 8px;
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -188,9 +215,16 @@ body{
     <p id="sidePanelMeta"></p>
 
     <!-- Placeholder content (Step 1 only) -->
-    <div class="panel-placeholder">
-      Execution workspace will appear here.
-    </div>
+  <div class="execution-section">
+   <label class="panel-label">Execution note</label>
+   <textarea id="executionNoteInput"
+    placeholder="Describe how you are thinking of executing this intent (optional)">
+   </textarea>
+
+  <button class="panel-save-btn" onclick="saveExecutionNote()">
+    Save execution note
+  </button>
+</div>
   </div>
 </div>
 
@@ -369,8 +403,14 @@ const sidePanelTitle = document.getElementById("sidePanelTitle");
 const sidePanelMeta = document.getElementById("sidePanelMeta");
 
 function openSidePanel(intent){
+  activeIntent = intent;
   sidePanelTitle.textContent = intent.id;
   sidePanelMeta.textContent = `Creator: ${intent.creatorId} | Stage 4 — Execution Path Open`;
+
+  const noteInput = document.getElementById("executionNoteInput");
+  if(noteInput){
+  noteInput.value = intent.executionNote || "";
+  }
 
   sidePanel.classList.remove("hidden");
   overlay.classList.remove("hidden");
@@ -379,7 +419,14 @@ function openSidePanel(intent){
     sidePanel.classList.add("open");
   });
 }
+function saveExecutionNote(){
+  if(!activeIntent) return;
 
+  const note = document.getElementById("executionNoteInput").value.trim();
+  activeIntent.executionNote = note;
+
+  console.log("Execution note saved:", note);
+}
 function closeSidePanel(){
   sidePanel.classList.remove("open");
   overlay.classList.add("hidden");
