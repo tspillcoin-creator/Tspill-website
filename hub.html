@@ -154,7 +154,7 @@ body{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px;
+  padding: 0 0 12px 0;
   font-size: 14px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
@@ -168,7 +168,7 @@ body{
 }
 
 .side-panel-content {
-  padding: 14px;
+  padding: 0;
   font-size: 13px;
 }
 
@@ -286,7 +286,16 @@ body{
   font-size: 13px;
 }
 
-  
+.readonly {
+  opacity: 0.75;
+}
+
+.readonly input,
+.readonly textarea,
+.readonly button {
+  display: none;
+}
+
 </style>
 </head>
 
