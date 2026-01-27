@@ -619,19 +619,21 @@ function createIntent(){
   render();
 }
 
-/* External signal → Stage 3 */
-function registerExternalSignal(intentId){
-  const intent = intents.find(i => i.id === intentId);
-  if(!intent) return;
+async function registerExternalSignal(intentId) {
+  const intent = window.intents.find(i => i.id === intentId);
+  if (!intent) return;
 
   // 🔒 Do NOT downgrade stage if execution already opened
-  if(intent.stage >= 4) return;
+  if (intent.stage >= 4) return;
 
-  intent.signals++;
-  if(intent.signals >= 1){
-    intent.stage = 3;
-  }
-  render();
+  const ref = doc(window.db, "intents", intentId);
+
+  await updateDoc(ref, {
+    stage: 3,
+    signals: increment(1)
+  });
+
+  await loadIntentsFromFirebase();
 }
 
 function saveContext(){
