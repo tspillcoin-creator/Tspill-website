@@ -286,6 +286,10 @@ body{
   font-size: 13px;
 }
 
+  .side-panel.readonly {
+  opacity: 0.85;
+}
+
 .readonly {
   opacity: 0.75;
 }
@@ -295,6 +299,24 @@ body{
 .readonly button {
   display: none;
 }
+  
+.side-panel.readonly input,
+.side-panel.readonly textarea,
+.side-panel.readonly select,
+.side-panel.readonly button {
+  display: none;
+}
+.readonly .panel-section {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.readonly .panel-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.5;
+}
+  
 
 </style>
 </head>
