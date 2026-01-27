@@ -443,6 +443,40 @@ body{
   </div>
 </div>
 
+<script type="module">
+  // Firebase imports
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  // Firebase config (UNCHANGED)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
+    authDomain: "tspill-protocol.firebaseapp.com",
+    projectId: "tspill-protocol",
+    storageBucket: "tspill-protocol.firebasestorage.app",
+    messagingSenderId: "863753676409",
+    appId: "1:863753676409:web:ae3957d697c68d877556a8"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 🔑 Read identity
+  const TSPILL_ID = localStorage.getItem("TSPILL_ID");
+
+  if (!TSPILL_ID) {
+    alert("Identity missing. Redirecting.");
+    window.location.href = "index.html";
+  }
+
+  // 🌐 Expose to window (IMPORTANT for existing code)
+  window.db = db;
+  window.TSPILL_ID = TSPILL_ID;
+
+  console.log("🔥 Hub Firebase connected:", TSPILL_ID);
+</script>
+
 <script>
 window.intents = window.intents || [];
 const intents = window.intents;
