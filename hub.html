@@ -623,15 +623,14 @@ async function registerExternalSignal(intentId) {
   const intent = window.intents.find(i => i.id === intentId);
   if (!intent) return;
 
-  // 🔒 Do NOT downgrade stage if execution already opened
-  if (intent.stage >= 4) return;
-
   const ref = doc(window.db, "intents", intentId);
 
+  // only signal increment here
   await updateDoc(ref, {
-    stage: 3,
     signals: increment(1)
   });
+
+  console.log("📡 External signal registered:", intentId);
 
   await loadIntentsFromFirebase();
 }
