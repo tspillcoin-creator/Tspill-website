@@ -14,6 +14,59 @@ body{
   overflow:hidden;
 }
 
+  body::before {
+  content: "PUBLIC LEDGER";
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  opacity: 0.05;
+  color: #f5d67a;
+  pointer-events: none;
+  z-index: 0;
+}
+/* === Standard Motion Nodes === */
+
+.fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.25s ease-out forwards;
+}
+
+.stamp-in {
+  animation: stampIn 0.18s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes stampIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .top-bar{
   position:fixed;
   top:16px;
