@@ -443,7 +443,125 @@ body{
   </div>
 </div>
 
+<script type="module">
+/* ===============================
+   🔥 FIREBASE – HUB SINGLE MODULE
+   =============================== */
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/* ===============================
+   🔐 FIREBASE CONFIG (UNCHANGED)
+   =============================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
+  authDomain: "tspill-protocol.firebaseapp.com",
+  projectId: "tspill-protocol",
+  storageBucket: "tspill-protocol.firebasestorage.app",
+  messagingSenderId: "863753676409",
+  appId: "1:863753676409:web:ae3957d697c68d877556a8"
+};
+
+/* ===============================
+   🚀 INIT FIREBASE
+   =============================== */
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ===============================
+   🔑 READ IDENTITY
+   =============================== */
+const TSPILL_ID = localStorage.getItem("TSPILL_ID");
+
+if (!TSPILL_ID) {
+  alert("Identity missing. Redirecting.");
+  window.location.href = "index.html";
+}
+
+/* ===============================
+   🌐 EXPOSE GLOBALS (IMPORTANT)
+   =============================== */
+window.db = db;
+window.TSPILL_ID = TSPILL_ID;
+
+/* ===============================
+   💾 SAVE INTENT (F2 – WRITE)
+   =============================== */
+window.saveIntentToFirebase = async function (intentData) {
+  try {
+    const docRef = await addDoc(
+      collection(db, "intents"),
+      {
+        ...intentData,
+        creatorId: TSPILL_ID,
+        stage: intentData.stage || 1,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    console.log("🔥 Intent saved:", docRef.id);
+    return docRef.id;
+
+  } catch (err) {
+    console.error("❌ Firebase write failed:", err);
+    return null;
+  }
+};
+
+/* ===============================
+   📥 LOAD INTENTS (F1 – READ)
+   =============================== */
+async function loadIntentsFromFirebase() {
+  try {
+    const q = query(
+      collection(db, "intents"),
+      where("creatorId", "==", TSPILL_ID)
+    );
+
+    const snapshot = await getDocs(q);
+
+    // reset global intents
+    window.intents = [];
+
+    snapshot.forEach(doc => {
+      window.intents.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    console.log("✅ Intents loaded from Firebase:", window.intents);
+
+    if (typeof renderIntentGrid === "function") {
+      renderIntentGrid();
+    } else {
+      window.addEventListener("load", () => {
+        renderIntentGrid();
+      });
+    }
+
+  } catch (err) {
+    console.error("❌ Firebase read failed:", err);
+  }
+}
+
+/* ===============================
+   ▶️ START
+   =============================== */
+loadIntentsFromFirebase();
+
+console.log("🔥 Hub Firebase connected:", TSPILL_ID);
+</script>
   
 <script>
 window.intents = window.intents || [];
