@@ -488,8 +488,43 @@ body{
   window.where = where;
 
   console.log("🔥 Hub Firebase connected:", TSPILL_ID);
-</script>
+  </script>
 
+  <script type="module">
+import {
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+async function loadIntentsFromFirebase() {
+  const q = query(
+    collection(window.db, "intents"),
+    where("creatorId", "==", window.TSPILL_ID)
+  );
+
+  const snapshot = await getDocs(q);
+
+  // clear old local placeholders
+  window.intents = [];
+
+  snapshot.forEach(doc => {
+    window.intents.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  console.log("✅ Intents loaded from Firebase:", window.intents);
+
+  // 🔁 re-render using existing renderer
+  renderIntentGrid();
+}
+
+loadIntentsFromFirebase();
+</script>
+  
 <script>
 window.intents = window.intents || [];
 const intents = window.intents;
