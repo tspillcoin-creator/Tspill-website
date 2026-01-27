@@ -416,7 +416,7 @@ body{
 <div id="overlay" class="overlay hidden" onclick="closeSidePanel()"></div>
  
 <div class="top-bar">
-  Creator ID: TS-UNASSIGNED | Status: Entry acknowledged
+  <span id="creatorLabel"></span> | Status: Entry acknowledged
 </div>
 
 <div class="grid" id="grid"></div>
@@ -492,6 +492,11 @@ if (!TSPILL_ID) {
    =============================== */
 window.db = db;
 window.TSPILL_ID = TSPILL_ID;
+
+const creatorLabel = document.getElementById("creatorLabel");
+if (creatorLabel) {
+  creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID}`;
+}
 
 /* ===============================
    💾 SAVE INTENT (F2 – WRITE)
