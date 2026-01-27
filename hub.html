@@ -14,18 +14,27 @@ body{
   overflow:hidden;
 }
 
-  .ledger-watermark {
+ .ledger-watermark {
   position: fixed;
-  bottom: 20px;
-  right: 24px;
-  font-size: 10px;
-  letter-spacing: 0.35em;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 96px;              /* BIG */
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+
   color: #f5d67a;
-  opacity: 0.08;
+  opacity: 0.035;               /* VERY subtle */
+
   pointer-events: none;
-  z-index: 5;
   user-select: none;
+
+  z-index: 1;
+  white-space: nowrap;
 }
+
 
 .top-bar{
   position:fixed;
