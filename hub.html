@@ -481,6 +481,12 @@ body{
   window.db = db;
   window.TSPILL_ID = TSPILL_ID;
 
+  // 🔓 Expose Firestore helpers (required for non-module scripts)
+  window.getDocs = getDocs;
+  window.collection = collection;
+  window.query = query;
+  window.where = where;
+
   console.log("🔥 Hub Firebase connected:", TSPILL_ID);
 </script>
 
