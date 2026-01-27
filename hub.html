@@ -14,57 +14,17 @@ body{
   overflow:hidden;
 }
 
-  body::before {
-  content: "PUBLIC LEDGER";
+  .ledger-watermark {
   position: fixed;
-  bottom: 24px;
+  bottom: 20px;
   right: 24px;
   font-size: 10px;
-  letter-spacing: 0.3em;
-  opacity: 0.05;
+  letter-spacing: 0.35em;
   color: #f5d67a;
+  opacity: 0.08;
   pointer-events: none;
-  z-index: 0;
-}
-/* === Standard Motion Nodes === */
-
-.fade-in {
-  animation: fadeIn 0.25s ease-out forwards;
-}
-
-.slide-in-right {
-  animation: slideInRight 0.25s ease-out forwards;
-}
-
-.stamp-in {
-  animation: stampIn 0.18s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(12px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes stampIn {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  z-index: 5;
+  user-select: none;
 }
 
 .top-bar{
@@ -178,6 +138,21 @@ body{
   padding:8px;
   cursor:pointer;
 }
+
+  .intent-card {
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.intent-card.stamp {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.intent-card.new {
+  transform: scale(0.97);
+  opacity: 0;
+}
+
   /* Side Panel */
 .side-panel {
   position: fixed;
@@ -375,6 +350,9 @@ body{
 </head>
 
 <body>
+
+<div class="ledger-watermark">PUBLIC LEDGER</div>
+
   
   <!-- Stage 4 Side Panel -->
 <div id="sidePanel" class="side-panel hidden">
