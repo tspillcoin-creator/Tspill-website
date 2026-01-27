@@ -518,11 +518,17 @@ async function loadIntentsFromFirebase() {
 
   console.log("✅ Intents loaded from Firebase:", window.intents);
 
-  // 🔁 re-render using existing renderer
-  renderIntentGrid();
+  if (typeof renderIntentGrid === "function") {
+    renderIntentGrid();
+  } else {
+    window.addEventListener("load", () => {
+      renderIntentGrid();
+    });
+  }
 }
 
 loadIntentsFromFirebase();
+
 </script>
   
 <script>
