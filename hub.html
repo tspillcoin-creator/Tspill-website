@@ -461,9 +461,9 @@ import {
   updateDoc,
   increment
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
- 
-window.updateDoc = updateDoc;
+
 window.doc = doc;
+window.updateDoc = updateDoc;
 window.increment = increment;
 
 /* ===============================
@@ -619,21 +619,43 @@ function createIntent(){
   render();
 }
 
+async function promoteStageIfEligible(intent) {
+  if (intent.stage === 2 && intent.signals >= 1) {
+    await updateDoc(doc(window.db, "intents", intent.id), {
+      stage: 3
+    });
+  }
+
+  if (intent.stage === 3 && intent.signals >= 2) {
+    await updateDoc(doc(window.db, "intents", intent.id), {
+      stage: 4
+    });
+  }
+}
+
 async function registerExternalSignal(intentId) {
   const intent = window.intents.find(i => i.id === intentId);
   if (!intent) return;
 
   const ref = doc(window.db, "intents", intentId);
 
-  // only signal increment here
   await updateDoc(ref, {
     signals: increment(1)
   });
 
   console.log("📡 External signal registered:", intentId);
 
+  // reload
   await loadIntentsFromFirebase();
+
+  // re-check stage
+  const updated = window.intents.find(i => i.id === intentId);
+  if (updated) {
+    await promoteStageIfEligible(updated);
+    await loadIntentsFromFirebase();
+  }
 }
+
 
 function saveContext(){
   if(!activeIntent) return;
