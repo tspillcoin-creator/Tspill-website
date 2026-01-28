@@ -633,33 +633,44 @@ async function promoteStageIfEligible(intent) {
   }
 }
 
-async function registerExternalSignal(intentId) {
+window.registerExternalSignal = async function (intentId) {
   const intent = window.intents.find(i => i.id === intentId);
-  if (!intent) return;
 
-  const ref = doc(window.db, "intents", intentId);
-
-  await updateDoc(ref, {
-    signals: increment(1)
-  });
-
-  console.log("📡 External signal registered:", intentId);
-
-  await loadIntentsFromFirebase();
-
-  const updated = window.intents.find(i => i.id === intentId);
-  if (!updated) return;
-
-  if (updated.stage === 2 && updated.signals >= 1) {
-    await updateDoc(ref, { stage: 3 });
+  if (!intent) {
+    console.warn("❌ Intent not found:", intentId);
+    return;
   }
 
-  if (updated.stage === 3 && updated.signals >= 2) {
-    await updateDoc(ref, { stage: 4 });
+  // 🔒 Never downgrade once execution opened
+  if (intent.stage >= 4) {
+    console.warn("⛔ Execution already opened");
+    return;
   }
 
-  await loadIntentsFromFirebase();
-}
+  try {
+    const ref = doc(window.db, "intents", intentId);
+
+    // 🔥 Single source of truth update
+    await updateDoc(ref, {
+      signals: increment(1),
+      stage: 3
+    });
+
+    // ✅ Local state update (IMMEDIATE UI)
+    intent.signals = (intent.signals || 0) + 1;
+    intent.stage = 3;
+
+    console.log("✅ External signal registered:", intentId);
+
+    if (typeof render === "function") {
+      render();
+    }
+
+  } catch (err) {
+    console.error("🔥 registerExternalSignal failed:", err);
+  }
+};
+
 
 
 function saveContext(){
