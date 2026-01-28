@@ -645,15 +645,20 @@ async function registerExternalSignal(intentId) {
 
   console.log("📡 External signal registered:", intentId);
 
-  // reload
   await loadIntentsFromFirebase();
 
-  // re-check stage
   const updated = window.intents.find(i => i.id === intentId);
-  if (updated) {
-    await promoteStageIfEligible(updated);
-    await loadIntentsFromFirebase();
+  if (!updated) return;
+
+  if (updated.stage === 2 && updated.signals >= 1) {
+    await updateDoc(ref, { stage: 3 });
   }
+
+  if (updated.stage === 3 && updated.signals >= 2) {
+    await updateDoc(ref, { stage: 4 });
+  }
+
+  await loadIntentsFromFirebase();
 }
 
 
