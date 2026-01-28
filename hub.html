@@ -654,6 +654,10 @@ function saveContext(){
   closeModals();
   render();
 }
+  
+if (intent.stage === 3 && intent.signals >= 2) {
+  intent.stage = 4; // Execution Open
+}
 
 function openExecutionPath(intentId){
   const intent = intents.find(i => i.id === intentId);
