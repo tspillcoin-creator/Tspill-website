@@ -691,12 +691,15 @@ function saveContext(){
 }
   
 function openExecutionPath(intentId) {
-  if (!Array.isArray(window.intents) || window.intents.length === 0) {
-    console.warn("⏳ Intents not loaded yet");
+
+  // ✅ Safety: intents must exist
+  if (!Array.isArray(window.intents)) {
+    console.warn("⏳ Intents array not ready");
     return;
   }
 
   const intent = window.intents.find(i => i.id === intentId);
+
   if (!intent) {
     console.warn("❌ Intent not found:", intentId);
     return;
@@ -704,6 +707,7 @@ function openExecutionPath(intentId) {
 
   console.log("🚀 openExecutionPath fired:", intent);
 
+  // ✅ Stage rule
   if (
     intent.stage === 3 &&
     intent.signals >= 2 &&
