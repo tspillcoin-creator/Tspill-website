@@ -551,7 +551,9 @@ async function loadIntentsFromFirebase() {
         ...doc.data()
       });
     });
-
+    
+    renderIntents();
+    
     console.log("✅ Intents loaded from Firebase:", window.intents);
 
     if (typeof renderIntentGrid === "function") {
