@@ -634,6 +634,12 @@ async function promoteStageIfEligible(intent) {
 }
 
 window.registerExternalSignal = async function (intentId) {
+  // ⛔ Guard: intents not loaded yet
+  if (!window.intents || window.intents.length === 0) {
+    console.warn("⚠️ Intents not loaded yet");
+    return;
+  }
+
   const intent = window.intents.find(i => i.id === intentId);
 
   if (!intent) {
@@ -650,13 +656,13 @@ window.registerExternalSignal = async function (intentId) {
   try {
     const ref = doc(window.db, "intents", intentId);
 
-    // 🔥 Single source of truth update
+    // 🔥 Firestore = source of truth
     await updateDoc(ref, {
       signals: increment(1),
       stage: 3
     });
 
-    // ✅ Local state update (IMMEDIATE UI)
+    // ⚡ Immediate UI update
     intent.signals = (intent.signals || 0) + 1;
     intent.stage = 3;
 
@@ -670,8 +676,6 @@ window.registerExternalSignal = async function (intentId) {
     console.error("🔥 registerExternalSignal failed:", err);
   }
 };
-
-
 
 function saveContext(){
   if(!activeIntent) return;
