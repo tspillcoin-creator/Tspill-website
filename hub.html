@@ -691,14 +691,19 @@ function saveContext(){
 }
   
 function openExecutionPath(intentId) {
-  if (!window.intents || window.intents.length === 0) return;
+  if (!Array.isArray(window.intents) || window.intents.length === 0) {
+    console.warn("⏳ Intents not loaded yet");
+    return;
+  }
 
   const intent = window.intents.find(i => i.id === intentId);
-  if (!intent) return;
+  if (!intent) {
+    console.warn("❌ Intent not found:", intentId);
+    return;
+  }
 
   console.log("🚀 openExecutionPath fired:", intent);
 
-  // ✅ Stage 4 constraint check (SAFE)
   if (
     intent.stage === 3 &&
     intent.signals >= 2 &&
@@ -709,6 +714,7 @@ function openExecutionPath(intentId) {
     render();
   }
 }
+
 
 function render(){
   grid.innerHTML = "";
