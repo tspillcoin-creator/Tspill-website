@@ -597,7 +597,7 @@ function closeModals(){
   contextModal.style.display = "none";
 }
 
-function createIntent(){
+async function createIntent(){
   const title = intentTitle.value.trim();
   const desc  = intentDesc.value.trim();
   if(!title || !desc) return;
