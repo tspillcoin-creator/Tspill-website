@@ -597,41 +597,36 @@ function closeModals(){
   contextModal.style.display = "none";
 }
 
-function createIntent(){
+async function createIntent(){
   const title = intentTitle.value.trim();
   const desc  = intentDesc.value.trim();
   if(!title || !desc) return;
 
-  intents.push({
-    id: "INT-" + String(intentCounter++).padStart(3,"0"),
+  const id = await saveIntentToFirebase({
     title,
     description: desc,
     stage: 2,
     signals: 0,
-    creatorId: window.TSPILL_ID,
-    createdAt: new Date().toLocaleDateString(),
     contextLocked: false
   });
 
-  intentTitle.value = "";
-  intentDesc.value = "";
   closeModals();
-  render();
+  await loadIntentsFromFirebase(); // 🔥 reload from truth
 }
 
-async function promoteStageIfEligible(intent) {
+async function promoteStageIfEligible(intent){
+  const ref = doc(window.db, "intents", intent.id);
+
   if (intent.stage === 2 && intent.signals >= 1) {
-    await updateDoc(doc(window.db, "intents", intent.id), {
-      stage: 3
-    });
+    await updateDoc(ref, { stage: 3 });
   }
 
-  if (intent.stage === 3 && intent.signals >= 2) {
-    await updateDoc(doc(window.db, "intents", intent.id), {
-      stage: 4
-    });
+  if (intent.stage === 3 && intent.signals >= 2 && intent.contextLocked) {
+    await updateDoc(ref, { stage: 4 });
+    return;
   }
 }
+
 
 window.registerExternalSignal = async function (intentId) {
   if (!window.intents || window.intents.length === 0) {
@@ -653,8 +648,7 @@ window.registerExternalSignal = async function (intentId) {
     const ref = doc(window.db, "intents", intentId);
 
     await updateDoc(ref, {
-      signals: increment(1),
-      stage: 3
+      signals: increment(1)
     });
 
     // Local sync
@@ -677,7 +671,18 @@ function saveContext(){
   activeIntent.intentNature = nature.value.trim();
   activeIntent.contextPurpose = purpose.value.trim();
   activeIntent.contextServe = serve.value.trim();
-  activeIntent.contextLocked = true;
+  await updateDoc(
+  doc(window.db, "intents", activeIntent.id),
+  {
+    domain: domain.value.trim(),
+    intentNature: nature.value.trim(),
+    contextPurpose: purpose.value.trim(),
+    contextServe: serve.value.trim(),
+    contextLocked: true
+  }
+);
+
+await loadIntentsFromFirebase();
 
   domain.value = "";
   nature.value = "";
