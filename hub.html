@@ -634,9 +634,8 @@ async function promoteStageIfEligible(intent) {
 }
 
 window.registerExternalSignal = async function (intentId) {
-  // ⛔ Guard: intents not loaded yet
   if (!window.intents || window.intents.length === 0) {
-    console.warn("⚠️ Intents not loaded yet");
+    console.warn("⏳ Intents not loaded yet");
     return;
   }
 
@@ -647,30 +646,24 @@ window.registerExternalSignal = async function (intentId) {
     return;
   }
 
-  // 🔒 Never downgrade once execution opened
-  if (intent.stage >= 4) {
-    console.warn("⛔ Execution already opened");
-    return;
-  }
+  // 🔒 Never downgrade
+  if (intent.stage >= 4) return;
 
   try {
     const ref = doc(window.db, "intents", intentId);
 
-    // 🔥 Firestore = source of truth
     await updateDoc(ref, {
       signals: increment(1),
       stage: 3
     });
 
-    // ⚡ Immediate UI update
+    // Local sync
     intent.signals = (intent.signals || 0) + 1;
     intent.stage = 3;
 
     console.log("✅ External signal registered:", intentId);
 
-    if (typeof render === "function") {
-      render();
-    }
+    if (typeof render === "function") render();
 
   } catch (err) {
     console.error("🔥 registerExternalSignal failed:", err);
@@ -697,27 +690,26 @@ function saveContext(){
   render();
 }
   
-if (intent.stage === 3 && intent.signals >= 2) {
-  intent.stage = 4; // Execution Open
-}
+function openExecutionPath(intentId) {
+  if (!window.intents || window.intents.length === 0) return;
 
-function openExecutionPath(intentId){
-  const intent = intents.find(i => i.id === intentId);
-  console.log("openExecutionPath fired", intent);
-  if(!intent) return;
+  const intent = window.intents.find(i => i.id === intentId);
+  if (!intent) return;
 
-  // Stage 4 constraint check
-  if(
+  console.log("🚀 openExecutionPath fired:", intent);
+
+  // ✅ Stage 4 constraint check (SAFE)
+  if (
     intent.stage === 3 &&
-    intent.contextLocked === true &&
-    intent.signals >= 1
-  ){
+    intent.signals >= 2 &&
+    intent.contextLocked === true
+  ) {
     intent.executionOpen = true;
     intent.stage = 4;
     render();
   }
 }
-  
+
 function render(){
   grid.innerHTML = "";
   intents.forEach(intent=>{
