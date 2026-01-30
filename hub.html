@@ -556,7 +556,11 @@ async function loadIntentsFromFirebase() {
     
     console.log("✅ Intents loaded from Firebase:", window.intents);
 
-    render();
+if (typeof render === "function" && grid) {
+  render();
+} else {
+  console.warn("⚠️ Grid not ready, render skipped");
+}
 
   } catch (err) {
     console.error("❌ Firebase read failed:", err);
