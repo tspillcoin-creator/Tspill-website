@@ -419,7 +419,7 @@ body{
   <span id="creatorLabel"></span> | Status: Entry acknowledged
 </div>
 
-<div class="grid" id="Intent grid"></div>
+<div class="grid" id="grid"></div>
 
 <button class="plus-btn" onclick="openCreateModal()">+</button>
 
@@ -504,7 +504,7 @@ window.TSPILL_ID = TSPILL_ID;
 
 const creatorLabel = document.getElementById("creatorLabel");
 if (creatorLabel) {
-  creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID}`;
+  creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID};
 }
 
 /* ===============================
@@ -578,6 +578,8 @@ console.log("🔥 Hub Firebase connected:", TSPILL_ID);
 <script>
 window.intents = window.intents || [];
 const intents = window.intents;
+const createModal = document.getElementById("createModal");
+const contextModal = document.getElementById("contextModal");
   
 let intentCounter = 1;
 let activeIntent = null;
