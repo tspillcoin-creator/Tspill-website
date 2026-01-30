@@ -442,8 +442,6 @@ body{
     <button onclick="saveContext()">Save Context</button>
   </div>
 </div>
-
-alert("NEW FILE LOADED");
   
 <script type="module">
 /* ===============================
@@ -545,8 +543,7 @@ async function loadIntentsFromFirebase() {
     const snapshot = await getDocs(q);
 
     // reset global intents
-    window.intents = [];
-
+   
     snapshot.forEach(doc => {
       window.intents.push({
         id: doc.id,
@@ -574,10 +571,11 @@ loadIntentsFromFirebase();
 
 console.log("🔥 Hub Firebase connected:", TSPILL_ID);
 </script>
-  
+
+
 <script>
+  
 window.intents = window.intents || [];
-const intents = window.intents;
 const createModal = document.getElementById("createModal");
 const contextModal = document.getElementById("contextModal");
   
