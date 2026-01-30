@@ -545,8 +545,7 @@ window.loadIntentsFromFirebase = async function () {
     );
 
     const snapshot = await getDocs(q);
-    const data = doc.data();
-
+    
     window.intents = [];
     
     snapshot.forEach(doc => {
