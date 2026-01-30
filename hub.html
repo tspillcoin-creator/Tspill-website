@@ -509,22 +509,40 @@ if (creatorLabel) {
   creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID}`;
 }
 window.intents = [];
+
+  async function getNextIntentId() {
+  const q = query(
+    collection(db, "intents"),
+    orderBy("intentNumber", "desc"),
+    limit(1)
+  );
+
+  const snap = await getDocs(q);
+
+  let nextNumber = 1;
+  if (!snap.empty) {
+    nextNumber = (snap.docs[0].data().intentNumber || 0) + 1;
+  }
+
+  return {
+    intentNumber: nextNumber,
+    intentId: `INT-${String(nextNumber).padStart(3, "0")}`
+  };
+}
+
 /* ===============================
    💾 SAVE INTENT (F2 – WRITE)
    =============================== */
 window.saveIntentToFirebase = async function (intentData) {
   try {
-    // 🔑 ENSURE LOGICAL INTENT ID EXISTS
-    if (!intentData.intentId) {
-      const count = window.intents ? window.intents.length + 1 : 1;
-      intentData.intentId = "INT-" + String(count).padStart(3, "0");
-    }
+    const { intentId, intentNumber } = await getNextIntentId();
 
     const docRef = await addDoc(
       collection(db, "intents"),
       {
         ...intentData,
-        intentId: intentData.intentId, // 🔥 CRITICAL FIX
+        intentId,         // ✅ INT-001, INT-002, INT-003
+        intentNumber,     // ✅ used only for ordering
         creatorId: TSPILL_ID,
         stage: intentData.stage || 1,
         createdAt: serverTimestamp(),
@@ -532,7 +550,7 @@ window.saveIntentToFirebase = async function (intentData) {
       }
     );
 
-    console.log("🔥 Intent saved:", intentData.intentId, docRef.id);
+    console.log("🔥 Intent saved:", intentId);
     return docRef.id;
 
   } catch (err) {
