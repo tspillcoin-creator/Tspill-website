@@ -815,14 +815,24 @@ function openReadonlyPanel(intent){
   });
 }
 
-function saveExecutionNote(){
+async function saveExecutionNote(){
   if(!activeIntent) return;
 
   const note = document.getElementById("executionNoteInput").value.trim();
   activeIntent.executionNote = note;
 
-  console.log("Execution note saved:", note);
+  try {
+    await updateDoc(doc(db, "intents", activeIntent.id), {
+      executionNote: note,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log("✅ Execution note saved to Firebase");
+  } catch (err) {
+    console.error("❌ Failed to save execution note:", err);
+  }
 }
+
   
 function handleImageUpload(event){
   if(!activeIntent) return;
@@ -854,15 +864,27 @@ function renderImagePreview(image){
   }
 }
   
-function saveAnchor(){
+async function saveAnchor(){
   if(!activeIntent) return;
 
-  const anchorValue =
-    document.getElementById("anchorInput").value.trim();
-
+  const anchorValue = document.getElementById("anchorInput").value.trim();
   activeIntent.anchor = anchorValue;
 
-  console.log("Anchor saved:", anchorValue);
+  try {
+    await updateDoc(doc(db, "intents", activeIntent.id), {
+      anchor: anchorValue,
+      stage: 5,
+      anchoredAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    activeIntent.stage = 5;
+    console.log("✅ Anchor saved & intent anchored");
+
+    render();
+  } catch (err) {
+    console.error("❌ Failed to save anchor:", err);
+  }
 }
 
 function closeSidePanel(){
