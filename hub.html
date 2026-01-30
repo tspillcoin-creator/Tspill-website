@@ -537,7 +537,7 @@ window.saveIntentToFirebase = async function (intentData) {
 /* ===============================
    📥 LOAD INTENTS (F1 – READ)
    =============================== */
-async function loadIntentsFromFirebase() {
+window.loadIntentsFromFirebase = async function () {
   try {
     const q = query(
       collection(db, "intents"),
@@ -546,27 +546,25 @@ async function loadIntentsFromFirebase() {
 
     const snapshot = await getDocs(q);
 
-    // reset global intents
-   
+    window.intents = [];
+
     snapshot.forEach(doc => {
       window.intents.push({
         id: doc.id,
         ...doc.data()
       });
     });
-    
+
     console.log("✅ Intents loaded from Firebase:", window.intents);
 
-if (typeof render === "function" && grid) {
-  render();
-} else {
-  console.warn("⚠️ Grid not ready, render skipped");
-}
+    if (typeof render === "function" && grid) {
+      render();
+    }
 
   } catch (err) {
     console.error("❌ Firebase read failed:", err);
   }
-}
+};
 
 /* ===============================
    ▶️ START
