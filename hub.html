@@ -740,25 +740,18 @@ function render(){
     const card = document.createElement("div");
     card.className = "intent-card";
 
-if(intent.stage === 3){
-  if(!intent.contextLocked){
-    card.onclick = () => openContextModal(intent);
-  } else {
-    card.onclick = () => openExecutionPath(intent.id);
-  }
-}
-if(intent.stage === 4){
-  card.onclick = () => openSidePanel(intent);
-}
-if(intent.stage === 5){
-  card.onclick = () => openReadonlyPanel(intent);
-}
-
-    let contextText = "Context: Not defined";
-    if(intent.contextLocked){
-      contextText = `Context:
-${intent.domain || "-"} | ${intent.intentNature || "-"}
-${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
+    if(intent.stage === 3){
+      if(!intent.contextLocked){
+        card.onclick = () => openContextModal(intent);
+      } else {
+        card.onclick = () => openExecutionPath(intent.id);
+      }
+    }
+    if(intent.stage === 4){
+      card.onclick = () => openSidePanel(intent);
+    }
+    if(intent.stage === 5){
+      card.onclick = () => openReadonlyPanel(intent);
     }
 
     let stageLabel = "Under Observation";
@@ -767,14 +760,14 @@ ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}`;
     if(intent.stage === 5) stageLabel = "Anchored";
 
     card.innerHTML = `
-      <div class="intent-id">${intent.id}</div>
+      <div class="intent-id">${intent.intentId || "INT-001"}</div>
       <div class="intent-title">${intent.title}</div>
       <div class="intent-meta">
-      ${intent.creatorId || "TS-UNASSIGNED"} | ${stageLabel}
+        ${intent.creatorId || "TS-UNASSIGNED"} | ${stageLabel}
       </div>
       <div class="intent-footer">
-      <span>Signals: ${intent.signals || 0}</span>
-      ${intent.stage === 5 ? `<span class="anchor-badge">ANCHOR</span>` : ""}
+        <span>Signals: ${intent.signals || 0}</span>
+        ${intent.stage === 5 ? `<span class="anchor-badge">ANCHOR</span>` : ""}
       </div>
     `;
     grid.appendChild(card);
