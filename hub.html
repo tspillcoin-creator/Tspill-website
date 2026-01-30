@@ -932,6 +932,33 @@ function populateReadonlyPanel(intent){
     </div>
   `;
 }
+  
+function renderIntentGrid() {
+  const hub = document.getElementById("intentGrid");
+  if (!hub) {
+    console.error("❌ intentGrid container not found");
+    return;
+  }
+
+  hub.innerHTML = "";
+
+  if (!Array.isArray(window.intents) || window.intents.length === 0) {
+    console.log("ℹ️ No intents to render");
+    return;
+  }
+
+  window.intents.forEach(intent => {
+    const card = document.createElement("div");
+    card.className = "intent-card";
+    card.innerHTML = `
+      <h3>${intent.title || "Untitled"}</h3>
+      <p>${intent.description || ""}</p>
+    `;
+    hub.appendChild(card);
+  });
+
+  console.log("✅ Intent cards rendered:", window.intents.length);
+}
 
 </script>
 
