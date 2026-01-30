@@ -608,6 +608,26 @@ async function createIntent(){
   contextLocked: false
 });
 
+  // 🔴 ADD THIS BLOCK — DO NOT MODIFY
+const newIntent = {
+  id: "LOCAL-" + Date.now(),
+  title,
+  description: desc,
+  stage: 2,
+  signals: 0,
+  creatorId: window.TSPILL_ID,
+  createdAt: new Date().toLocaleDateString(),
+  contextLocked: false
+};
+
+window.intents.push(newIntent);
+
+if (typeof renderIntentGrid === "function") {
+  renderIntentGrid();
+} else if (typeof render === "function") {
+  render();
+}
+
 await loadIntentsFromFirebase();
 
 
