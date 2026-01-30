@@ -514,10 +514,17 @@ window.intents = [];
    =============================== */
 window.saveIntentToFirebase = async function (intentData) {
   try {
+    // 🔑 ENSURE LOGICAL INTENT ID EXISTS
+    if (!intentData.intentId) {
+      const count = window.intents ? window.intents.length + 1 : 1;
+      intentData.intentId = "INT-" + String(count).padStart(3, "0");
+    }
+
     const docRef = await addDoc(
       collection(db, "intents"),
       {
         ...intentData,
+        intentId: intentData.intentId, // 🔥 CRITICAL FIX
         creatorId: TSPILL_ID,
         stage: intentData.stage || 1,
         createdAt: serverTimestamp(),
@@ -525,7 +532,7 @@ window.saveIntentToFirebase = async function (intentData) {
       }
     );
 
-    console.log("🔥 Intent saved:", docRef.id);
+    console.log("🔥 Intent saved:", intentData.intentId, docRef.id);
     return docRef.id;
 
   } catch (err) {
