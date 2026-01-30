@@ -502,9 +502,9 @@ window.TSPILL_ID = TSPILL_ID;
 
 const creatorLabel = document.getElementById("creatorLabel");
 if (creatorLabel) {
-  creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID};
+  creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID}`;
 }
-
+window.intents = [];
 /* ===============================
    💾 SAVE INTENT (F2 – WRITE)
    =============================== */
@@ -570,7 +570,6 @@ if (typeof render === "function" && grid) {
 loadIntentsFromFirebase();
 
 console.log("🔥 Hub Firebase connected:", TSPILL_ID);
-}
 
 </script>
 
