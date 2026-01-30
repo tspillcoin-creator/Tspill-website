@@ -549,11 +549,10 @@ window.loadIntentsFromFirebase = async function () {
     window.intents = [];
     
     snapshot.forEach(doc => {
-     window.intents.push({
-     id: data.intentId || data.intentKey, // ← INT-001
-     _docId: doc.id,                      // keep Firestore ID
-     ...data
-    });
+      window.intents.push({
+        id: doc.id,
+        ...doc.data()
+      });
     });
 
     console.log("✅ Intents loaded from Firebase:", window.intents);
