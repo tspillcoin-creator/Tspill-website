@@ -556,7 +556,7 @@ async function loadIntentsFromFirebase() {
     
     console.log("✅ Intents loaded from Firebase:", window.intents);
 
-    renderIntentGrid();
+    render();
 
   } catch (err) {
     console.error("❌ Firebase read failed:", err);
@@ -609,7 +609,7 @@ async function createIntent(){
 });
 
   // 🔴 ADD THIS BLOCK — DO NOT MODIFY
-const newIntent = {
+  const newIntent = {
   id: "LOCAL-" + Date.now(),
   title,
   description: desc,
@@ -622,10 +622,7 @@ const newIntent = {
 
 window.intents.push(newIntent);
 
-if (typeof renderIntentGrid === "function") {
-  renderIntentGrid();
-} else if (typeof render === "function") {
-  render();
+render();
 }
 
 await loadIntentsFromFirebase();
