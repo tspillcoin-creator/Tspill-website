@@ -556,13 +556,7 @@ async function loadIntentsFromFirebase() {
     
     console.log("✅ Intents loaded from Firebase:", window.intents);
 
-    if (typeof renderIntentGrid === "function") {
-      renderIntentGrid();
-    } else {
-      window.addEventListener("load", () => {
-        renderIntentGrid();
-      });
-    }
+    renderIntentGrid();
 
   } catch (err) {
     console.error("❌ Firebase read failed:", err);
