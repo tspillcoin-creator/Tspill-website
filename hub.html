@@ -683,27 +683,28 @@ async function promoteStageIfEligible(intent) {
 }
 
 window.registerExternalSignal = async function (intentId) {
+  if (!Array.isArray(window.intents)) return;
+
   const intent = window.intents.find(i => i.id === intentId);
   if (!intent) {
     console.warn("❌ Intent not found:", intentId);
     return;
   }
 
-  try {
-    // ✅ USE FIRESTORE DOCUMENT ID
-    const ref = doc(window.db, "intents", intent._docId);
+  // 🔥 USE FIRESTORE DOC ID — NOT INT-001
+  const docRef = doc(window.db, "intents", intent._docId);
 
-    await updateDoc(ref, {
+  try {
+    await updateDoc(docRef, {
       signals: increment(1),
-      stage: intent.stage < 3 ? 3 : intent.stage
+      stage: intent.stage === 2 ? 3 : intent.stage
     });
 
-    // ✅ Local sync
+    // ✅ local sync
     intent.signals = (intent.signals || 0) + 1;
-    intent.stage = Math.max(intent.stage, 3);
+    if (intent.stage === 2) intent.stage = 3;
 
-    console.log("✅ Stage incremented:", intent.id);
-
+    console.log("✅ Signal registered & stage updated:", intent.id);
     render();
 
   } catch (err) {
