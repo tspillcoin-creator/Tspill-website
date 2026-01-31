@@ -652,21 +652,21 @@ async function createIntent(){
   const desc  = intentDesc.value.trim();
   if(!title || !desc) return;
 
-  // ✅ IMPORTANT: use the global save function ONLY
-  await window.saveIntentToFirebase({
+  await saveIntentToFirebase({
     title,
     description: desc,
+    stage: 2,
     signals: 0,
-    contextLocked: false,
-    stage: 2
+    contextLocked: false
   });
 
-  await window.loadIntentsFromFirebase();
+  await loadIntentsFromFirebase();
 
   intentTitle.value = "";
   intentDesc.value = "";
   closeModals();
 }
+
 
 async function promoteStageIfEligible(intent) {
   if (intent.stage === 2 && intent.signals >= 1) {
