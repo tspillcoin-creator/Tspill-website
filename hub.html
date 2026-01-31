@@ -844,6 +844,20 @@ function render(){
   });
 }
 
+  function getFormattedContext(intent) {
+  const domain = intent.domain?.trim();
+  const nature = intent.intentNature?.trim();
+  const purpose = intent.contextPurpose?.trim();
+  const serve = intent.contextServe?.trim();
+
+  if (!domain && !nature && !purpose && !serve) return "—";
+
+  return `
+    <strong>${domain || "—"}</strong>${nature ? " | " + nature : ""}<br/>
+    ${purpose || "—"}${serve ? " → " + serve : ""}
+  `;
+}
+
 function resetSidePanelState() {
   const noteInput = document.getElementById("executionNoteInput");
   const anchorInput = document.getElementById("anchorInput");
@@ -1046,12 +1060,13 @@ function populateReadonlyPanel(intent){
     </div>
    </div>
 
-    ${intent.image?.src ? `
-      <div class="readonly-section">
-        <div class="readonly-label">Artifact</div>
-        <img class="readonly-image" src="${intent.image.src}" />
-      </div>
-    ` : ""}
+    ${intent.image?.src || intent.imageUrl ? `
+  <div class="readonly-section">
+    <div class="readonly-label">Artifact</div>
+    <img class="readonly-image"
+         src="${intent.image?.src || intent.imageUrl}" />
+  </div>
+` : ""}
 
     ${intent.anchor ? `
       <div class="readonly-section">
