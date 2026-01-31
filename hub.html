@@ -1029,10 +1029,19 @@ function formatTimestamp(ts){
 }
 
 function populateReadonlyPanel(intent){
-  const domain = intent.domain?.trim() || "—";
-  const nature = intent.intentNature?.trim() || "—";
-  const purpose = intent.contextPurpose?.trim() || "—";
-  const serve = intent.contextServe?.trim() || "—";
+const hasStructuredContext =
+  intent.domain || intent.intentNature || intent.contextPurpose || intent.contextServe;
+
+const domain  = intent.domain?.trim() || "";
+const nature  = intent.intentNature?.trim() || "";
+const purpose = intent.contextPurpose?.trim() || "";
+const serve   = intent.contextServe?.trim() || "";
+
+const fallbackContext =
+  intent.context ||
+  intent.contextText ||
+  intent.executionNote ||
+  "—";
 
   const content = document.querySelector(".side-panel-content");
 
@@ -1055,9 +1064,13 @@ function populateReadonlyPanel(intent){
    <div class="readonly-section">
     <div class="readonly-label">Context</div>
     <div class="readonly-value">
-    <strong>${domain}</strong> | ${nature}<br/>
-    ${purpose} → ${serve}
-    </div>
+    ${
+    hasStructuredContext
+    ? `<strong>${domain || "—"}</strong>${nature ? " | " + nature : ""}<br/>
+       ${purpose || "—"}${serve ? " → " + serve : ""}`
+    : fallbackContext
+    }
+   </div>
    </div>
 
     ${intent.image?.src || intent.imageUrl ? `
