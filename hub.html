@@ -535,14 +535,33 @@ window.intents = [];
    =============================== */
 window.saveIntentToFirebase = async function (intentData) {
   try {
-    const { intentId, intentNumber } = await getNextIntentId();
+    // 🔐 1. Get counter document
+    const counterRef = doc(db, "meta", "intentCounter");
 
+    // 🔼 2. Atomically increment counter
+    await updateDoc(counterRef, {
+      current: increment(1)
+    });
+
+    // 🔁 3. Read updated counter
+    const counterSnap = await getDocs(
+      query(collection(db, "meta"), where("__name__", "==", "intentCounter"))
+    );
+
+    let count = 1;
+    counterSnap.forEach(d => {
+      count = d.data().current;
+    });
+
+    // 🆔 4. Generate GLOBAL INT ID
+    const intentId = "INT-" + String(count).padStart(3, "0");
+
+    // 💾 5. Save intent
     const docRef = await addDoc(
       collection(db, "intents"),
       {
         ...intentData,
-        intentId,         // ✅ INT-001, INT-002, INT-003
-        intentNumber,     // ✅ used only for ordering
+        intentId: intentId,
         creatorId: TSPILL_ID,
         stage: intentData.stage || 1,
         createdAt: serverTimestamp(),
