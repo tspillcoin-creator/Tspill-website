@@ -353,7 +353,46 @@ body{
   letter-spacing: 0.12em;
   opacity: 0.5;
 }
-  
+
+.readonly-section {
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.readonly-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.55;
+  margin-bottom: 4px;
+}
+
+.readonly-value {
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.readonly-image {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border: 1px solid rgba(245,214,122,0.25);
+  margin-top: 6px;
+}
+
+.readonly-link {
+  color: #f5d67a;
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 12px;
+}
+
+.readonly-footer {
+  margin-top: 20px;
+  font-size: 11px;
+  opacity: 0.6;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 10px;
+}
 
 </style>
 </head>
@@ -964,44 +1003,73 @@ function closeSidePanel(){
   }, 300);
 }
 
+function formatTimestamp(ts){
+  if (!ts) return "-";
+
+  if (ts.seconds) {
+    const d = new Date(ts.seconds * 1000);
+    return d.toLocaleString();
+  }
+
+  return ts;
+}
+
 function populateReadonlyPanel(intent){
   const content = document.querySelector(".side-panel-content");
 
   content.innerHTML = `
     <div class="readonly-header">
-      <div class="intent-id">${intent.id}</div>
+      <div class="intent-id">${intent.intentId || intent.id}</div>
       <div class="intent-title">${intent.title}</div>
       <div class="anchor-badge">ANCHOR</div>
+
       <div class="stage-path">
         Draft → Observed → Interest → Execution → ● Anchored
       </div>
     </div>
 
-    <div class="timeline">
-      <div>Created: ${intent.createdAt}</div>
-      <div>Anchored: ${intent.anchoredAt || "-"}</div>
+    <div class="readonly-section">
+      <div class="readonly-label">Created</div>
+      <div class="readonly-value">${formatTimestamp(intent.createdAt)}</div>
     </div>
 
-    <div class="context-snapshot">
-      <strong>Context</strong><br/>
-      ${intent.domain || "-"} | ${intent.intentNature || "-"}<br/>
-      ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}
+    <div class="readonly-section">
+      <div class="readonly-label">Context</div>
+      <div class="readonly-value">
+        ${intent.domain || "-"} · ${intent.intentNature || "-"}<br/>
+        ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}
+      </div>
     </div>
 
     ${intent.image?.src ? `
-      <div class="anchor-evidence">
-        <img src="${intent.image.src}" />
-        <div class="anchor-ref">${intent.anchor || ""}</div>
+      <div class="readonly-section">
+        <div class="readonly-label">Artifact</div>
+        <img class="readonly-image" src="${intent.image.src}" />
       </div>
     ` : ""}
 
-    <div class="execution-trace">
-      <strong>Execution note</strong>
-      <div>${intent.executionNote || "-"}</div>
-      <div class="signal-count">Signals: ${intent.signals || 0}</div>
+    ${intent.anchor ? `
+      <div class="readonly-section">
+        <div class="readonly-label">Anchor</div>
+        <a class="readonly-link" href="${intent.anchor}" target="_blank">
+          ${intent.anchor}
+        </a>
+      </div>
+    ` : ""}
+
+    <div class="readonly-section">
+      <div class="readonly-label">Execution Note</div>
+      <div class="readonly-value">
+        ${intent.executionNote || "-"}
+      </div>
+    </div>
+
+    <div class="readonly-footer">
+      Signals: ${intent.signals || 0}
     </div>
   `;
 }
+
   
 
 </script>
