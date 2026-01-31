@@ -652,22 +652,20 @@ async function createIntent(){
   const desc  = intentDesc.value.trim();
   if(!title || !desc) return;
 
-  await addDoc(collection(db, "intents"), {
-  title,
-  description: desc,
-  stage: 2,
-  signals: 0,
-  creatorId: window.TSPILL_ID,
-  createdAt: new Date().toLocaleDateString(),
-  contextLocked: false
-});
+  // ✅ IMPORTANT: use the global save function ONLY
+  await window.saveIntentToFirebase({
+    title,
+    description: desc,
+    signals: 0,
+    contextLocked: false,
+    stage: 2
+  });
 
-await loadIntentsFromFirebase();
+  await window.loadIntentsFromFirebase();
 
   intentTitle.value = "";
   intentDesc.value = "";
   closeModals();
-  render();
 }
 
 async function promoteStageIfEligible(intent) {
