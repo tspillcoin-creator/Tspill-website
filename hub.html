@@ -849,22 +849,30 @@ function openReadonlyPanel(intent){
 }
 
 async function saveExecutionNote(){
-  if(!activeIntent) return;
+  if (!activeIntent) return;
 
-  const note = document.getElementById("executionNoteInput").value.trim();
-  activeIntent.executionNote = note;
+  const note = document
+    .getElementById("executionNoteInput")
+    .value
+    .trim();
 
   try {
-    await updateDoc(doc(db, "intents", intent._docId), {
-      executionNote: note,
-      updatedAt: serverTimestamp()
-    });
+    await updateDoc(
+      doc(db, "intents", activeIntent._docId),
+      {
+        executionNote: note,
+        updatedAt: serverTimestamp()
+      }
+    );
 
-    console.log("✅ Execution note saved to Firebase");
+    activeIntent.executionNote = note;
+
+    console.log("✅ Execution note saved");
   } catch (err) {
     console.error("❌ Failed to save execution note:", err);
   }
 }
+
 
   
 function handleImageUpload(event){
@@ -898,27 +906,35 @@ function renderImagePreview(image){
 }
   
 async function saveAnchor(){
-  if(!activeIntent) return;
+  if (!activeIntent) return;
 
-  const anchorValue = document.getElementById("anchorInput").value.trim();
-  activeIntent.anchor = anchorValue;
+  const anchorValue = document
+    .getElementById("anchorInput")
+    .value
+    .trim();
 
   try {
-    await updateDoc(doc(db, "intents", intent._docId), {
-      anchor: anchorValue,
-      stage: 5,
-      anchoredAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    await updateDoc(
+      doc(db, "intents", activeIntent._docId),
+      {
+        anchor: anchorValue,
+        stage: 5,
+        anchoredAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+    );
 
+    activeIntent.anchor = anchorValue;
     activeIntent.stage = 5;
-    console.log("✅ Anchor saved & intent anchored");
 
+    console.log("✅ Anchor saved & intent anchored");
     render();
+
   } catch (err) {
     console.error("❌ Failed to save anchor:", err);
   }
 }
+
 
 function closeSidePanel(){
   sidePanel.classList.remove("open");
