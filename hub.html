@@ -1015,6 +1015,11 @@ function formatTimestamp(ts){
 }
 
 function populateReadonlyPanel(intent){
+  const domain = intent.domain?.trim() || "—";
+  const nature = intent.intentNature?.trim() || "—";
+  const purpose = intent.contextPurpose?.trim() || "—";
+  const serve = intent.contextServe?.trim() || "—";
+
   const content = document.querySelector(".side-panel-content");
 
   content.innerHTML = `
@@ -1033,12 +1038,13 @@ function populateReadonlyPanel(intent){
       <div class="readonly-value">${formatTimestamp(intent.createdAt)}</div>
     </div>
 
-    <div class="readonly-section">
-      <div class="readonly-label">Context</div>
-      <div class="readonly-value">
-      ${intent.context || intent.contextText || "—"}
-      </div>
+   <div class="readonly-section">
+    <div class="readonly-label">Context</div>
+    <div class="readonly-value">
+    <strong>${domain}</strong> | ${nature}<br/>
+    ${purpose} → ${serve}
     </div>
+   </div>
 
     ${intent.image?.src ? `
       <div class="readonly-section">
