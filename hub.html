@@ -670,54 +670,47 @@ async function createIntent(){
 
 async function promoteStageIfEligible(intent) {
   if (intent.stage === 2 && intent.signals >= 1) {
-    await updateDoc(doc(window.db, "intents", intent.id), {
+    await updateDoc(doc(db, "intents", intent._docId), {
       stage: 3
     });
   }
 
   if (intent.stage === 3 && intent.signals >= 2) {
-    await updateDoc(doc(window.db, "intents", intent.id), {
+    await updateDoc(doc(db, "intents", intent._docId), {
       stage: 4
     });
   }
 }
 
 window.registerExternalSignal = async function (intentId) {
-  if (!window.intents || window.intents.length === 0) {
-    console.warn("⏳ Intents not loaded yet");
-    return;
-  }
-
   const intent = window.intents.find(i => i.id === intentId);
-
   if (!intent) {
     console.warn("❌ Intent not found:", intentId);
     return;
   }
 
-  // 🔒 Never downgrade
-  if (intent.stage >= 4) return;
-
   try {
-    const ref = doc(window.db, "intents", intentId);
+    // ✅ USE FIRESTORE DOCUMENT ID
+    const ref = doc(window.db, "intents", intent._docId);
 
     await updateDoc(ref, {
       signals: increment(1),
-      stage: 3
+      stage: intent.stage < 3 ? 3 : intent.stage
     });
 
-    // Local sync
+    // ✅ Local sync
     intent.signals = (intent.signals || 0) + 1;
-    intent.stage = 3;
+    intent.stage = Math.max(intent.stage, 3);
 
-    console.log("✅ External signal registered:", intentId);
+    console.log("✅ Stage incremented:", intent.id);
 
-    if (typeof render === "function") render();
+    render();
 
   } catch (err) {
     console.error("🔥 registerExternalSignal failed:", err);
   }
 };
+
 
 function saveContext(){
   if(!activeIntent) return;
@@ -861,7 +854,7 @@ async function saveExecutionNote(){
   activeIntent.executionNote = note;
 
   try {
-    await updateDoc(doc(db, "intents", activeIntent.id), {
+    await updateDoc(doc(db, "intents", intent._docId), {
       executionNote: note,
       updatedAt: serverTimestamp()
     });
@@ -910,7 +903,7 @@ async function saveAnchor(){
   activeIntent.anchor = anchorValue;
 
   try {
-    await updateDoc(doc(db, "intents", activeIntent.id), {
+    await updateDoc(doc(db, "intents", intent._docId), {
       anchor: anchorValue,
       stage: 5,
       anchoredAt: serverTimestamp(),
