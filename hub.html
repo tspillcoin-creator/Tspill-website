@@ -733,35 +733,37 @@ function saveContext(){
   render();
 }
   
-function openExecutionPath(intentId) {
-
-  // ✅ Safety: intents must exist
-  if (!Array.isArray(window.intents)) {
-    console.warn("⏳ Intents array not ready");
-    return;
-  }
+async function openExecutionPath(intentId) {
+  if (!Array.isArray(window.intents)) return;
 
   const intent = window.intents.find(i => i.id === intentId);
+  if (!intent) return;
 
-  if (!intent) {
-    console.warn("❌ Intent not found:", intentId);
-    return;
-  }
-
-  console.log("🚀 openExecutionPath fired:", intent);
-
-  // ✅ Stage rule
+  // Stage rule
   if (
     intent.stage === 3 &&
     intent.signals >= 2 &&
     intent.contextLocked === true
   ) {
-    intent.executionOpen = true;
-    intent.stage = 4;
-    render();
+    try {
+      await updateDoc(
+        doc(db, "intents", intent._docId),
+        {
+          stage: 4,
+          updatedAt: serverTimestamp()
+        }
+      );
+
+      intent.stage = 4;
+      console.log("✅ Stage promoted to 4 (Execution Path)");
+
+      render();
+
+    } catch (err) {
+      console.error("❌ Failed to promote to stage 4:", err);
+    }
   }
 }
-
 
 function render(){
   grid.innerHTML = "";
