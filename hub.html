@@ -804,13 +804,29 @@ function render(){
     grid.appendChild(card);
   });
 }
-  
+
+function resetSidePanelState() {
+  const noteInput = document.getElementById("executionNoteInput");
+  const anchorInput = document.getElementById("anchorInput");
+  const imagePreview = document.getElementById("imagePreview");
+  const imageInput = document.getElementById("intentImageInput");
+
+  if (noteInput) noteInput.value = "";
+  if (anchorInput) anchorInput.value = "";
+  if (imageInput) imageInput.value = "";
+  if (imagePreview) {
+    imagePreview.innerHTML = "";
+    imagePreview.classList.add("hidden");
+  }
+}
+
 const sidePanel = document.getElementById("sidePanel");
 const overlay = document.getElementById("overlay");
 const sidePanelTitle = document.getElementById("sidePanelTitle");
 const sidePanelMeta = document.getElementById("sidePanelMeta");
 
 function openSidePanel(intent){
+  resetSidePanelState();
   activeIntent = intent;
   panelMode = "edit";
 
@@ -837,6 +853,7 @@ if(anchorInput){
 }
   
 function openReadonlyPanel(intent){
+  resetSidePanelState();
   activeIntent = intent;
   panelMode = "readonly";
 
