@@ -1036,8 +1036,7 @@ function populateReadonlyPanel(intent){
     <div class="readonly-section">
       <div class="readonly-label">Context</div>
       <div class="readonly-value">
-        ${intent.domain || "-"} · ${intent.intentNature || "-"}<br/>
-        ${intent.contextPurpose || "-"} → ${intent.contextServe || "-"}
+      ${intent.context || intent.contextText || "—"}
       </div>
     </div>
 
