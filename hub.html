@@ -997,13 +997,15 @@ function handleImageUpload(event){
   if(!file) return;
 
   const reader = new FileReader();
-  reader.onload = async () => {
+  reader.onload = () => {
   activeIntent.image = {
     type: "local",
     src: reader.result
   };
-
   renderImagePreview(activeIntent.image);
+  };
+  render.readAsDataURL(file);
+  }
 
   // ✅ persist image
   await updateDoc(
@@ -1098,7 +1100,7 @@ function formatTimestamp(ts){
 }
 
 function populateReadonlyPanel(intent){
-  
+  console.log(intent.constraints);
 const domain  = intent.domain || intent.constraints?.domain || "—";
 const nature  = intent.intentNature || intent.constraints?.nature || "—";
 const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
