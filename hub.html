@@ -1010,7 +1010,7 @@ async function saveExecutionNote(){
     
   if(!activeIntent) return;
 
-  const file = event.target.files[0];
+  file = event.target.files[0];
   if(!file) return;
 
   const reader = new FileReader();
