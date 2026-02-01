@@ -986,7 +986,6 @@ async function saveExecutionNote(){
   } catch (err) {
     console.error("❌ Failed to save execution note:", err);
   }
-}
 
   // ✅ persist image
   await updateDoc(
@@ -997,8 +996,6 @@ async function saveExecutionNote(){
   );
 
   console.log("Image attached & saved");
-};
-
   reader.readAsDataURL(file);
 }
   
