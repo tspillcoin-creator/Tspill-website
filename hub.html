@@ -638,7 +638,13 @@ window.loadIntentsFromFirebase = async function () {
 window.intents.push({
   ...data,
 
-  // 🔑 rehydrate image for UI
+  // 🔹 constraints (safe defaults)
+  domain: data.domain || "",
+  intentNature: data.intentNature || "",
+  purpose: data.purpose || "",
+  serve: data.serve || "",
+
+  // 🔹 image rehydrate
   image: data.imageUrl
     ? { type: "remote", src: data.imageUrl }
     : null,
@@ -648,6 +654,7 @@ window.intents.push({
   id: data.intentId || data.id || snap.id,
   _docId: snap.id
 });
+
 });
 
     console.log("✅ Intents loaded from Firebase:", window.intents);
@@ -963,16 +970,28 @@ function handleImageUpload(event){
   if(!file) return;
 
   const reader = new FileReader();
-  reader.onload = () => {
-    activeIntent.image = {
-      type: "local",
-      src: reader.result
-    };
-    renderImagePreview(activeIntent.image);
-    console.log("Image attached to intent");
+  reader.onload = async () => {
+  activeIntent.image = {
+    type: "local",
+    src: reader.result
   };
+
+  renderImagePreview(activeIntent.image);
+
+  // ✅ persist image
+  await updateDoc(
+    doc(db, "intents", activeIntent._docId),
+    {
+      imageUrl: reader.result
+    }
+  );
+
+  console.log("Image attached & saved");
+};
+
   reader.readAsDataURL(file);
 }
+  
 function renderImagePreview(image){
   const preview = document.getElementById("imagePreview");
   if(!preview) return;
