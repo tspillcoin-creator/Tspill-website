@@ -1065,13 +1065,7 @@ const fallbackContext =
 <div class="intent-id">${intent.intentId || intent.id}</div>
 <div class="intent-title">${intent.title}</div>
 
-<div class="intent-description">
-  <strong>DESCRIPTION:</strong><br/>
-  ${intent.description || "—"}
-</div>
-
 <div class="anchor-badge">ANCHOR</div>
-
 
       <div class="stage-path">
         Draft → Observed → Interest → Execution → ● Anchored
@@ -1084,7 +1078,7 @@ const fallbackContext =
     </div>
 
    <div class="readonly-section">
-  <div class="readonly-label">Context</div>
+  <div class="readonly-label">Description</div>
   <div class="readonly-value">
     ${intent.description || "—"}
   </div>
@@ -1093,19 +1087,17 @@ const fallbackContext =
 <div class="readonly-section">
   <div class="readonly-label">Constraints</div>
   <div class="readonly-value">
-    <strong>Domain:</strong> ${domain}<br/>
-    <strong>Intent nature:</strong> ${nature}<br/>
-    <strong>Purpose:</strong> ${purpose}<br/>
-    <strong>Serve:</strong> ${serve}
+    <strong>Domain:</strong> ${intent.domain || "—"}<br/>
+    <strong>Intent nature:</strong> ${intent.intentNature || "—"}<br/>
+    <strong>Purpose:</strong> ${intent.contextPurpose || "—"}<br/>
+    <strong>Serve:</strong> ${intent.contextServe || "—"}
   </div>
 </div>
-
 
     ${intent.imageUrl ? `
   <div class="readonly-section">
     <div class="readonly-label">Artifact</div>
-    <img class="readonly-image"
-         src="${intent.imageUrl}" />
+    <img class="readonly-image" src="${intent.imageUrl}" />
   </div>
 ` : ""}
 
