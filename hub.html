@@ -928,6 +928,32 @@ function openReadonlyPanel(intent){
 
   populateReadonlyPanel(intent);
 
+  async function ensureConstraintsExist(intent) {
+  const needsPatch =
+    intent.domain === undefined ||
+    intent.intentNature === undefined ||
+    intent.purpose === undefined ||
+    intent.serve === undefined;
+
+  if (!needsPatch) return;
+
+  const patch = {
+    domain: intent.domain || "",
+    intentNature: intent.intentNature || "",
+    purpose: intent.purpose || "",
+    serve: intent.serve || ""
+  };
+
+  Object.assign(intent, patch);
+
+  await updateDoc(
+    doc(db, "intents", intent._docId),
+    patch
+  );
+
+  console.log("Constraints backfilled");
+}
+
   sidePanel.classList.remove("hidden");
   overlay.classList.remove("hidden");
 
