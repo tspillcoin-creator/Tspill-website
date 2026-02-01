@@ -999,19 +999,6 @@ async function saveExecutionNote(){
   reader.readAsDataURL(file);
 }
   
-function renderImagePreview(image){
-  const preview = document.getElementById("imagePreview");
-  if(!preview) return;
-
-  if(image && image.src){
-    preview.innerHTML = `<img src="${image.src}" />`;
-    preview.classList.remove("hidden");
-  } else {
-    preview.innerHTML = "";
-    preview.classList.add("hidden");
-  }
-}
-
   function handleImageUpload(event){
   if(!activeIntent) return;
 
@@ -1028,6 +1015,19 @@ function renderImagePreview(image){
   };
   render.readAsDataURL(file);
   }
+
+  function renderImagePreview(image){
+  const preview = document.getElementById("imagePreview");
+  if(!preview) return;
+
+  if(image && image.src){
+    preview.innerHTML = `<img src="${image.src}" />`;
+    preview.classList.remove("hidden");
+  } else {
+    preview.innerHTML = "";
+    preview.classList.add("hidden");
+  }
+}
   
 async function saveAnchor(){
   if (!activeIntent) return;
