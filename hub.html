@@ -927,7 +927,9 @@ function openReadonlyPanel(intent){
   panelMode = "readonly";
 
   populateReadonlyPanel(intent);
-  renderimagepreview(intent.image);
+
+  ensureConstraintsExist(intent);
+  renderimagePreview(intent.image);
 
   async function ensureConstraintsExist(intent) {
   const needsPatch =
