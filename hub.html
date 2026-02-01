@@ -980,37 +980,47 @@ function renderImagePreview(image){
 async function saveAnchor(){
   if (!activeIntent) return;
 
-  const anchorValue = document.getElementById("anchorInput")?.value.trim() || "";
-  const contextValue = document.getElementById("contextInput")?.value.trim() || "";
-  const executionValue = document.getElementById("executionNoteInput")?.value.trim() || "";
+  const anchorValue = document.getElementById("anchorInput")?.value.trim();
+
+  // ❗ DO NOT read empty inputs
+  const contextValue =
+    document.getElementById("contextInput")?.value.trim();
+  const executionValue =
+    document.getElementById("executionNoteInput")?.value.trim();
+
+  const updatePayload = {
+    anchor: anchorValue,
+    stage: 5,
+    anchoredAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  // ✅ only overwrite if user actually typed something
+  if (contextValue) updatePayload.context = contextValue;
+  if (executionValue) updatePayload.executionNote = executionValue;
+
+  // ✅ preserve image
+  if (activeIntent.imageUrl) {
+    updatePayload.imageUrl = activeIntent.imageUrl;
+  }
 
   try {
     await updateDoc(
       doc(db, "intents", activeIntent._docId),
-      {
-        anchor: anchorValue,
-        context: contextValue,
-        executionNote: executionValue,
-        imageUrl: activeIntent.imageUrl || null,   // 👈 keeps image after refresh
-        stage: 5,
-        anchoredAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
+      updatePayload
     );
 
-    // sync local object
-    activeIntent.anchor = anchorValue;
-    activeIntent.context = contextValue;
-    activeIntent.executionNote = executionValue;
-    activeIntent.stage = 5;
+    // sync local object safely
+    Object.assign(activeIntent, updatePayload);
 
-    console.log("✅ Anchor saved fully");
+    console.log("✅ Anchor saved WITHOUT data loss");
     render();
 
   } catch (err) {
     console.error("❌ Failed to save anchor:", err);
   }
 }
+
 
 function closeSidePanel(){
   sidePanel.classList.remove("open");
