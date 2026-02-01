@@ -988,25 +988,6 @@ async function saveExecutionNote(){
   }
 }
 
-
-  
-function handleImageUpload(event){
-  if(!activeIntent) return;
-
-  const file = event.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-  activeIntent.image = {
-    type: "local",
-    src: reader.result
-  };
-  renderImagePreview(activeIntent.image);
-  };
-  render.readAsDataURL(file);
-  }
-
   // ✅ persist image
   await updateDoc(
     doc(db, "intents", activeIntent._docId),
@@ -1033,6 +1014,23 @@ function renderImagePreview(image){
     preview.classList.add("hidden");
   }
 }
+
+  function handleImageUpload(event){
+  if(!activeIntent) return;
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+  activeIntent.image = {
+    type: "local",
+    src: reader.result
+  };
+  renderImagePreview(activeIntent.image);
+  };
+  render.readAsDataURL(file);
+  }
   
 async function saveAnchor(){
   if (!activeIntent) return;
