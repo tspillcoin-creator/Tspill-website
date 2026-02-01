@@ -1016,7 +1016,7 @@ async function saveExecutionNote(){
   render.readAsDataURL(file);
   }
 
-  function renderImagePreview(image){
+  window.renderImagePreview=function(image){
   const preview = document.getElementById("imagePreview");
   if(!preview) return;
 
@@ -1027,7 +1027,7 @@ async function saveExecutionNote(){
     preview.innerHTML = "";
     preview.classList.add("hidden");
   }
-}
+};
   
 async function saveAnchor(){
   if (!activeIntent) return;
