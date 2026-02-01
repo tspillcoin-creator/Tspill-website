@@ -634,12 +634,21 @@ window.loadIntentsFromFirebase = async function () {
   snapshot.forEach(snap => {
   const data = snap.data();
 
-  window.intents.push({
-    ...data,
-    id: data.intentId || data.id || snap.id,
-    _docId: snap.id
-  });
-  });
+ 
+window.intents.push({
+  ...data,
+
+  // 🔑 rehydrate image for UI
+  image: data.imageUrl
+    ? { type: "remote", src: data.imageUrl }
+    : null,
+
+  imageUrl: data.imageUrl || "",
+
+  id: data.intentId || data.id || snap.id,
+  _docId: snap.id
+});
+});
 
     console.log("✅ Intents loaded from Firebase:", window.intents);
 
@@ -1046,10 +1055,10 @@ function populateReadonlyPanel(intent){
 const hasStructuredContext =
   intent.domain || intent.intentNature || intent.contextPurpose || intent.contextServe;
 
-const domain  = intent.domain?.trim() || "";
-const nature  = intent.intentNature?.trim() || "";
-const purpose = intent.contextPurpose?.trim() || "";
-const serve   = intent.contextServe?.trim() || "";
+const domain  = intent.domain || intent.constraints?.domain || "—";
+const nature  = intent.intentNature || intent.constraints?.intentNature || "—";
+const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
+const serve   = intent.contextServe || intent.constraints?.serve || "—";
 
 const fallbackContext =
   intent.context ||
