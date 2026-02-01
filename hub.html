@@ -966,6 +966,9 @@ function openReadonlyPanel(intent){
 }
 
 async function saveExecutionNote(){
+
+  const reader = new FileReader();
+  
   if (!activeIntent) return;
 
   const note = document
@@ -1002,6 +1005,9 @@ async function saveExecutionNote(){
 }
   
   function handleImageUpload(event){
+
+  const file = e.target.files[0];
+    
   if(!activeIntent) return;
 
   const file = event.target.files[0];
