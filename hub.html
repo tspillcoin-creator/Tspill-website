@@ -927,6 +927,7 @@ function openReadonlyPanel(intent){
   panelMode = "readonly";
 
   populateReadonlyPanel(intent);
+  renderimagepreview(intent.image);
 
   async function ensureConstraintsExist(intent) {
   const needsPatch =
@@ -1097,11 +1098,9 @@ function formatTimestamp(ts){
 }
 
 function populateReadonlyPanel(intent){
-const hasStructuredContext =
-  intent.domain || intent.intentNature || intent.contextPurpose || intent.contextServe;
-
+  
 const domain  = intent.domain || intent.constraints?.domain || "—";
-const nature  = intent.intentNature || intent.constraints?.intentNature || "—";
+const nature  = intent.intentNature || intent.constraints?.nature || "—";
 const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
 const serve   = intent.contextServe || intent.constraints?.serve || "—";
 
