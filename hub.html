@@ -980,33 +980,37 @@ function renderImagePreview(image){
 async function saveAnchor(){
   if (!activeIntent) return;
 
-  const anchorValue = document
-    .getElementById("anchorInput")
-    .value
-    .trim();
+  const anchorValue = document.getElementById("anchorInput")?.value.trim() || "";
+  const contextValue = document.getElementById("contextInput")?.value.trim() || "";
+  const executionValue = document.getElementById("executionNoteInput")?.value.trim() || "";
 
   try {
     await updateDoc(
       doc(db, "intents", activeIntent._docId),
       {
         anchor: anchorValue,
+        context: contextValue,
+        executionNote: executionValue,
+        imageUrl: activeIntent.imageUrl || null,   // 👈 keeps image after refresh
         stage: 5,
         anchoredAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
     );
 
+    // sync local object
     activeIntent.anchor = anchorValue;
+    activeIntent.context = contextValue;
+    activeIntent.executionNote = executionValue;
     activeIntent.stage = 5;
 
-    console.log("✅ Anchor saved & intent anchored");
+    console.log("✅ Anchor saved fully");
     render();
 
   } catch (err) {
     console.error("❌ Failed to save anchor:", err);
   }
 }
-
 
 function closeSidePanel(){
   sidePanel.classList.remove("open");
