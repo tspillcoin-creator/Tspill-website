@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TSPILL Hub — Stage 3 Fixed</title>
+<title>TSPILL Hub — Stage 3</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -83,7 +83,6 @@ body{
   opacity:0.7;
   line-height:1.4;
 }
-
 .intent-footer {
   display: flex;
   justify-content: space-between;
@@ -203,13 +202,12 @@ body{
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .panel-label {
   font-size: 12px;
   opacity: 0.8;
-  margin-bottom: 4px;
 }
 
 .execution-section textarea {
@@ -226,14 +224,13 @@ body{
   color: #f5d67a;
   padding: 8px;
   cursor: pointer;
-  margin-top: 8px;
 }
 
 .image-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-top: 16px;
 }
 
 .image-preview img {
@@ -247,11 +244,12 @@ body{
 .image-preview.hidden {
   display: none;
 }
-
+  
 .anchor-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 16px;
 }
 
 .anchor-section input {
@@ -261,22 +259,21 @@ body{
   padding: 8px;
 }
 
-.anchor-badge {
-  font-size: 11px;
-  display: inline-block;
-  border: 1px solid rgba(245,214,122,0.5);
-  padding: 2px 6px;
-  margin-top: 8px;
-}
-
 .readonly-header {
   border-bottom: 1px solid rgba(245,214,122,0.2);
-  padding-bottom: 12px;
-  margin-bottom: 16px;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.anchor-badge {
+  font-size: 11px;
+  opacity: 0.7;
+  border: 1px solid rgba(245,214,122,0.5);
+  padding: 2px 6px;
 }
 
 .readonly-section {
-  margin-bottom: 16px;
+  margin-top: 14px;
 }
 
 .readonly-label {
@@ -294,7 +291,7 @@ body{
 
 .readonly-image {
   width: 100%;
-  max-height: 200px;
+  max-height: 160px;
   object-fit: contain;
   border: 1px solid rgba(245,214,122,0.25);
   margin-top: 6px;
@@ -302,16 +299,17 @@ body{
 
 .readonly-link {
   color: #f5d67a;
-  text-decoration: underline;
+  text-decoration: none;
   word-break: break-all;
+  font-size: 12px;
 }
 
 .readonly-footer {
-  margin-top: 24px;
+  margin-top: 20px;
   font-size: 11px;
   opacity: 0.6;
   border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 12px;
+  padding-top: 10px;
 }
 </style>
 </head>
@@ -326,10 +324,10 @@ body{
     <button class="close-btn" onclick="closeSidePanel()">×</button>
   </div>
 
-  <div class="side-panel-content">
+  <div class="side-panel-content" id="sidePanelMainContent">
     <p id="sidePanelMeta"></p>
 
-    <div id="editModeUI">
+    <div id="editModeControls">
       <div class="execution-section">
         <label class="panel-label">Execution note</label>
         <textarea id="executionNoteInput" placeholder="Describe how you are thinking of executing this intent (optional)"></textarea>
@@ -344,12 +342,12 @@ body{
         
       <div class="anchor-section">
         <label class="panel-label">Anchor (optional)</label>
-        <input type="text" id="anchorInput" placeholder="Reference link or execution anchor" />
-        <button class="panel-save-btn" onclick="saveAnchor()">Save anchor & Finalize</button>
+        <input type="text" id="anchorInput" placeholder="Reference, link, or execution anchor" />
+        <button class="panel-save-btn" onclick="saveAnchor()">Save anchor</button>
       </div>
     </div>
 
-    <div id="readonlyModeUI"></div>
+    <div id="readonlyContent" style="display:none;"></div>
   </div>
 </div>
 
@@ -375,8 +373,8 @@ body{
   <div class="modal-box">
     <input id="domain" placeholder="Domain (e.g. Fashion, Art, Technology)">
     <input id="nature" placeholder="Intent nature (e.g. Research, Build, Expression)">
-    <textarea id="purpose" placeholder="Context purpose (e.g. Explore an idea)"></textarea>
-    <input id="serve" placeholder="Context serve (e.g. Community, Self, Market)">
+    <textarea id="purpose" placeholder="Context purpose"></textarea>
+    <input id="serve" placeholder="Context serve"></textarea>
     <button onclick="saveContext()">Save Context</button>
   </div>
 </div>
@@ -399,7 +397,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const TSPILL_ID = localStorage.getItem("TSPILL_ID");
 if (!TSPILL_ID) { window.location.href = "index.html"; }
 
@@ -511,12 +508,11 @@ function render(){
     const card = document.createElement("div");
     card.className = "intent-card";
     
-    if(intent.stage === 2) card.onclick = () => alert("Waiting for signals...");
     if(intent.stage === 3) card.onclick = () => intent.contextLocked ? openExecutionPath(intent.id) : openContextModal(intent);
     if(intent.stage === 4) card.onclick = () => openSidePanel(intent);
     if(intent.stage === 5) card.onclick = () => openReadonlyPanel(intent);
 
-    let stageLabel = intent.stage === 5 ? "Anchored" : (intent.stage === 4 ? "Execution Path" : "Observed");
+    let stageLabel = intent.stage === 5 ? "Anchored" : (intent.stage === 4 ? "Execution Path" : "Under Observation");
 
     card.innerHTML = `
       <div class="intent-id">${intent.id}</div>
@@ -533,16 +529,18 @@ function render(){
 
 function openSidePanel(intent){
   activeIntent = intent;
-  document.getElementById("editModeUI").style.display = "block";
-  document.getElementById("readonlyModeUI").style.display = "none";
+  document.getElementById("editModeControls").style.display = "block";
+  document.getElementById("readonlyContent").style.display = "none";
   document.getElementById("sidePanelTitle").textContent = intent.id;
   document.getElementById("executionNoteInput").value = intent.executionNote || "";
   document.getElementById("anchorInput").value = intent.anchor || "";
   
+  const preview = document.getElementById("imagePreview");
   if(intent.imageUrl || (intent.image && intent.image.src)){
-    const prev = document.getElementById("imagePreview");
-    prev.innerHTML = `<img src="${intent.imageUrl || intent.image.src}" />`;
-    prev.classList.remove("hidden");
+    preview.innerHTML = `<img src="${intent.imageUrl || intent.image.src}" />`;
+    preview.classList.remove("hidden");
+  } else {
+    preview.classList.add("hidden");
   }
 
   document.getElementById("sidePanel").classList.add("open");
@@ -551,13 +549,14 @@ function openSidePanel(intent){
 }
 
 async function saveExecutionNote(){
+  if(!activeIntent) return;
   const note = document.getElementById("executionNoteInput").value;
   await updateDoc(doc(db, "intents", activeIntent._docId), { executionNote: note });
 }
 
 function handleImageUpload(event) {
   const file = event.target.files[0];
-  if (!file) return;
+  if (!file || !activeIntent) return;
   const reader = new FileReader();
   reader.onload = async () => {
     const base64 = reader.result;
@@ -572,27 +571,27 @@ function handleImageUpload(event) {
 
 async function saveAnchor(){
   const anchor = document.getElementById("anchorInput").value.trim();
-  const updates = { 
+  await updateDoc(doc(db, "intents", activeIntent._docId), { 
     anchor: anchor, 
     stage: 5, 
     anchoredAt: serverTimestamp() 
-  };
-  await updateDoc(doc(db, "intents", activeIntent._docId), updates);
+  });
   closeSidePanel();
   await loadIntentsFromFirebase();
 }
 
 function openReadonlyPanel(intent){
   activeIntent = intent;
-  document.getElementById("editModeUI").style.display = "none";
-  document.getElementById("readonlyModeUI").style.display = "block";
+  document.getElementById("editModeControls").style.display = "none";
+  document.getElementById("readonlyContent").style.display = "block";
   
-  const domain = intent.domain || "—";
-  const nature = intent.intentNature || "—";
-  const purpose = intent.contextPurpose || "—";
-  const serve = intent.contextServe || "—";
+  const domain = intent.domain || intent.constraints?.domain || "—";
+  const nature = intent.intentNature || intent.constraints?.nature || "—";
+  const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
+  const serve = intent.contextServe || intent.constraints?.serve || "—";
+  const imgSrc = intent.imageUrl || intent.image?.src;
 
-  document.getElementById("readonlyModeUI").innerHTML = `
+  document.getElementById("readonlyContent").innerHTML = `
     <div class="readonly-header">
       <div class="intent-id">${intent.id}</div>
       <div class="intent-title">${intent.title}</div>
@@ -611,15 +610,15 @@ function openReadonlyPanel(intent){
         <strong>Serve:</strong> ${serve}
       </div>
     </div>
-    ${intent.imageUrl ? `
+    ${imgSrc ? `
       <div class="readonly-section">
         <div class="readonly-label">Artifact</div>
-        <img class="readonly-image" src="${intent.imageUrl}" />
+        <img class="readonly-image" src="${imgSrc}" />
       </div>
     ` : ""}
     <div class="readonly-section">
       <div class="readonly-label">Execution Note</div>
-      <div class="readonly-value">${intent.executionNote || "No notes provided."}</div>
+      <div class="readonly-value">${intent.executionNote || "—"}</div>
     </div>
     ${intent.anchor ? `
       <div class="readonly-section">
