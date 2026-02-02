@@ -19,17 +19,22 @@ body{
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 96px;
+
+  font-size: 96px;              /* BIG */
   font-weight: 600;
   letter-spacing: 0.4em;
   text-transform: uppercase;
+
   color: #f5d67a;
-  opacity: 0.035;
+  opacity: 0.035;               /* VERY subtle */
+
   pointer-events: none;
   user-select: none;
+
   z-index: 1;
   white-space: nowrap;
 }
+
 
 .top-bar{
   position:fixed;
@@ -53,11 +58,12 @@ body{
 }
 
 .intent-card {
-  height: 140px;
+  height: 140px;              /* 🔒 FIXED STAMP HEIGHT */
   padding: 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
   border: 1px solid rgba(245,214,122,0.25);
   background: rgba(0,0,0,0.6);
   cursor: pointer;
@@ -69,10 +75,12 @@ body{
   opacity: 0.6;
 }
 
+
 .intent-title {
   font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -140,6 +148,21 @@ body{
   cursor:pointer;
 }
 
+  .intent-card {
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.intent-card.stamp {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.intent-card.new {
+  transform: scale(0.97);
+  opacity: 0;
+}
+
+  /* Side Panel */
 .side-panel {
   position: fixed;
   top: 0;
@@ -168,7 +191,7 @@ body{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 0 0 12px 0;
   font-size: 14px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
@@ -182,11 +205,17 @@ body{
 }
 
 .side-panel-content {
-  padding: 20px;
+  padding: 0;
   font-size: 13px;
-  overflow-y: auto;
 }
 
+.panel-placeholder {
+  margin-top: 20px;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Overlay */
 .overlay {
   position: fixed;
   inset: 0;
@@ -197,12 +226,10 @@ body{
 .overlay.hidden {
   display: none;
 }
-
 .execution-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 16px;
 }
 
 .panel-label {
@@ -216,6 +243,7 @@ body{
   border: 1px solid rgba(245,214,122,0.3);
   color: #f5d67a;
   padding: 8px;
+  resize: vertical;
 }
 
 .panel-save-btn {
@@ -226,7 +254,7 @@ body{
   cursor: pointer;
 }
 
-.image-section {
+  .image-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -244,6 +272,13 @@ body{
 .image-preview.hidden {
   display: none;
 }
+
+.image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
   
 .anchor-section {
   display: flex;
@@ -258,7 +293,7 @@ body{
   color: #f5d67a;
   padding: 8px;
 }
-
+  
 .readonly-header {
   border-bottom: 1px solid rgba(245,214,122,0.2);
   padding-bottom: 8px;
@@ -272,8 +307,56 @@ body{
   padding: 2px 6px;
 }
 
+.stage-path {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.anchor-evidence img {
+  max-height: 80px;
+  object-fit: contain;
+  width: 100%;
+}
+
+.execution-trace {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+  .side-panel.readonly {
+  opacity: 0.85;
+}
+
+.readonly {
+  opacity: 0.75;
+}
+
+.readonly input,
+.readonly textarea,
+.readonly button {
+  display: none;
+}
+  
+.side-panel.readonly input,
+.side-panel.readonly textarea,
+.side-panel.readonly select,
+.side-panel.readonly button {
+  display: none;
+}
+.readonly .panel-section {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.readonly .panel-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.5;
+}
+
 .readonly-section {
   margin-top: 14px;
+  font-size: 13px;
 }
 
 .readonly-label {
@@ -281,7 +364,6 @@ body{
   letter-spacing: 0.12em;
   opacity: 0.55;
   margin-bottom: 4px;
-  text-transform: uppercase;
 }
 
 .readonly-value {
@@ -311,6 +393,7 @@ body{
   border-top: 1px solid rgba(255,255,255,0.08);
   padding-top: 10px;
 }
+
 </style>
 </head>
 
@@ -318,39 +401,57 @@ body{
 
 <div class="ledger-watermark">PUBLIC LEDGER</div>
 
+  
+  <!-- Stage 4 Side Panel -->
 <div id="sidePanel" class="side-panel hidden">
   <div class="side-panel-header">
     <div id="sidePanelTitle">Intent</div>
     <button class="close-btn" onclick="closeSidePanel()">×</button>
   </div>
 
-  <div class="side-panel-content" id="sidePanelMainContent">
+  <div class="side-panel-content">
     <p id="sidePanelMeta"></p>
 
-    <div id="editModeControls">
-      <div class="execution-section">
-        <label class="panel-label">Execution note</label>
-        <textarea id="executionNoteInput" placeholder="Describe how you are thinking of executing this intent (optional)"></textarea>
-        <button class="panel-save-btn" onclick="saveExecutionNote()">Save execution note</button>
-      </div>
+    <!-- Placeholder content (Step 1 only) -->
+  <div class="execution-section">
+   <label class="panel-label">Execution note</label>
+   <textarea id="executionNoteInput"
+    placeholder="Describe how you are thinking of executing this intent (optional)">
+   </textarea>
 
-      <div class="image-section">
-        <label class="panel-label">Intent image (optional)</label>
-        <input type="file" id="intentImageInput" accept="image/*" onchange="handleImageUpload(event)" />
-        <div id="imagePreview" class="image-preview hidden"></div>
-      </div>
-        
-      <div class="anchor-section">
-        <label class="panel-label">Anchor (optional)</label>
-        <input type="text" id="anchorInput" placeholder="Reference, link, or execution anchor" />
-        <button class="panel-save-btn" onclick="saveAnchor()">Save anchor</button>
-      </div>
-    </div>
+  <button class="panel-save-btn" onclick="saveExecutionNote()">
+    Save execution note
+  </button>
+</div>
+    <!-- Image Upload (Stage 4 only) -->
+  <div class="image-section">
+    <label class="panel-label">Intent image (optional)</label>
 
-    <div id="readonlyContent" style="display:none;"></div>
+    <input type="file"
+           id="intentImageInput"
+           accept="image/*"
+           onchange="handleImageUpload(event)" />
+
+    <div id="imagePreview" class="image-preview hidden"></div>
+  </div>
+    
+    <!-- Anchor -->
+<div class="anchor-section">
+  <label class="panel-label">Anchor (optional)</label>
+  <input
+    type="text"
+    id="anchorInput"
+    placeholder="Reference, link, or execution anchor"
+  />
+
+  <button class="panel-save-btn" onclick="saveAnchor()">
+    Save anchor
+  </button>
+</div>
   </div>
 </div>
 
+<!-- Overlay -->
 <div id="overlay" class="overlay hidden" onclick="closeSidePanel()"></div>
  
 <div class="top-bar">
@@ -361,6 +462,7 @@ body{
 
 <button class="plus-btn" onclick="openCreateModal()">+</button>
 
+<!-- Stage 2 create -->
 <div class="modal" id="createModal">
   <div class="modal-box">
     <input id="intentTitle" placeholder="Intent title">
@@ -369,23 +471,47 @@ body{
   </div>
 </div>
 
+<!-- Stage 3 context -->
 <div class="modal" id="contextModal">
   <div class="modal-box">
     <input id="domain" placeholder="Domain (e.g. Fashion, Art, Technology)">
     <input id="nature" placeholder="Intent nature (e.g. Research, Build, Expression)">
-    <textarea id="purpose" placeholder="Context purpose"></textarea>
-    <input id="serve" placeholder="Context serve"></textarea>
+    <textarea id="purpose" placeholder="Context purpose (e.g. Explore an idea, validate interest)"></textarea>
+    <input id="serve" placeholder="Context serve (e.g. Community, Self, Market)">
     <button onclick="saveContext()">Save Context</button>
   </div>
 </div>
   
 <script type="module">
+/* ===============================
+   🔥 FIREBASE – HUB SINGLE MODULE
+   =============================== */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
-  getFirestore, collection, query, where, getDocs, addDoc, 
-  serverTimestamp, doc, updateDoc, increment, orderBy, limit
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+window.addDoc = addDoc;
+window.collection = collection;
+window.serverTimestamp = serverTimestamp;
+
+window.doc = doc;
+window.updateDoc = updateDoc;
+window.increment = increment;
+
+/* ===============================
+   🔐 FIREBASE CONFIG (UNCHANGED)
+   =============================== */
 const firebaseConfig = {
   apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
   authDomain: "tspill-protocol.firebaseapp.com",
@@ -395,129 +521,336 @@ const firebaseConfig = {
   appId: "1:863753676409:web:ae3957d697c68d877556a8"
 };
 
+/* ===============================
+   🚀 INIT FIREBASE
+   =============================== */
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+/* ===============================
+   🔑 READ IDENTITY
+   =============================== */
 const TSPILL_ID = localStorage.getItem("TSPILL_ID");
-if (!TSPILL_ID) { window.location.href = "index.html"; }
 
-window.db = db;
-window.TSPILL_ID = TSPILL_ID;
-window.updateDoc = updateDoc;
-window.doc = doc;
-window.increment = increment;
-window.serverTimestamp = serverTimestamp;
-
-const creatorLabel = document.getElementById("creatorLabel");
-if (creatorLabel) { creatorLabel.textContent = `Creator ID: ${TSPILL_ID}`; }
-
-window.intents = [];
-
-window.saveIntentToFirebase = async function (intentData) {
-  try {
-    const counterRef = doc(db, "meta", "intentCounter");
-    await updateDoc(counterRef, { current: increment(1) });
-    const counterSnap = await getDocs(query(collection(db, "meta"), where("__name__", "==", "intentCounter")));
-    let count = 1;
-    counterSnap.forEach(d => { count = d.data().current; });
-    const intentId = "INT-" + String(count).padStart(3, "0");
-
-    const docRef = await addDoc(collection(db, "intents"), {
-      ...intentData,
-      intentId: intentId,
-      creatorId: TSPILL_ID,
-      stage: intentData.stage || 1,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    return docRef.id;
-  } catch (err) { console.error(err); return null; }
-};
-
-window.loadIntentsFromFirebase = async function () {
-  try {
-    const q = query(collection(db, "intents"), where("creatorId", "==", TSPILL_ID));
-    const snapshot = await getDocs(q);
-    window.intents = [];
-    snapshot.forEach(snap => {
-      const data = snap.data();
-      window.intents.push({
-        ...data,
-        id: data.intentId || snap.id,
-        _docId: snap.id,
-        image: data.imageUrl ? { type: "remote", src: data.imageUrl } : null
-      });
-    });
-    render();
-  } catch (err) { console.error(err); }
-};
-
-loadIntentsFromFirebase();
-</script>
-
-<script>
-let activeIntent = null;
-
-function openCreateModal(){ document.getElementById("createModal").style.display = "flex"; }
-function closeModals(){ 
-    document.getElementById("createModal").style.display = "none"; 
-    document.getElementById("contextModal").style.display = "none"; 
+if (!TSPILL_ID) {
+  alert("Identity missing. Redirecting.");
+  window.location.href = "index.html";
 }
 
-async function createIntent(){
-  const title = document.getElementById("intentTitle").value.trim();
-  const desc = document.getElementById("intentDesc").value.trim();
-  if(!title || !desc) return;
-  await saveIntentToFirebase({ title, description: desc, stage: 2, signals: 0, contextLocked: false });
-  await loadIntentsFromFirebase();
-  closeModals();
+/* ===============================
+   🌐 EXPOSE GLOBALS (IMPORTANT)
+   =============================== */
+window.db = db;
+window.TSPILL_ID = TSPILL_ID;
+
+const creatorLabel = document.getElementById("creatorLabel");
+if (creatorLabel) {
+  creatorLabel.textContent = `Creator ID: ${window.TSPILL_ID}`;
+}
+window.intents = [];
+
+  async function getNextIntentId() {
+  const q = query(
+    collection(db, "intents"),
+    orderBy("intentNumber", "desc"),
+    limit(1)
+  );
+
+  const snap = await getDocs(q);
+
+  let nextNumber = 1;
+  if (!snap.empty) {
+    nextNumber = (snap.docs[0].data().intentNumber || 0) + 1;
+  }
+
+  return {
+    intentNumber: nextNumber,
+    intentId: `INT-${String(nextNumber).padStart(3, "0")}`
+  };
+}
+
+/* ===============================
+   💾 SAVE INTENT (F2 – WRITE)
+   =============================== */
+window.saveIntentToFirebase = async function (intentData) {
+  try {
+    // 🔐 1. Get counter document
+    const counterRef = doc(db, "meta", "intentCounter");
+
+    // 🔼 2. Atomically increment counter
+    await updateDoc(counterRef, {
+      current: increment(1)
+    });
+
+    // 🔁 3. Read updated counter
+    const counterSnap = await getDocs(
+      query(collection(db, "meta"), where("__name__", "==", "intentCounter"))
+    );
+
+    let count = 1;
+    counterSnap.forEach(d => {
+      count = d.data().current;
+    });
+
+    // 🆔 4. Generate GLOBAL INT ID
+    const intentId = "INT-" + String(count).padStart(3, "0");
+
+    // 💾 5. Save intent
+    const docRef = await addDoc(
+      collection(db, "intents"),
+      {
+        ...intentData,
+        intentId: intentId,
+        creatorId: TSPILL_ID,
+        stage: intentData.stage || 1,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    console.log("🔥 Intent saved:", intentId);
+    return docRef.id;
+
+  } catch (err) {
+    console.error("❌ Firebase write failed:", err);
+    return null;
+  }
+};
+
+/* ===============================
+   📥 LOAD INTENTS (F1 – READ)
+   =============================== */
+window.loadIntentsFromFirebase = async function () {
+  try {
+    const q = query(
+      collection(db, "intents"),
+      where("creatorId", "==", TSPILL_ID)
+    );
+
+    const snapshot = await getDocs(q);
+    
+    window.intents = [];
+    
+  snapshot.forEach(snap => {
+  const data = snap.data();
+
+ 
+window.intents.push({
+  ...data,
+
+  // 🔹 constraints (safe defaults)
+  domain: data.domain || "",
+  intentNature: data.intentNature || "",
+  purpose: data.purpose || "",
+  serve: data.serve || "",
+
+  // 🔹 image rehydrate
+  image: data.imageUrl
+    ? { type: "remote", src: data.imageUrl }
+    : null,
+
+  imageUrl: data.imageUrl || "",
+
+  id: data.intentId || data.id || snap.id,
+  _docId: snap.id
+});
+
+});
+
+    console.log("✅ Intents loaded from Firebase:", window.intents);
+
+    if (typeof render === "function" && grid) {
+      render();
+    }
+
+  } catch (err) {
+    console.error("❌ Firebase read failed:", err);
+  }
+};
+
+/* ===============================
+   ▶️ START
+   =============================== */
+loadIntentsFromFirebase();
+
+console.log("🔥 Hub Firebase connected:", TSPILL_ID);
+
+</script>
+
+
+<script>
+  
+window.intents = window.intents || [];
+const createModal = document.getElementById("createModal");
+const contextModal = document.getElementById("contextModal");
+  
+let intentCounter = 1;
+let activeIntent = null;
+
+function openCreateModal(){
+  createModal.style.display = "flex";
 }
 
 function openContextModal(intent){
+  if(intent.stage !== 3 || intent.contextLocked) return;
   activeIntent = intent;
-  document.getElementById("contextModal").style.display = "flex";
+  contextModal.style.display = "flex";
 }
 
-async function saveContext(){
-  if(!activeIntent) return;
-  const updates = {
-    domain: document.getElementById("domain").value.trim(),
-    intentNature: document.getElementById("nature").value.trim(),
-    contextPurpose: document.getElementById("purpose").value.trim(),
-    contextServe: document.getElementById("serve").value.trim(),
-    contextLocked: true,
-    signals: increment(1),
-    stage: 3
-  };
-  await updateDoc(doc(db, "intents", activeIntent._docId), updates);
-  closeModals();
+function closeModals(){
+  createModal.style.display = "none";
+  contextModal.style.display = "none";
+}
+
+async function createIntent(){
+  const title = intentTitle.value.trim();
+  const desc  = intentDesc.value.trim();
+  if(!title || !desc) return;
+
+  await saveIntentToFirebase({
+    title,
+    description: desc,
+    stage: 2,
+    signals: 0,
+    contextLocked: false
+  });
+
   await loadIntentsFromFirebase();
+
+  intentTitle.value = "";
+  intentDesc.value = "";
+  closeModals();
 }
 
-async function openExecutionPath(intentId) {
+
+async function promoteStageIfEligible(intent) {
+  if (intent.stage === 2 && intent.signals >= 1) {
+    await updateDoc(doc(db, "intents", intent._docId), {
+      stage: 3
+    });
+  }
+
+  if (intent.stage === 3 && intent.signals >= 2) {
+    await updateDoc(doc(db, "intents", intent._docId), {
+      stage: 4
+    });
+  }
+}
+
+window.registerExternalSignal = async function (intentId) {
+  if (!Array.isArray(window.intents)) return;
+
   const intent = window.intents.find(i => i.id === intentId);
-  if (intent && intent.stage === 3 && intent.signals >= 2) {
-    await updateDoc(doc(db, "intents", intent._docId), { stage: 4 });
-    await loadIntentsFromFirebase();
+  if (!intent) {
+    console.warn("❌ Intent not found:", intentId);
+    return;
+  }
+
+  // 🔥 USE FIRESTORE DOC ID — NOT INT-001
+  const docRef = doc(window.db, "intents", intent._docId);
+
+  try {
+    await updateDoc(docRef, {
+      signals: increment(1),
+      stage: intent.stage === 2 ? 3 : intent.stage
+    });
+
+    // ✅ local sync
+    intent.signals = (intent.signals || 0) + 1;
+    if (intent.stage === 2) intent.stage = 3;
+
+    console.log("✅ Signal registered & stage updated:", intent.id);
+    render();
+
+  } catch (err) {
+    console.error("🔥 registerExternalSignal failed:", err);
+  }
+};
+
+
+function saveContext(){
+  if(!activeIntent) return;
+
+  activeIntent.domain = domain.value.trim();
+  activeIntent.intentNature = nature.value.trim();
+  activeIntent.contextPurpose = purpose.value.trim();
+  activeIntent.contextServe = serve.value.trim();
+  activeIntent.contextLocked = true;
+
+  domain.value = "";
+  nature.value = "";
+  purpose.value = "";
+  serve.value = "";
+
+  registerExternalSignal(activeIntent.id);
+
+  closeModals();
+  render();
+}
+  
+async function openExecutionPath(intentId) {
+  if (!Array.isArray(window.intents)) return;
+
+  const intent = window.intents.find(i => i.id === intentId);
+  if (!intent) return;
+
+  // Stage rule
+  if (
+    intent.stage === 3 &&
+    intent.signals >= 2 &&
+    intent.contextLocked === true
+  ) {
+    try {
+      await updateDoc(
+        doc(db, "intents", intent._docId),
+        {
+          stage: 4,
+          updatedAt: serverTimestamp()
+        }
+      );
+
+      intent.stage = 4;
+      console.log("✅ Stage promoted to 4 (Execution Path)");
+
+      render();
+
+    } catch (err) {
+      console.error("❌ Failed to promote to stage 4:", err);
+    }
   }
 }
 
 function render(){
-  const grid = document.getElementById("grid");
   grid.innerHTML = "";
-  window.intents.forEach(intent => {
+  intents.forEach(intent=>{
     const card = document.createElement("div");
     card.className = "intent-card";
-    
-    if(intent.stage === 3) card.onclick = () => intent.contextLocked ? openExecutionPath(intent.id) : openContextModal(intent);
-    if(intent.stage === 4) card.onclick = () => openSidePanel(intent);
-    if(intent.stage === 5) card.onclick = () => openReadonlyPanel(intent);
 
-    let stageLabel = intent.stage === 5 ? "Anchored" : (intent.stage === 4 ? "Execution Path" : "Under Observation");
+    if(intent.stage === 3){
+      if(!intent.contextLocked){
+        card.onclick = () => openContextModal(intent);
+      } else {
+        card.onclick = () => openExecutionPath(intent.id);
+      }
+    }
+    if(intent.stage === 4){
+      card.onclick = () => openSidePanel(intent);
+    }
+    if(intent.stage === 5){
+      card.onclick = () => openReadonlyPanel(intent);
+    }
+
+    let stageLabel = "Under Observation";
+    if(intent.stage === 3) stageLabel = "External Interest Detected";
+    if(intent.stage === 4) stageLabel = "Execution Path Open";
+    if(intent.stage === 5) stageLabel = "Anchored";
 
     card.innerHTML = `
-      <div class="intent-id">${intent.id}</div>
+      <div class="intent-id">${intent.intentId ?? intent.id}</div>
       <div class="intent-title">${intent.title}</div>
-      <div class="intent-meta">${intent.creatorId} | ${stageLabel}</div>
+      <div class="intent-meta">
+        ${intent.creatorId || "TS-UNASSIGNED"} | ${stageLabel}
+      </div>
       <div class="intent-footer">
         <span>Signals: ${intent.signals || 0}</span>
         ${intent.stage === 5 ? `<span class="anchor-badge">ANCHOR</span>` : ""}
@@ -527,117 +860,325 @@ function render(){
   });
 }
 
+  function getFormattedContext(intent) {
+  const domain = intent.domain?.trim();
+  const nature = intent.intentNature?.trim();
+  const purpose = intent.contextPurpose?.trim();
+  const serve = intent.contextServe?.trim();
+
+  if (!domain && !nature && !purpose && !serve) return "—";
+
+  return `
+    <strong>${domain || "—"}</strong>${nature ? " | " + nature : ""}<br/>
+    ${purpose || "—"}${serve ? " → " + serve : ""}
+  `;
+}
+
+function resetSidePanelState() {
+  const noteInput = document.getElementById("executionNoteInput");
+  const anchorInput = document.getElementById("anchorInput");
+  const imagePreview = document.getElementById("imagePreview");
+  const imageInput = document.getElementById("intentImageInput");
+
+  if (noteInput) noteInput.value = "";
+  if (anchorInput) anchorInput.value = "";
+  if (imageInput) imageInput.value = "";
+  if (imagePreview) {
+    imagePreview.innerHTML = "";
+    imagePreview.classList.add("hidden");
+  }
+}
+
+const sidePanel = document.getElementById("sidePanel");
+const overlay = document.getElementById("overlay");
+const sidePanelTitle = document.getElementById("sidePanelTitle");
+const sidePanelMeta = document.getElementById("sidePanelMeta");
+
 function openSidePanel(intent){
+  resetSidePanelState();
   activeIntent = intent;
-  document.getElementById("editModeControls").style.display = "block";
-  document.getElementById("readonlyContent").style.display = "none";
-  document.getElementById("sidePanelTitle").textContent = intent.id;
-  document.getElementById("executionNoteInput").value = intent.executionNote || "";
-  document.getElementById("anchorInput").value = intent.anchor || "";
-  
-  const preview = document.getElementById("imagePreview");
-  if(intent.imageUrl || (intent.image && intent.image.src)){
-    preview.innerHTML = `<img src="${intent.imageUrl || intent.image.src}" />`;
-    preview.classList.remove("hidden");
-  } else {
-    preview.classList.add("hidden");
+  panelMode = "edit";
+
+  sidePanelTitle.textContent = intent.id;
+  sidePanelMeta.textContent = `Creator: ${intent.creatorId} | Stage 4 — Execution Path Open`;
+
+  const noteInput = document.getElementById("executionNoteInput");
+  if(noteInput){
+  noteInput.value = intent.executionNote || "";
   }
 
-  document.getElementById("sidePanel").classList.add("open");
-  document.getElementById("sidePanel").classList.remove("hidden");
-  document.getElementById("overlay").classList.remove("hidden");
-}
+  sidePanel.classList.remove("hidden");
+  overlay.classList.remove("hidden");
 
-async function saveExecutionNote(){
-  if(!activeIntent) return;
-  const note = document.getElementById("executionNoteInput").value;
-  await updateDoc(doc(db, "intents", activeIntent._docId), { executionNote: note });
-}
-
-function handleImageUpload(event) {
-  const file = event.target.files[0];
-  if (!file || !activeIntent) return;
-  const reader = new FileReader();
-  reader.onload = async () => {
-    const base64 = reader.result;
-    await updateDoc(doc(db, "intents", activeIntent._docId), { imageUrl: base64 });
-    activeIntent.imageUrl = base64;
-    const prev = document.getElementById("imagePreview");
-    prev.innerHTML = `<img src="${base64}" />`;
-    prev.classList.remove("hidden");
-  };
-  reader.readAsDataURL(file);
-}
-
-async function saveAnchor(){
-  const anchor = document.getElementById("anchorInput").value.trim();
-  await updateDoc(doc(db, "intents", activeIntent._docId), { 
-    anchor: anchor, 
-    stage: 5, 
-    anchoredAt: serverTimestamp() 
+  requestAnimationFrame(() => {
+    sidePanel.classList.add("open");
   });
-  closeSidePanel();
-  await loadIntentsFromFirebase();
+  renderImagePreview(intent.image);
+  
+  const anchorInput = document.getElementById("anchorInput");
+if(anchorInput){
+  anchorInput.value = intent.anchor || "";
+}
 }
 
-function openReadonlyPanel(intent){
-  activeIntent = intent;
-  document.getElementById("editModeControls").style.display = "none";
-  document.getElementById("readonlyContent").style.display = "block";
-  
-  const domain = intent.domain || intent.constraints?.domain || "—";
-  const nature = intent.intentNature || intent.constraints?.nature || "—";
-  const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
-  const serve = intent.contextServe || intent.constraints?.serve || "—";
-  const imgSrc = intent.imageUrl || intent.image?.src;
+async function ensureConstraintsExist(intent) {
+  const needsPatch =
+    intent.domain === undefined &&
+    intent.intentNature === undefined &&
+    intent.contextPurpose === undefined &&
+    intent.contextServe === undefined &&
+    !intent.constraints;
 
-  document.getElementById("readonlyContent").innerHTML = `
+  if (!needsPatch) return;
+
+  const patch = {
+    constraints: {
+      domain: intent.domain || "",
+      nature: intent.intentNature || "",
+      purpose: intent.contextPurpose || "",
+      serve: intent.contextServe || ""
+    }
+  };
+
+  Object.assign(intent, patch);
+
+  await updateDoc(
+    doc(db, "intents", intent._docId),
+    patch
+  );
+
+  console.log("Constraints backfilled");
+}
+
+async function openReadonlyPanel(intent) {
+  resetSidePanelState();
+  activeIntent = intent;
+  panelMode = "readonly";
+
+  await ensureConstraintsExist(intent); // ✅ now visible
+
+  populateReadonlyPanel(intent);
+
+  sidePanel.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+
+  requestAnimationFrame(() => {
+    sidePanel.classList.add("open");
+  });
+}
+
+async function saveExecutionNote() {
+  if (!activeIntent) return;
+
+  const note = executionNoteInput.value || "";
+
+  await updateDoc(
+    doc(db, "intents", activeIntent._docId),
+    { executionNote: note }
+  );
+
+  activeIntent.executionNote = note;
+  console.log("✅ Execution note saved");
+}
+
+  
+async function saveExecutionNote() {
+  if (!activeIntent) return;
+
+  const note = executionNoteInput.value || "";
+
+  await updateDoc(
+    doc(db, "intents", activeIntent._docId),
+    { executionNote: note }
+  );
+
+  activeIntent.executionNote = note;
+  console.log("✅ Execution note saved");
+}
+
+  
+  function handleImageUpload(event) {
+  if (!activeIntent) return;
+
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    activeIntent.image = {
+      type: "local",
+      src: reader.result
+    };
+
+    renderImagePreview(intent.image);
+    console.log("Image attached & saved");
+  };
+
+  reader.readAsDataURL(selectedFile);
+}
+
+  window.renderImagePreview=function(image){
+  const preview = document.getElementById("imagePreview");
+  if(!preview) return;
+
+  if(image && image.src){
+    preview.innerHTML = `<img src="${image.src}" />`;
+    preview.classList.remove("hidden");
+  } else {
+    preview.innerHTML = "";
+    preview.classList.add("hidden");
+  }
+};
+  
+async function saveAnchor(){
+  if (!activeIntent) return;
+
+  const anchorValue = document.getElementById("anchorInput")?.value.trim();
+
+  // ❗ DO NOT read empty inputs
+  const contextValue =
+    document.getElementById("contextInput")?.value.trim();
+  const executionValue =
+    document.getElementById("executionNoteInput")?.value.trim();
+
+  const updatePayload = {
+    anchor: anchorValue,
+    stage: 5,
+    anchoredAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  // ✅ only overwrite if user actually typed something
+  if (contextValue) updatePayload.context = contextValue;
+  if (executionValue) updatePayload.executionNote = executionValue;
+
+  // ✅ preserve image
+  if (activeIntent.imageUrl) {
+    updatePayload.imageUrl = activeIntent.imageUrl;
+  }
+
+  try {
+    await updateDoc(
+      doc(db, "intents", activeIntent._docId),
+      updatePayload
+    );
+
+    // sync local object safely
+    Object.assign(activeIntent, updatePayload);
+
+    console.log("✅ Anchor saved WITHOUT data loss");
+    render();
+
+  } catch (err) {
+    console.error("❌ Failed to save anchor:", err);
+  }
+}
+
+
+function closeSidePanel(){
+  sidePanel.classList.remove("open");
+  overlay.classList.add("hidden");
+
+  setTimeout(() => {
+    sidePanel.classList.add("hidden");
+  }, 300);
+}
+
+function formatTimestamp(ts){
+  if (!ts) return "-";
+
+  if (ts.seconds) {
+    const d = new Date(ts.seconds * 1000);
+    return d.toLocaleString();
+  }
+
+  return ts;
+}
+
+function populateReadonlyPanel(intent){
+  console.log(intent.constraints);
+const domain  = intent.domain || intent.constraints?.domain || "—";
+const nature  = intent.intentNature || intent.constraints?.nature || "—";
+const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
+const serve   = intent.contextServe || intent.constraints?.serve || "—";
+
+const fallbackContext =
+  intent.context ||
+  intent.contextText ||
+  intent.executionNote ||
+  "—";
+
+  const content = document.querySelector(".side-panel-content");
+
+  content.innerHTML = `
     <div class="readonly-header">
-      <div class="intent-id">${intent.id}</div>
-      <div class="intent-title">${intent.title}</div>
-      <div class="anchor-badge">FINAL ANCHOR</div>
-    </div>
-    <div class="readonly-section">
-      <div class="readonly-label">Description</div>
-      <div class="readonly-value">${intent.description}</div>
-    </div>
-    <div class="readonly-section">
-      <div class="readonly-label">Constraints</div>
-      <div class="readonly-value">
-        <strong>Domain:</strong> ${domain}<br>
-        <strong>Nature:</strong> ${nature}<br>
-        <strong>Purpose:</strong> ${purpose}<br>
-        <strong>Serve:</strong> ${serve}
+      
+<div class="intent-id">${intent.intentId || intent.id}</div>
+<div class="intent-title">${intent.title}</div>
+
+<div class="anchor-badge">ANCHOR</div>
+
+      <div class="stage-path">
+        Draft → Observed → Interest → Execution → ● Anchored
       </div>
     </div>
-    ${imgSrc ? `
-      <div class="readonly-section">
-        <div class="readonly-label">Artifact</div>
-        <img class="readonly-image" src="${imgSrc}" />
-      </div>
-    ` : ""}
+
     <div class="readonly-section">
-      <div class="readonly-label">Execution Note</div>
-      <div class="readonly-value">${intent.executionNote || "—"}</div>
+      <div class="readonly-label">Created</div>
+      <div class="readonly-value">${formatTimestamp(intent.createdAt)}</div>
     </div>
+
+   <div class="readonly-section">
+  <div class="readonly-label">Description</div>
+  <div class="readonly-value">
+    ${intent.description || "—"}
+  </div>
+</div>
+
+<div class="readonly-section">
+  <div class="readonly-label">Constraints</div>
+  <div class="readonly-value">
+  
+   <strong>Domain:</strong> ${domain}<br/>
+   <strong>Intent nature:</strong> ${nature}<br/>
+   <strong>Purpose:</strong> ${purpose}<br/>
+   <strong>Serve:</strong> ${serve}
+
+  </div>
+</div>
+
+    ${intent.image?.src || intent.imageUrl ? `
+  <div class="readonly-section">
+    <div class="readonly-label">Artifact</div>
+    <img class="readonly-image" src="${intent.image?.src || intent.imageUrl}" />
+  </div>
+` : ""}
+
     ${intent.anchor ? `
       <div class="readonly-section">
         <div class="readonly-label">Anchor</div>
-        <a class="readonly-link" href="${intent.anchor}" target="_blank">${intent.anchor}</a>
+        <a class="readonly-link" href="${intent.anchor}" target="_blank">
+          ${intent.anchor}
+        </a>
       </div>
     ` : ""}
+
+    <div class="readonly-section">
+      <div class="readonly-label">Execution Note</div>
+      <div class="readonly-value">
+        ${intent.executionNote || "-"}
+      </div>
+    </div>
+
+    <div class="readonly-footer">
+      Signals: ${intent.signals || 0}
+    </div>
   `;
-  
-  document.getElementById("sidePanel").classList.add("open");
-  document.getElementById("sidePanel").classList.remove("hidden");
-  document.getElementById("overlay").classList.remove("hidden");
 }
 
-function closeSidePanel(){
-  document.getElementById("sidePanel").classList.remove("open");
-  setTimeout(() => document.getElementById("sidePanel").classList.add("hidden"), 300);
-  document.getElementById("overlay").classList.add("hidden");
-}
+  
+
 </script>
 
 </body>
