@@ -931,32 +931,6 @@ function openReadonlyPanel(intent){
   ensureConstraintsExist(intent);
   renderImagePreview(intent.image);
 
-  async function ensureConstraintsExist(intent) {
-  const needsPatch =
-    intent.domain === undefined ||
-    intent.intentNature === undefined ||
-    intent.purpose === undefined ||
-    intent.serve === undefined;
-
-  if (!needsPatch) return;
-
-  const patch = {
-    domain: intent.domain || "",
-    intentNature: intent.intentNature || "",
-    purpose: intent.purpose || "",
-    serve: intent.serve || ""
-  };
-
-  Object.assign(intent, patch);
-
-  await updateDoc(
-    doc(db, "intents", intent._docId),
-    patch
-  );
-
-  console.log("Constraints backfilled");
-}
-
   sidePanel.classList.remove("hidden");
   overlay.classList.remove("hidden");
 
@@ -965,64 +939,57 @@ function openReadonlyPanel(intent){
   });
 }
 
-async function saveExecutionNote(){
-
-  const reader = new FileReader();
   
+async function saveExecutionNote() {
   if (!activeIntent) return;
 
-  const note = document
-    .getElementById("executionNoteInput")
-    .value
-    .trim();
+  const note = executionNoteInput.value || "";
 
-  try {
-    await updateDoc(
-      doc(db, "intents", activeIntent._docId),
-      {
-        executionNote: note,
-        updatedAt: serverTimestamp()
-      }
-    );
-
-    activeIntent.executionNote = note;
-
-    console.log("✅ Execution note saved");
-  } catch (err) {
-    console.error("❌ Failed to save execution note:", err);
-  }
-
-  // ✅ persist image
   await updateDoc(
     doc(db, "intents", activeIntent._docId),
-    {
-      imageUrl: reader.result
-    }
+    { executionNote: note }
   );
 
-  console.log("Image attached & saved");
-  reader.readAsDataURL(file);
+  activeIntent.executionNote = note;
+  console.log("✅ Execution note saved");
 }
+
   
-  function handleImageUpload(event){
+async function saveExecutionNote() {
+  if (!activeIntent) return;
 
-  const file = e.target.files[0];
-    
-  if(!activeIntent) return;
+  const note = executionNoteInput.value || "";
 
-  file = event.target.files[0];
-  if(!file) return;
+  await updateDoc(
+    doc(db, "intents", activeIntent._docId),
+    { executionNote: note }
+  );
+
+  activeIntent.executionNote = note;
+  console.log("✅ Execution note saved");
+}
+
+  
+  function handleImageUpload(event) {
+  if (!activeIntent) return;
+
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return;
 
   const reader = new FileReader();
+
   reader.onload = () => {
-  activeIntent.image = {
-    type: "local",
-    src: reader.result
+    activeIntent.image = {
+      type: "local",
+      src: reader.result
+    };
+
+    renderImagePreview(activeIntent.image);
+    console.log("Image attached & saved");
   };
-  renderImagePreview(activeIntent.image);
-  };
-  render.readAsDataURL(file);
-  }
+
+  reader.readAsDataURL(selectedFile);
+}
 
   window.renderImagePreview=function(image){
   const preview = document.getElementById("imagePreview");
@@ -1145,10 +1112,10 @@ const fallbackContext =
 <div class="readonly-section">
   <div class="readonly-label">Constraints</div>
   <div class="readonly-value">
-    <strong>Domain:</strong> ${intent.domain || "—"}<br/>
-    <strong>Intent nature:</strong> ${intent.intentNature || "—"}<br/>
-    <strong>Purpose:</strong> ${intent.contextPurpose || "—"}<br/>
-    <strong>Serve:</strong> ${intent.contextServe || "—"}
+    <strong>Domain:</strong> ${domain}<br/>
+    <strong>Intent nature:</strong> ${nature}<br/>
+    <strong>Purpose:</strong> ${purpose}<br/>
+    <strong>Serve:</strong> ${serve}
   </div>
 </div>
 
