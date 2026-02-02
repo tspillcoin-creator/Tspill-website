@@ -1011,14 +1011,14 @@ async function saveExecutionNote() {
       src: reader.result
     };
 
-    renderImagePreview(activeIntent.image);
+    renderImagePreview(intent.image);
     console.log("Image attached & saved");
   };
 
   reader.readAsDataURL(selectedFile);
 }
 
-  window.renderImagePreview=function(image){
+  window.renderImagePreview=function(intent.image){
   const preview = document.getElementById("imagePreview");
   if(!preview) return;
 
@@ -1139,17 +1139,19 @@ const fallbackContext =
 <div class="readonly-section">
   <div class="readonly-label">Constraints</div>
   <div class="readonly-value">
-    <strong>Domain:</strong> ${domain}<br/>
-    <strong>Intent nature:</strong> ${nature}<br/>
-    <strong>Purpose:</strong> ${purpose}<br/>
-    <strong>Serve:</strong> ${serve}
+  
+   <strong>Domain:</strong> ${domain}<br/>
+   <strong>Intent nature:</strong> ${nature}<br/>
+   <strong>Purpose:</strong> ${purpose}<br/>
+   <strong>Serve:</strong> ${serve}
+
   </div>
 </div>
 
-    ${intent.imageUrl ? `
+    ${intent.image?.src || intent.imageUrl ? `
   <div class="readonly-section">
     <div class="readonly-label">Artifact</div>
-    <img class="readonly-image" src="${intent.imageUrl}" />
+    <img class="readonly-image" src="${intent.image?.src || intent.imageUrl}" />
   </div>
 ` : ""}
 
