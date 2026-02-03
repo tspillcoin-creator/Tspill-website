@@ -982,7 +982,16 @@ async function saveExecutionNote() {
   activeIntent.executionNote = note;
   console.log("✅ Execution note saved");
 }
-  
+
+
+async function uploadImageToStorage(file, intentId) {
+  const storageRef = firebase.storage().ref();
+  const imgRef = storageRef.child(`intent-images/${intentId}/${file.name}`);
+
+  await imgRef.put(file);
+  return await imgRef.getDownloadURL();
+}
+
 function handleImageUpload(event) {
   if (!activeIntent) return;
 
@@ -991,8 +1000,7 @@ function handleImageUpload(event) {
 
   const reader = new FileReader();
   reader.onload = async () => {
-    activeIntent.imageUrl = reader.result;
-
+    
     renderImagePreview(activeIntent.imageUrl);
 
     await updateDoc(
@@ -1020,6 +1028,22 @@ function handleImageUpload(event) {
   }
 }
 
+
+ async function saveAnchor(intentId) {
+  let imageUrl = null;
+
+  if (selectedImageFile) {
+    imageUrl = await uploadImageToStorage(selectedImageFile, intentId);
+  }
+
+  await db.collection("intents").doc(intentId).update({
+    imageUrl: imageUrl || null,
+    anchoredAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  console.log("✅ Anchor saved WITH image URL");
+}
+ 
   
 async function saveAnchor(){
   if (!activeIntent) return;
