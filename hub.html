@@ -959,7 +959,7 @@ async function openReadonlyPanel(intent) {
   ensureConstraintsExist(intent); // ✅ now visible
 
   populateReadonlyPanel(intent);
-  renderImagePreview(activeIntent.image);
+  renderImagePreview(intent.imageUrl);
 
   sidePanel.classList.remove("hidden");
   overlay.classList.remove("hidden");
@@ -983,40 +983,43 @@ async function saveExecutionNote() {
   console.log("✅ Execution note saved");
 }
   
- function handleImageUpload(event){
+function handleImageUpload(event) {
   if (!activeIntent) return;
 
   const file = event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
+  reader.onload = async () => {
+    activeIntent.imageUrl = reader.result;
 
-  reader.onload = () => {
-    activeIntent.image = {
-      type: "local",
-      src: reader.result
-    };
+    renderImagePreview(activeIntent.imageUrl);
 
-    renderImagePreview(activeIntent.image);
-    console.log("Image attached & previewed");
+    await updateDoc(
+      doc(db, "intents", activeIntent._docId),
+      { imageUrl: reader.result }
+    );
+
+    console.log("Image attached & saved");
   };
 
   reader.readAsDataURL(file);
 }
 
-
-  window.renderImagePreview=function(image){
+  
+  function renderImagePreview(imageUrl) {
   const preview = document.getElementById("imagePreview");
-  if(!preview) return;
+  if (!preview) return;
 
-  if(image && image.src){
-    preview.innerHTML = `<img src="${image.src}" />`;
+  if (imageUrl) {
+    preview.innerHTML = `<img src="${imageUrl}" />`;
     preview.classList.remove("hidden");
   } else {
     preview.innerHTML = "";
     preview.classList.add("hidden");
   }
-};
+}
+
   
 async function saveAnchor(){
   if (!activeIntent) return;
