@@ -984,13 +984,14 @@ async function saveExecutionNote() {
 }
 
 
-async function uploadImageToStorage(file, intentId) {
-  const storageRef = firebase.storage().ref();
-  const imgRef = storageRef.child(`intent-images/${intentId}/${file.name}`);
+async function uploadIntentImage(file, intentId) {
+  const ref = firebase
+    .storage()
+    .ref(`intent-images/${intentId}/${file.name}`);
 
-  await imgRef.put(file);
-  return await imgRef.getDownloadURL();
-}
+  await ref.put(file);
+  return await ref.getDownloadURL()
+
 
 function handleImageUpload(event) {
   if (!activeIntent) return;
@@ -1001,14 +1002,7 @@ function handleImageUpload(event) {
   const reader = new FileReader();
   reader.onload = async () => {
     
-    renderImagePreview(activeIntent.imageUrl);
-
-    await updateDoc(
-      doc(db, "intents", activeIntent._docId),
-      { imageUrl: reader.result }
-    );
-
-    console.log("Image attached & saved");
+    renderImagePreview(reader.result);
   };
 
   reader.readAsDataURL(file);
@@ -1028,23 +1022,24 @@ function handleImageUpload(event) {
   }
 }
 
-
- async function saveAnchor(intentId) {
+  
+async function saveAnchor(intentId, constraints) {
   let imageUrl = null;
 
   if (selectedImageFile) {
-    imageUrl = await uploadImageToStorage(selectedImageFile, intentId);
+    imageUrl = await uploadIntentImage(selectedImageFile, intentId);
   }
 
-  await db.collection("intents").doc(intentId).update({
-    imageUrl: imageUrl || null,
-    anchoredAt: firebase.firestore.FieldValue.serverTimestamp()
+  await updateDoc(doc(db, "intents", intentId), {
+    imageUrl: imageUrl,
+    constraints: constraints,
+    anchoredAt: serverTimestamp()
   });
 
-  console.log("✅ Anchor saved WITH image URL");
+  console.log("✅ Anchor saved correctly");
 }
+
  
-  
 async function saveAnchor(){
   if (!activeIntent) return;
 
