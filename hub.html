@@ -921,23 +921,23 @@ if(anchorInput){
 }
 }
 
-  
 async function ensureConstraintsExist(intent) {
-  if (!intent) return;
-
   const needsPatch =
-    intent.domain === undefined ||
-    intent.intentNature === undefined ||
-    intent.purpose === undefined ||
-    intent.serve === undefined;
+    intent.domain === undefined &&
+    intent.intentNature === undefined &&
+    intent.contextPurpose === undefined &&
+    intent.contextServe === undefined &&
+    !intent.constraints;
 
   if (!needsPatch) return;
 
   const patch = {
-    domain: intent.domain || "",
-    intentNature: intent.intentNature || "",
-    purpose: intent.purpose || "",
-    serve: intent.serve || ""
+    constraints: {
+      domain: intent.domain || "",
+      nature: intent.intentNature || "",
+      purpose: intent.contextPurpose || "",
+      serve: intent.contextServe || ""
+    }
   };
 
   Object.assign(intent, patch);
@@ -950,16 +950,14 @@ async function ensureConstraintsExist(intent) {
   console.log("Constraints backfilled");
 }
 
-
 async function openReadonlyPanel(intent) {
   resetSidePanelState();
   activeIntent = intent;
   panelMode = "readonly";
 
-  ensureConstraintsExist(intent); // ✅ now visible
+  await ensureConstraintsExist(intent); // ✅ now visible
 
   populateReadonlyPanel(intent);
-  renderImagePreview(intent.imageUrl);
 
   sidePanel.classList.remove("hidden");
   overlay.classList.remove("hidden");
@@ -983,63 +981,56 @@ async function saveExecutionNote() {
   console.log("✅ Execution note saved");
 }
 
-
-async function uploadIntentImage(file, intentId) {
-  const ref = firebase
-    .storage()
-    .ref(`intent-images/${intentId}/${file.name}`);
-
-  await ref.put(file);
-  return await ref.getDownloadURL()
-
-
-function handleImageUpload(event) {
+  
+async function saveExecutionNote() {
   if (!activeIntent) return;
 
-  const file = event.target.files[0];
-  if (!file) return;
+  const note = executionNoteInput.value || "";
 
-  const reader = new FileReader();
-  reader.onload = async () => {
-    
-    renderImagePreview(reader.result);
-  };
+  await updateDoc(
+    doc(db, "intents", activeIntent._docId),
+    { executionNote: note }
+  );
 
-  reader.readAsDataURL(file);
+  activeIntent.executionNote = note;
+  console.log("✅ Execution note saved");
 }
 
   
-  function renderImagePreview(imageUrl) {
-  const preview = document.getElementById("imagePreview");
-  if (!preview) return;
+  function handleImageUpload(event) {
+  if (!activeIntent) return;
 
-  if (imageUrl) {
-    preview.innerHTML = `<img src="${imageUrl}" />`;
+  const selectedFile = event.target.files[0];
+  if (!selectedFile) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    activeIntent.image = {
+      type: "local",
+      src: reader.result
+    };
+
+    renderImagePreview(intent.image);
+    console.log("Image attached & saved");
+  };
+
+  reader.readAsDataURL(selectedFile);
+}
+
+  window.renderImagePreview=function(image){
+  const preview = document.getElementById("imagePreview");
+  if(!preview) return;
+
+  if(image && image.src){
+    preview.innerHTML = `<img src="${image.src}" />`;
     preview.classList.remove("hidden");
   } else {
     preview.innerHTML = "";
     preview.classList.add("hidden");
   }
-}
-
+};
   
-async function saveAnchor(intentId, constraints) {
-  let imageUrl = null;
-
-  if (selectedImageFile) {
-    imageUrl = await uploadIntentImage(selectedImageFile, intentId);
-  }
-
-  await updateDoc(doc(db, "intents", intentId), {
-    imageUrl: imageUrl,
-    constraints: constraints,
-    anchoredAt: serverTimestamp()
-  });
-
-  console.log("✅ Anchor saved correctly");
-}
-
- 
 async function saveAnchor(){
   if (!activeIntent) return;
 
@@ -1106,7 +1097,7 @@ function formatTimestamp(ts){
 }
 
 function populateReadonlyPanel(intent){
-  console.log("INTENT OBJECT →", intent);
+  console.log(intent.constraints);
 const domain  = intent.domain || intent.constraints?.domain || "—";
 const nature  = intent.intentNature || intent.constraints?.nature || "—";
 const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
@@ -1148,21 +1139,21 @@ const fallbackContext =
 <div class="readonly-section">
   <div class="readonly-label">Constraints</div>
   <div class="readonly-value">
-    <strong>Domain:</strong> ${intent.domain || "—"}<br/>
-    <strong>Intent nature:</strong> ${intent.intentNature || "—"}<br/>
-    <strong>Purpose:</strong> ${intent.purpose || "—"}<br/>
-    <strong>Serve:</strong> ${intent.serve || "—"}
+  
+   <strong>Domain:</strong> ${domain}<br/>
+   <strong>Intent nature:</strong> ${nature}<br/>
+   <strong>Purpose:</strong> ${purpose}<br/>
+   <strong>Serve:</strong> ${serve}
+
   </div>
 </div>
 
-
-    ${intent.image?.src ? `
+    ${intent.image?.src || intent.imageUrl ? `
   <div class="readonly-section">
     <div class="readonly-label">Artifact</div>
-    <img class="readonly-image" src="${intent.image.src}" />
+    <img class="readonly-image" src="${intent.image?.src || intent.imageUrl}" />
   </div>
 ` : ""}
-
 
     ${intent.anchor ? `
       <div class="readonly-section">
@@ -1172,7 +1163,6 @@ const fallbackContext =
         </a>
       </div>
     ` : ""}
-
 
     <div class="readonly-section">
       <div class="readonly-label">Execution Note</div>
@@ -1188,6 +1178,7 @@ const fallbackContext =
 }
 
   
+
 </script>
 
 </body>
