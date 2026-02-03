@@ -921,23 +921,23 @@ if(anchorInput){
 }
 }
 
+  
 async function ensureConstraintsExist(intent) {
+  if (!intent) return;
+
   const needsPatch =
-    intent.domain === undefined &&
-    intent.intentNature === undefined &&
-    intent.contextPurpose === undefined &&
-    intent.contextServe === undefined &&
-    !intent.constraints;
+    intent.domain === undefined ||
+    intent.intentNature === undefined ||
+    intent.purpose === undefined ||
+    intent.serve === undefined;
 
   if (!needsPatch) return;
 
   const patch = {
-    constraints: {
-      domain: intent.domain || "",
-      nature: intent.intentNature || "",
-      purpose: intent.contextPurpose || "",
-      serve: intent.contextServe || ""
-    }
+    domain: intent.domain || "",
+    intentNature: intent.intentNature || "",
+    purpose: intent.purpose || "",
+    serve: intent.serve || ""
   };
 
   Object.assign(intent, patch);
@@ -950,14 +950,16 @@ async function ensureConstraintsExist(intent) {
   console.log("Constraints backfilled");
 }
 
+
 async function openReadonlyPanel(intent) {
   resetSidePanelState();
   activeIntent = intent;
   panelMode = "readonly";
 
-  await ensureConstraintsExist(intent); // ✅ now visible
+  ensureConstraintsExist(intent); // ✅ now visible
 
   populateReadonlyPanel(intent);
+  renderImagePreview(activeIntent.image);
 
   sidePanel.classList.remove("hidden");
   overlay.classList.remove("hidden");
@@ -980,28 +982,12 @@ async function saveExecutionNote() {
   activeIntent.executionNote = note;
   console.log("✅ Execution note saved");
 }
-
   
-async function saveExecutionNote() {
+ function handleImageUpload(event){
   if (!activeIntent) return;
 
-  const note = executionNoteInput.value || "";
-
-  await updateDoc(
-    doc(db, "intents", activeIntent._docId),
-    { executionNote: note }
-  );
-
-  activeIntent.executionNote = note;
-  console.log("✅ Execution note saved");
-}
-
-  
-  function handleImageUpload(event) {
-  if (!activeIntent) return;
-
-  const selectedFile = event.target.files[0];
-  if (!selectedFile) return;
+  const file = event.target.files[0];
+  if (!file) return;
 
   const reader = new FileReader();
 
@@ -1011,12 +997,13 @@ async function saveExecutionNote() {
       src: reader.result
     };
 
-    renderImagePreview(intent.image);
-    console.log("Image attached & saved");
+    renderImagePreview(activeIntent.image);
+    console.log("Image attached & previewed");
   };
 
-  reader.readAsDataURL(selectedFile);
+  reader.readAsDataURL(file);
 }
+
 
   window.renderImagePreview=function(image){
   const preview = document.getElementById("imagePreview");
@@ -1139,21 +1126,21 @@ const fallbackContext =
 <div class="readonly-section">
   <div class="readonly-label">Constraints</div>
   <div class="readonly-value">
-  
-   <strong>Domain:</strong> ${domain}<br/>
-   <strong>Intent nature:</strong> ${nature}<br/>
-   <strong>Purpose:</strong> ${purpose}<br/>
-   <strong>Serve:</strong> ${serve}
-
+    <strong>Domain:</strong> ${intent.domain || "—"}<br/>
+    <strong>Intent nature:</strong> ${intent.intentNature || "—"}<br/>
+    <strong>Purpose:</strong> ${intent.purpose || "—"}<br/>
+    <strong>Serve:</strong> ${intent.serve || "—"}
   </div>
 </div>
 
-    ${intent.image?.src || intent.imageUrl ? `
+
+    ${intent.image?.src ? `
   <div class="readonly-section">
     <div class="readonly-label">Artifact</div>
-    <img class="readonly-image" src="${intent.image?.src || intent.imageUrl}" />
+    <img class="readonly-image" src="${intent.image.src}" />
   </div>
 ` : ""}
+
 
     ${intent.anchor ? `
       <div class="readonly-section">
@@ -1163,6 +1150,7 @@ const fallbackContext =
         </a>
       </div>
     ` : ""}
+
 
     <div class="readonly-section">
       <div class="readonly-label">Execution Note</div>
@@ -1178,7 +1166,6 @@ const fallbackContext =
 }
 
   
-
 </script>
 
 </body>
