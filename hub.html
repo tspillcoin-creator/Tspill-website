@@ -1087,7 +1087,7 @@ function formatTimestamp(ts){
 }
 
 function populateReadonlyPanel(intent){
-  console.log(intent.constraints);
+  console.log("INTENT OBJECT →", intent);
 const domain  = intent.domain || intent.constraints?.domain || "—";
 const nature  = intent.intentNature || intent.constraints?.nature || "—";
 const purpose = intent.contextPurpose || intent.constraints?.purpose || "—";
