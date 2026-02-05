@@ -494,6 +494,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   addDoc,
   serverTimestamp,
   doc,
@@ -503,6 +504,7 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+window.getDoc = getDoc;
 window.addDoc = addDoc;
 window.collection = collection;
 window.serverTimestamp = serverTimestamp;
@@ -1264,41 +1266,53 @@ window.signalIntent = async function(intentId) {
   const docRef = doc(db, "intents", intent._docId);
 
   try {
-    await runTransaction(db, async (transaction) => {
-      const sfDoc = await transaction.get(docRef);
-      if (!sfDoc.exists()) throw "Document does not exist!";
-      
-      const data = sfDoc.data();
-      let currentSignals = { count: 0, by: {} };
-      
-      if (typeof data.signals === 'number') {
-        currentSignals.count = data.signals;
-      } else if (data.signals) {
-        currentSignals = data.signals;
+    // 1. Read latest state
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    
+    // 2. Schema check & Validation
+    let currentCount = 0;
+    let isLegacy = false;
+    
+    if (typeof data.signals === 'number') {
+      currentCount = data.signals;
+      isLegacy = true;
+    } else if (data.signals) {
+      currentCount = data.signals.count || 0;
+      if (data.signals.by && data.signals.by[TSPILL_ID]) {
+        alert("Already signaled.");
+        return;
       }
-      
-      if (currentSignals.by && currentSignals.by[TSPILL_ID]) {
-        throw "Already signaled";
-      }
-      
-      const newSignals = {
-        count: currentSignals.count + 1,
-        by: { ...currentSignals.by, [TSPILL_ID]: true }
-      };
-      
-      const updates = { signals: newSignals };
+    }
 
-      // Stage promotion logic
-      let newStage = data.stage;
-      if (data.stage === 2 && newSignals.count >= 1) newStage = 3;
-      if (data.stage === 3 && newSignals.count >= 2) newStage = 4;
-      
-      if (newStage !== data.stage) {
-        updates.stage = newStage;
-      }
-      
-      transaction.update(docRef, updates);
-    });
+    const newCount = currentCount + 1;
+    let updates = {};
+
+    if (isLegacy) {
+      // Overwrite legacy number with object
+      updates.signals = {
+        count: newCount,
+        by: { [TSPILL_ID]: true }
+      };
+    } else {
+      // Atomic update
+      updates["signals.count"] = increment(1);
+      updates[`signals.by.${TSPILL_ID}`] = true;
+    }
+
+    // 3. Stage Promotion
+    let newStage = data.stage;
+    // Stage 2 -> 3 (Observed -> External Interest)
+    if (data.stage === 2 && newCount >= 1) newStage = 3;
+    // Stage 3 -> 4 (Interest -> Execution Path Open)
+    if (data.stage === 3 && newCount >= 2) newStage = 4;
+    
+    if (newStage !== data.stage) {
+      updates.stage = newStage;
+    }
+
+    await updateDoc(docRef, updates);
 
     console.log("✅ Signaled intent:", intentId);
     await loadIntentsFromFirebase();
