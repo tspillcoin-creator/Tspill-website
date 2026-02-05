@@ -855,14 +855,22 @@ function render(){
       card.onclick = () => handleStage2Click(intent);
     }
     if(intent.stage === 3){
-      if(!intent.contextLocked){
-        card.onclick = () => openContextModal(intent);
+      if (intent.creatorId === TSPILL_ID) {
+        if(!intent.contextLocked){
+          card.onclick = () => openContextModal(intent);
+        } else {
+          card.onclick = () => openExecutionPath(intent.id);
+        }
       } else {
-        card.onclick = () => openExecutionPath(intent.id);
+        card.onclick = () => openReadonlyPanel(intent);
       }
     }
     if(intent.stage === 4){
-      card.onclick = () => openSidePanel(intent);
+      if (intent.creatorId === TSPILL_ID) {
+        card.onclick = () => openSidePanel(intent);
+      } else {
+        card.onclick = () => openReadonlyPanel(intent);
+      }
     }
     if(intent.stage === 5){
       card.onclick = () => openReadonlyPanel(intent);
@@ -1226,9 +1234,8 @@ function renderSignalButton(intent) {
 }
 
 window.handleStage2Click = async function(intent) {
-  // 1. Creator -> View only
+  // 1. Creator -> No action
   if (intent.creatorId === TSPILL_ID) {
-    openReadonlyPanel(intent);
     return;
   }
 
@@ -1238,15 +1245,7 @@ window.handleStage2Click = async function(intent) {
   if (!hasSignaled) {
     // Auto-signal on first view
     await signalIntent(intent.id); 
-    
-    // Find updated intent after reload
-    const updatedIntent = window.intents.find(i => i.id === intent.id);
-    if (updatedIntent) {
-      openReadonlyPanel(updatedIntent);
-    }
-  } else {
-    // Already signaled -> View only
-    openReadonlyPanel(intent);
+    // Do not open panel as per requirement
   }
 };
 
@@ -1303,10 +1302,9 @@ window.signalIntent = async function(intentId) {
 
     // 3. Stage Promotion
     let newStage = data.stage;
-    // Stage 2 -> 3 (Observed -> External Interest)
-    if (data.stage === 2 && newCount >= 1) newStage = 3;
-    // Stage 3 -> 4 (Interest -> Execution Path Open)
-    if (data.stage === 3 && newCount >= 2) newStage = 4;
+    // Robust promotion logic
+    if (newCount >= 1 && newStage < 3) newStage = 3;
+    if (newCount >= 2 && newStage < 4) newStage = 4;
     
     if (newStage !== data.stage) {
       updates.stage = newStage;
