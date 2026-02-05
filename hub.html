@@ -498,7 +498,9 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
-  increment
+  increment,
+  runTransaction,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 window.addDoc = addDoc;
@@ -508,6 +510,8 @@ window.serverTimestamp = serverTimestamp;
 window.doc = doc;
 window.updateDoc = updateDoc;
 window.increment = increment;
+window.runTransaction = runTransaction;
+window.orderBy = orderBy;
 
 /* ===============================
    🔐 FIREBASE CONFIG (UNCHANGED)
@@ -622,9 +626,10 @@ window.saveIntentToFirebase = async function (intentData) {
    =============================== */
 window.loadIntentsFromFirebase = async function () {
   try {
+    // 🌍 Global feed: Remove creator filter, show all
     const q = query(
       collection(db, "intents"),
-      where("creatorId", "==", TSPILL_ID)
+      orderBy("createdAt", "desc")
     );
 
     const snapshot = await getDocs(q);
@@ -634,9 +639,17 @@ window.loadIntentsFromFirebase = async function () {
   snapshot.forEach(snap => {
   const data = snap.data();
 
+  // 🔄 Schema normalization for signals
+  let signals = { count: 0, by: {} };
+  if (typeof data.signals === 'number') {
+    signals.count = data.signals;
+  } else if (data.signals && typeof data.signals === 'object') {
+    signals = data.signals;
+  }
  
 window.intents.push({
   ...data,
+  signals: signals, // Override with normalized object
 
   // 🔹 constraints (safe defaults)
   domain: data.domain || "",
@@ -862,7 +875,7 @@ function render(){
         ${intent.creatorId || "TS-UNASSIGNED"} | ${stageLabel}
       </div>
       <div class="intent-footer">
-        <span>Signals: ${intent.signals || 0}</span>
+        <span>Signals: ${intent.signals?.count || 0}</span>
         ${intent.stage === 5 ? `<span class="anchor-badge">ANCHOR</span>` : ""}
       </div>
     `;
@@ -1184,10 +1197,94 @@ const fallbackContext =
     </div>
 
     <div class="readonly-footer">
-      Signals: ${intent.signals || 0}
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Signals: ${intent.signals?.count || 0}</span>
+        ${renderSignalButton(intent)}
+      </div>
     </div>
   `;
 }
+
+function renderSignalButton(intent) {
+  const isCreator = intent.creatorId === TSPILL_ID;
+  const hasSignaled = intent.signals?.by?.[TSPILL_ID];
+
+  if (isCreator) {
+    return `<span style="opacity:0.5; font-size:11px;">(Owner)</span>`;
+  }
+
+  if (hasSignaled) {
+    return `<button class="panel-save-btn" disabled style="opacity:0.5; border-color:transparent;">✓ Signaled</button>`;
+  }
+
+  return `<button class="panel-save-btn" onclick="signalIntent('${intent.id}')">Signal Interest</button>`;
+}
+
+window.signalIntent = async function(intentId) {
+  const intent = window.intents.find(i => i.id === intentId);
+  if (!intent) return;
+
+  if (intent.creatorId === TSPILL_ID) {
+    alert("You cannot signal your own intent.");
+    return;
+  }
+  if (intent.signals?.by?.[TSPILL_ID]) {
+    alert("You have already signaled this intent.");
+    return;
+  }
+
+  const docRef = doc(db, "intents", intent._docId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const sfDoc = await transaction.get(docRef);
+      if (!sfDoc.exists()) throw "Document does not exist!";
+      
+      const data = sfDoc.data();
+      let currentSignals = { count: 0, by: {} };
+      
+      if (typeof data.signals === 'number') {
+        currentSignals.count = data.signals;
+      } else if (data.signals) {
+        currentSignals = data.signals;
+      }
+      
+      if (currentSignals.by && currentSignals.by[TSPILL_ID]) {
+        throw "Already signaled";
+      }
+      
+      const newSignals = {
+        count: currentSignals.count + 1,
+        by: { ...currentSignals.by, [TSPILL_ID]: true }
+      };
+      
+      const updates = { signals: newSignals };
+
+      // Stage promotion logic
+      let newStage = data.stage;
+      if (data.stage === 2 && newSignals.count >= 1) newStage = 3;
+      if (data.stage === 3 && newSignals.count >= 2) newStage = 4;
+      
+      if (newStage !== data.stage) {
+        updates.stage = newStage;
+      }
+      
+      transaction.update(docRef, updates);
+    });
+
+    console.log("✅ Signaled intent:", intentId);
+    await loadIntentsFromFirebase();
+    
+    const updatedIntent = window.intents.find(i => i.id === intentId);
+    if (updatedIntent && sidePanel.classList.contains("open")) {
+       openReadonlyPanel(updatedIntent);
+    }
+
+  } catch (err) {
+    console.error("Signal failed:", err);
+    alert("Signal failed: " + err);
+  }
+};
 
   
 
