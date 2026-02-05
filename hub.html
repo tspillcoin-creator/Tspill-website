@@ -641,8 +641,8 @@ window.intents.push({
   // 🔹 constraints (safe defaults)
   domain: data.domain || "",
   intentNature: data.intentNature || "",
-  purpose: data.purpose || "",
-  serve: data.serve || "",
+  contextPurpose: data.contextPurpose || data.purpose || "",
+  contextServe: data.contextServe || data.serve || "",
 
   // 🔹 image rehydrate
   image: data.imageUrl
@@ -768,14 +768,24 @@ window.registerExternalSignal = async function (intentId) {
 };
 
 
-function saveContext(){
+async function saveContext(){
   if(!activeIntent) return;
 
-  activeIntent.domain = domain.value.trim();
-  activeIntent.intentNature = nature.value.trim();
-  activeIntent.contextPurpose = purpose.value.trim();
-  activeIntent.contextServe = serve.value.trim();
-  activeIntent.contextLocked = true;
+  const updates = {
+    domain: domain.value.trim(),
+    intentNature: nature.value.trim(),
+    contextPurpose: purpose.value.trim(),
+    contextServe: serve.value.trim(),
+    contextLocked: true
+  };
+
+  Object.assign(activeIntent, updates);
+
+  try {
+    await updateDoc(doc(db, "intents", activeIntent._docId), updates);
+  } catch (e) {
+    console.error("Failed to save context", e);
+  }
 
   domain.value = "";
   nature.value = "";
@@ -1011,7 +1021,7 @@ async function saveExecutionNote() {
       src: reader.result
     };
 
-    renderImagePreview(intent.image);
+    renderImagePreview(activeIntent.image);
     console.log("Image attached & saved");
   };
 
@@ -1054,7 +1064,9 @@ async function saveAnchor(){
   if (executionValue) updatePayload.executionNote = executionValue;
 
   // ✅ preserve image
-  if (activeIntent.imageUrl) {
+  if (activeIntent.image && activeIntent.image.src) {
+    updatePayload.imageUrl = activeIntent.image.src;
+  } else if (activeIntent.imageUrl) {
     updatePayload.imageUrl = activeIntent.imageUrl;
   }
 
