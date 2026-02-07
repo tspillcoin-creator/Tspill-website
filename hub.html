@@ -854,7 +854,7 @@ function render(){
     card.className = "intent-card";
 
     if(intent.stage === 2){
-      card.onclick = () => handleStage2Click(intent);
+      card.onclick = () => handleAutoSignalClick(intent);
     }
     if(intent.stage === 3){
       if (intent.creatorId === TSPILL_ID) {
@@ -864,7 +864,7 @@ function render(){
           card.onclick = () => openExecutionPath(intent.id);
         }
       } else {
-        card.onclick = () => openReadonlyPanel(intent);
+        card.onclick = () => handleAutoSignalClick(intent);
       }
     }
     if(intent.stage === 4){
@@ -1236,19 +1236,16 @@ function renderSignalButton(intent) {
   return `<button class="panel-save-btn" onclick="signalIntent('${intent.id}')">Signal Interest</button>`;
 }
 
-window.handleStage2Click = async function(intent) {
-  // 1. Creator -> No action
-  if (intent.creatorId === TSPILL_ID) {
-    return;
-  }
+window.handleAutoSignalClick = async function(intent) {
+  if (intent.creatorId === TSPILL_ID) return;
 
-  // 2. Non-creator
-  const hasSignaled = intent.signals?.by?.[TSPILL_ID];
-
-  if (!hasSignaled) {
-    // Auto-signal on first view
-    await signalIntent(intent.id); 
-    // Do not open panel as per requirement
+  // Auto-signal (allow multiple per user)
+  await signalIntent(intent.id);
+  
+  // Open panel if Stage 3+ (to show context)
+  const updated = window.intents.find(i => i.id === intent.id);
+  if (updated && updated.stage >= 3) {
+    openReadonlyPanel(updated);
   }
 };
 
@@ -1258,10 +1255,6 @@ window.signalIntent = async function(intentId) {
 
   if (intent.creatorId === TSPILL_ID) {
     alert("You cannot signal your own intent.");
-    return;
-  }
-  if (intent.signals?.by?.[TSPILL_ID]) {
-    alert("You have already signaled this intent.");
     return;
   }
 
@@ -1282,10 +1275,6 @@ window.signalIntent = async function(intentId) {
       isLegacy = true;
     } else if (data.signals) {
       currentCount = data.signals.count || 0;
-      if (data.signals.by && data.signals.by[TSPILL_ID]) {
-        alert("Already signaled.");
-        return;
-      }
     }
 
     const newCount = currentCount + 1;
