@@ -205,8 +205,10 @@ body{
 }
 
 .side-panel-content {
-  padding: 0;
+  padding: 20px;
   font-size: 13px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .panel-placeholder {
@@ -1186,6 +1188,13 @@ const fallbackContext =
   </div>
 </div>
 
+<div class="readonly-section">
+  <div class="readonly-label">Execution Note</div>
+  <div class="readonly-value">
+    ${intent.executionNote || "-"}
+  </div>
+</div>
+
     ${intent.image?.src || intent.imageUrl ? `
   <div class="readonly-section">
     <div class="readonly-label">Artifact</div>
@@ -1202,13 +1211,6 @@ const fallbackContext =
       </div>
     ` : ""}
 
-    <div class="readonly-section">
-      <div class="readonly-label">Execution Note</div>
-      <div class="readonly-value">
-        ${intent.executionNote || "-"}
-      </div>
-    </div>
-
     <div class="readonly-footer">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span>Signals: ${intent.signals?.count || 0}</span>
@@ -1219,6 +1221,7 @@ const fallbackContext =
 }
 
 function renderSignalButton(intent) {
+  if (intent.stage >= 4) return "";
   const isCreator = intent.creatorId === TSPILL_ID;
   const hasSignaled = intent.signals?.by?.[TSPILL_ID];
 
