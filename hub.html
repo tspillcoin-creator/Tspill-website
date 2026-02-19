@@ -395,11 +395,55 @@ body{
   border-top: 1px solid rgba(255,255,255,0.08);
   padding-top: 10px;
 }
+  /* HUB MOBILE */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    padding: 20px 15px;
+    top: 110px;
+    bottom: 90px;
+  }
+  
+  .side-panel {
+    width: 100% !important;
+    transform: translateY(100%);
+  }
+  
+  .side-panel.open {
+    transform: translateY(0);
+  }
+  
+  .modal-box {
+    width: 92vw;
+    margin: 20px;
+  }
+  
+  .ledger-watermark {
+    font-size: 52px;
+    letter-spacing: 0.2em;
+  }
+}
 
 </style>
 </head>
 
 <body>
+
+  /* MOBILE + SHARED NAV for Hub */
+.shared-nav { position:fixed; top:0; left:0; right:0; height:58px; background:rgba(5,5,5,0.98); border-bottom:1px solid #d4af37; z-index:9999; display:flex; align-items:center; padding:0 20px; }
+.nav-content { width:100%; max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
+.nav-logo { font-family:'Space Grotesk',sans-serif; font-size:1.35rem; font-weight:700; letter-spacing:3px; color:#d4af37; cursor:pointer; }
+.nav-links { display:flex; gap:28px; }
+.nav-links a { color:#ddd; text-decoration:none; font-size:0.95rem; font-weight:500; letter-spacing:1px; transition:color .2s; }
+.nav-links a:hover { color:#d4af37; }
+@media (max-width:768px){
+  .grid { grid-template-columns:1fr; padding:20px 15px; top:110px; bottom:90px; }
+  .side-panel { width:100% !important; transform:translateY(100%); }
+  .side-panel.open { transform:translateY(0); }
+  .modal-box { width:92vw; margin:20px; }
+  .ledger-watermark { font-size:52px; letter-spacing:0.2em; }
+  .nav-links { gap:18px; font-size:0.9rem; }
+}
 
 <div class="ledger-watermark">PUBLIC LEDGER</div>
 
