@@ -4,216 +4,111 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TSPILL — Identity Protocol</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 
-<!-- Firebase (COMPAT for simple copy-paste use) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
-:root {
-  --gold:#d4af37;
-  --bg:#050505;
-  --card:#ffffff;
-}
+:root { --gold:#d4af37; --bg:#050505; --card:#ffffff; }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
   background:var(--bg);
   font-family:'Space Grotesk',sans-serif;
   height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
   overflow:hidden;
+  padding-top:58px; /* space for nav */
 }
 #bg-canvas{position:fixed;inset:0;z-index:1;}
+.shared-nav{
+  position:fixed;top:0;left:0;right:0;height:58px;background:rgba(5,5,5,0.98);border-bottom:1px solid var(--gold);z-index:9999;display:flex;align-items:center;padding:0 20px;
+}
+.nav-content{width:100%;max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;font-weight:700;letter-spacing:3px;color:var(--gold);cursor:pointer;}
+.nav-links{display:flex;gap:28px;}
+.nav-links a{color:#ddd;text-decoration:none;font-size:0.95rem;font-weight:500;letter-spacing:1px;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
 .gate-card{
-  position:relative;
-  z-index:10;
-  width:440px;
-  padding:60px 50px 80px;
-  background:var(--card);
-  text-align:center;
-  box-shadow:0 40px 100px rgba(0,0,0,0.6);
+  position:relative;z-index:10;width:440px;max-width:92vw;padding:50px 30px 70px;margin:40px auto 0;background:var(--card);text-align:center;box-shadow:0 40px 100px rgba(0,0,0,0.6);
 }
 .logo-seal{width:72px;margin:0 auto 25px;}
 .logo-seal img{width:100%;}
 h1{font-size:2.8rem;letter-spacing:10px;margin-bottom:6px;}
-.caption{
-  font-size:.65rem;
-  letter-spacing:4px;
-  color:#666;
-  margin-bottom:45px;
-  display:block;
-}
-label{
-  font-size:.6rem;
-  letter-spacing:3px;
-  color:#999;
-  margin-bottom:14px;
-  display:block;
-}
-input{
-  width:100%;
-  padding:20px;
-  text-align:center;
-  margin-bottom:30px;
-  border:1px solid #eee;
-  background:#f9f9f9;
-}
-.btn{
-  width:100%;
-  padding:22px;
-  background:#000;
-  color:#fff;
-  border:none;
-  font-weight:700;
-  letter-spacing:4px;
-  cursor:pointer;
-}
+.caption{font-size:.65rem;letter-spacing:4px;color:#666;margin-bottom:45px;display:block;}
+label{font-size:.6rem;letter-spacing:3px;color:#999;margin-bottom:14px;display:block;}
+input{width:100%;padding:20px;text-align:center;margin-bottom:30px;border:1px solid #eee;background:#f9f9f9;}
+.btn{width:100%;padding:22px;background:#000;color:#fff;border:none;font-weight:700;letter-spacing:4px;cursor:pointer;}
 .btn:hover{background:var(--gold);color:#000;}
 .enter-btn{background:var(--gold);color:#000;margin-top:20px;}
-#id-display{
-  display:none;
-  margin-top:10px;
-  padding:40px;
-  background:#0a0a0a;
-  border:2px dashed var(--gold);
-  color:#fff;
-}
-.generated-id{
-  font-size:2rem;
-  letter-spacing:8px;
-  margin:15px 0;
+#id-display{display:none;margin-top:10px;padding:40px;background:#0a0a0a;border:2px dashed var(--gold);color:#fff;}
+.generated-id{font-size:2rem;letter-spacing:8px;margin:15px 0;}
+@media (max-width:640px){
+  .gate-card{padding:40px 20px 60px;}
+  h1{font-size:2.2rem;letter-spacing:6px;}
+  .nav-links{gap:18px;font-size:0.9rem;}
 }
 </style>
 </head>
 
 <body>
 
+<!-- SHARED NAV -->
+<nav class="shared-nav">
+  <div class="nav-content">
+    <div class="nav-logo" onclick="window.location.href='index.html'">TSPILL ☕</div>
+    <div class="nav-links">
+      <a href="index.html">Gate</a>
+      <a href="home.html">Home</a>
+      <a href="hub.html">Ledger</a>
+    </div>
+  </div>
+</nav>
+
 <canvas id="bg-canvas"></canvas>
 
 <div class="gate-card">
-
-<div id="main-content">
-  <div class="logo-seal">
-    <img src="tspill-logo.png" alt="TSPILL Seal">
+  <div id="main-content">
+    <div class="logo-seal"><img src="tspill-logo.png" alt="TSPILL Seal"></div>
+    <h1>TSPILL</h1>
+    <span class="caption">Production-Linked Ecosystem</span>
+    <label>Institutional Identifier</label>
+    <input id="credential" placeholder="Email or Wallet Address">
+    <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
   </div>
 
-  <h1>TSPILL</h1>
-  <span class="caption">Production-Linked Ecosystem</span>
-
-  <label>Institutional Identifier</label>
-  <input id="credential" placeholder="Email or Wallet Address">
-
-  <button class="btn" onclick="verifyIdentity()">Verify Identity</button>
-</div>
-
-<div id="id-display">
-  <span style="font-size:.55rem;color:var(--gold);letter-spacing:4px;">
-    PROTOCOL ACCESS MAPPED
-  </span>
-  <div class="generated-id" id="tspillID"></div>
-  <p style="font-size:.6rem;color:#666;">
-    Identity persists across all TSPILL nodes.
-  </p>
-  <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
-</div>
-
+  <div id="id-display">
+    <span style="font-size:.55rem;color:var(--gold);letter-spacing:4px;">PROTOCOL ACCESS MAPPED</span>
+    <div class="generated-id" id="tspillID"></div>
+    <p style="font-size:.6rem;color:#666;">Identity persists across all TSPILL nodes.</p>
+    <button class="btn enter-btn" onclick="enterEcosystem()">Enter Ecosystem</button>
+  </div>
 </div>
 
 <script>
-/* 🔐 FIREBASE CONFIG — FINAL */
-firebase.initializeApp({
-  apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
-  authDomain: "tspill-protocol.firebaseapp.com",
-  projectId: "tspill-protocol",
-  appId: "1:863753676409:web:ae3957d697c68d877556a8"
-});
+// Your original Firebase + canvas + ID logic (unchanged)
+firebase.initializeApp({apiKey:"AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",authDomain:"tspill-protocol.firebaseapp.com",projectId:"tspill-protocol",appId:"1:863753676409:web:ae3957d697c68d877556a8"});
+const db=firebase.firestore();
 
-const db = firebase.firestore();
-
-/* 🔑 ID LOGIC */
-function hashAnchor(str){
-  let h=0;
-  for(let i=0;i<str.length;i++){
-    h = str.charCodeAt(i) + ((h << 5) - h);
-  }
-  return Math.abs(h).toString(16);
-}
-
-function generateTspillID(hash){
-  return "TS-" + hash.slice(0,4).toUpperCase();
-}
+function hashAnchor(str){let h=0;for(let i=0;i<str.length;i++){h=str.charCodeAt(i)+((h<<5)-h);}return Math.abs(h).toString(16);}
+function generateTspillID(hash){return"TS-"+hash.slice(0,4).toUpperCase();}
 
 async function verifyIdentity(){
-  const input = document.getElementById("credential").value.trim().toLowerCase();
-  if(input.length < 5){
-    alert("Please enter a valid identifier.");
-    return;
-  }
-
-  const anchorHash = hashAnchor(input);
-  const tspillID = generateTspillID(anchorHash);
-
-  const ref = db.collection("identities").doc(tspillID);
-  const snap = await ref.get();
-
-  if(!snap.exists){
-    await ref.set({
-      tspill_id: tspillID,
-      anchor_hash: anchorHash,
-      created_at: firebase.firestore.FieldValue.serverTimestamp(),
-      protocol_version: "v0.1"
-    });
-  }
-
-  localStorage.setItem("TSPILL_ID", tspillID);
-
+  const input=document.getElementById("credential").value.trim().toLowerCase();
+  if(input.length<5){alert("Please enter a valid identifier.");return;}
+  const anchorHash=hashAnchor(input);
+  const tspillID=generateTspillID(anchorHash);
+  const ref=db.collection("identities").doc(tspillID);
+  const snap=await ref.get();
+  if(!snap.exists){await ref.set({tspill_id:tspillID,anchor_hash:anchorHash,created_at:firebase.firestore.FieldValue.serverTimestamp(),protocol_version:"v0.1"});}
+  localStorage.setItem("TSPILL_ID",tspillID);
   document.getElementById("main-content").style.display="none";
-  document.getElementById("tspillID").innerText = tspillID;
+  document.getElementById("tspillID").innerText=tspillID;
   document.getElementById("id-display").style.display="block";
 }
-
-function enterEcosystem(){
-  window.location.href = "home.html";
-}
+function enterEcosystem(){window.location.href="home.html";}
 
 /* BACKGROUND MOTION */
-const c=document.getElementById("bg-canvas"),x=c.getContext("2d");
-let n=[];
-function init(){
-  c.width=innerWidth;
-  c.height=innerHeight;
-  n=[...Array(80)].map(()=>({
-    x:Math.random()*c.width,
-    y:Math.random()*c.height,
-    vx:(Math.random()-.5),
-    vy:(Math.random()-.5)
-  }));
-}
-function loop(){
-  x.clearRect(0,0,c.width,c.height);
-  n.forEach(a=>{
-    a.x+=a.vx;a.y+=a.vy;
-    if(a.x<0||a.x>c.width)a.vx*=-1;
-    if(a.y<0||a.y>c.height)a.vy*=-1;
-    n.forEach(b=>{
-      let d=Math.hypot(a.x-b.x,a.y-b.y);
-      if(d<220){
-        x.strokeStyle=`rgba(212,175,55,${0.4*(1-d/220)})`;
-        x.beginPath();
-        x.moveTo(a.x,a.y);
-        x.lineTo(b.x,b.y);
-        x.stroke();
-      }
-    });
-  });
-  requestAnimationFrame(loop);
-}
+const c=document.getElementById("bg-canvas"),x=c.getContext("2d");let n=[];
+function init(){c.width=innerWidth;c.height=innerHeight;n=[...Array(80)].map(()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5),vy:(Math.random()-.5)}));}
+function loop(){x.clearRect(0,0,c.width,c.height);n.forEach(a=>{a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>c.width)a.vx*=-1;if(a.y<0||a.y>c.height)a.vy*=-1;n.forEach(b=>{let d=Math.hypot(a.x-b.x,a.y-b.y);if(d<220){x.strokeStyle=`rgba(212,175,55,${0.4*(1-d/220)})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();}})});requestAnimationFrame(loop);}
 init();loop();
 </script>
-
 </body>
 </html>
