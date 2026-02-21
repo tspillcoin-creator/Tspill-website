@@ -165,7 +165,17 @@
 
         .main-scroll-area::-webkit-scrollbar { width: 3px; }
         .main-scroll-area::-webkit-scrollbar-thumb { background: var(--gold); }
-    </style>
+    @media (max-width: 900px) {
+  body { flex-direction: column; overflow-y: auto; height: auto; }
+  .sidebar { width: 100%; min-width: 0; height: 300px; border-right: none; border-bottom: 1px solid var(--border); }
+  .terminal { height: auto; overflow: visible; }
+  .main-scroll-area { padding: 20px; overflow: visible; }
+  .quote-header { padding: 20px; }
+  .roadmap-grid { grid-template-columns: 1fr; }
+  .creator-identity { top: 10px; right: 10px; font-size: 10px; }
+  .sidebar-btn { position: relative; height: 60px; }
+}
+</style>
 </head>
 
 <body>
