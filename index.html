@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
+        /* (copy all CSS from the previous unified version) */
         * {
             margin: 0;
             padding: 0;
@@ -820,22 +821,25 @@
 
     <script>
         // ========== FIREBASE INIT ==========
-        firebase.initializeApp({
+        // Replace with your own Firebase config if needed
+        const firebaseConfig = {
             apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
             authDomain: "tspill-protocol.firebaseapp.com",
             projectId: "tspill-protocol",
             appId: "1:863753676409:web:ae3957d697c68d877556a8"
-        });
-
+        };
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
         // ========== IDENTITY ==========
         const TSPILL_ID = localStorage.getItem("TSPILL_ID");
         if (!TSPILL_ID) {
-            window.location.href = "index.html"; // Redirect to identity gate if needed
+            // For testing, generate a dummy ID if none exists
+            // In production, you'd redirect to identity page
+            localStorage.setItem("TSPILL_ID", "TS-TEST" + Math.floor(Math.random()*1000));
         }
-
-        document.getElementById('creatorBadge').textContent = TSPILL_ID;
+        const finalTSPILL_ID = localStorage.getItem("TSPILL_ID");
+        document.getElementById('creatorBadge').textContent = finalTSPILL_ID;
 
         // ========== GLOBAL STATE ==========
         let intents = [];
@@ -878,6 +882,100 @@
                 5: '#4a2a4a'
             };
             return colors[stage] || '#3a3a3a';
+        }
+
+        // ========== MODAL FUNCTIONS ==========
+        window.openCreateModal = function() {
+            console.log('openCreateModal called');
+            if (createModal) {
+                createModal.style.display = 'flex';
+            } else {
+                console.error('createModal element not found');
+            }
+        };
+
+        window.closeCreateModal = function() {
+            createModal.style.display = 'none';
+        };
+
+        window.openContextModal = function() {
+            contextModal.style.display = 'flex';
+        };
+
+        window.closeContextModal = function() {
+            contextModal.style.display = 'none';
+        };
+
+        // ========== FILTER FUNCTION ==========
+        window.filterNodes = function(filter) {
+            currentFilter = filter;
+            renderNodes();
+        };
+
+        // ========== LOAD INTENTS FROM FIREBASE ==========
+        async function loadIntents() {
+            try {
+                const snapshot = await db.collection('intents').orderBy('createdAt', 'desc').get();
+                intents = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    intents.push({
+                        ...data,
+                        id: data.intentId || doc.id,
+                        _docId: doc.id
+                    });
+                });
+                renderNodes();
+            } catch (error) {
+                console.error('Error loading intents:', error);
+                // For demo, add sample intents
+                addSampleIntents();
+            }
+        }
+
+        // ========== SAMPLE INTENTS FOR TESTING ==========
+        function addSampleIntents() {
+            intents = [
+                {
+                    id: 'INT-001',
+                    intentId: 'INT-001',
+                    title: 'Modular Furniture System',
+                    description: 'Sustainable, flat-pack furniture from recycled materials',
+                    creatorId: 'TS-ABCD',
+                    stage: 4,
+                    signals: { count: 3 },
+                    domain: 'Furniture',
+                    intentNature: 'Product Design',
+                    contextPurpose: 'Create sustainable urban furniture',
+                    contextServe: 'Urban planners, co-living spaces',
+                    executionNote: 'Exploring bamboo composites',
+                    anchor: 'https://example.com/prototype'
+                },
+                {
+                    id: 'INT-002',
+                    intentId: 'INT-002',
+                    title: 'Smart Plant Sensor',
+                    description: 'IoT device for urban farming',
+                    creatorId: 'TS-EFGH',
+                    stage: 2,
+                    signals: { count: 1 },
+                },
+                {
+                    id: 'INT-003',
+                    intentId: 'INT-003',
+                    title: 'Circular Fashion Line',
+                    description: 'Zero-waste clothing from industrial scraps',
+                    creatorId: 'TS-IJKL',
+                    stage: 5,
+                    signals: { count: 5 },
+                    domain: 'Fashion',
+                    intentNature: 'Textile Innovation',
+                    contextPurpose: 'Reduce fashion waste',
+                    contextServe: 'Eco-conscious consumers',
+                    anchor: 'https://example.com/collection'
+                }
+            ];
+            renderNodes();
         }
 
         // ========== RENDER NODE GRID ==========
@@ -936,14 +1034,13 @@
         }
 
         // ========== SELECT INTENT (OPEN INSPECTOR) ==========
-        window.selectIntent = async function(intentId) {
+        window.selectIntent = function(intentId) {
             const intent = intents.find(i => i.id === intentId || i.intentId === intentId);
             if (!intent) return;
             
             activeIntent = intent;
             
-            // Handle different stages and ownership
-            const isCreator = intent.creatorId === TSPILL_ID;
+            const isCreator = intent.creatorId === finalTSPILL_ID;
             
             let inspectorHtml = '';
 
@@ -961,7 +1058,6 @@
                     </div>
                 `;
             } else if (intent.stage === 3 && isCreator && !intent.contextLocked) {
-                // Creator of stage 3 without context
                 inspectorHtml = `
                     <div class="property-group">
                         <div class="property-label">INTENT</div>
@@ -977,7 +1073,6 @@
                     </div>
                 `;
             } else if (intent.stage === 3 && isCreator && intent.contextLocked) {
-                // Creator with context, ready for execution path
                 inspectorHtml = `
                     <div class="property-group">
                         <div class="property-label">INTENT</div>
@@ -998,7 +1093,6 @@
                     </div>
                 `;
             } else if (intent.stage === 4) {
-                // Stage 4 - Execution (editable for creator, readonly for others)
                 if (isCreator) {
                     inspectorHtml = `
                         <div class="property-group">
@@ -1014,7 +1108,314 @@
                             <div class="property-label">ANCHOR (OPTIONAL)</div>
                             <input class="inspector-input" id="anchorInput" value="${intent.anchor || ''}" placeholder="Link or reference">
                         </div>
+                        <div class="inspector-actions">
+                            <button class="inspector-btn" onclick="saveExecutionNote()">Save Note</button>
+                            <button class="inspector-btn primary" onclick="saveAnchor()">Anchor & Complete</button>
+                        </div>
+                    `;
+                } else {
+                    inspectorHtml = `
                         <div class="property-group">
-                            <div class="property-label">IMAGE (OPTIONAL)</div>
-                            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                            <button class="
+                            <div class="property-label">INTENT</div>
+                            <div class="property-value mono">${intent.intentId || intent.id}</div>
+                            <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
+                        </div>
+                        <div class="property-group">
+                            <div class="property-label">CREATOR</div>
+                            <div class="property-value mono">${intent.creatorId}</div>
+                        </div>
+                        ${intent.executionNote ? `
+                        <div class="property-group">
+                            <div class="property-label">EXECUTION NOTE</div>
+                            <div class="property-value">${intent.executionNote}</div>
+                        </div>` : ''}
+                        ${intent.anchor ? `
+                        <div class="property-group">
+                            <div class="property-label">ANCHOR</div>
+                            <a class="inspector-link" href="${intent.anchor}" target="_blank">${intent.anchor}</a>
+                        </div>` : ''}
+                        <div class="inspector-actions">
+                            <button class="inspector-btn" onclick="signalIntent('${intent.id}')">Signal Interest</button>
+                        </div>
+                    `;
+                }
+            } else if (intent.stage === 5) {
+                inspectorHtml = `
+                    <div class="property-group">
+                        <div class="property-label">ANCHORED INTENT</div>
+                        <div class="property-value mono">${intent.intentId || intent.id}</div>
+                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
+                    </div>
+                    <div class="property-group">
+                        <div class="property-label">CREATOR</div>
+                        <div class="property-value mono">${intent.creatorId}</div>
+                    </div>
+                    ${intent.executionNote ? `
+                    <div class="property-group">
+                        <div class="property-label">EXECUTION NOTE</div>
+                        <div class="property-value">${intent.executionNote}</div>
+                    </div>` : ''}
+                    ${intent.anchor ? `
+                    <div class="property-group">
+                        <div class="property-label">ANCHOR</div>
+                        <a class="inspector-link" href="${intent.anchor}" target="_blank">${intent.anchor}</a>
+                    </div>` : ''}
+                    <div class="property-group">
+                        <div class="property-label">FINAL SIGNAL COUNT</div>
+                        <div class="property-value">${intent.signals?.count || intent.signals || 0}</div>
+                    </div>
+                `;
+            } else {
+                inspectorHtml = `
+                    <div class="property-group">
+                        <div class="property-label">INTENT</div>
+                        <div class="property-value mono">${intent.intentId || intent.id}</div>
+                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
+                    </div>
+                    <div class="property-group">
+                        <div class="property-label">DESCRIPTION</div>
+                        <div class="property-value">${intent.description || '—'}</div>
+                    </div>
+                    <div class="property-group">
+                        <div class="property-label">CREATOR</div>
+                        <div class="property-value mono">${intent.creatorId}</div>
+                    </div>
+                    <div class="inspector-actions">
+                        <button class="inspector-btn" onclick="signalIntent('${intent.id}')">Signal Interest</button>
+                    </div>
+                `;
+            }
+
+            inspectorContent.innerHTML = inspectorHtml;
+        };
+
+        // ========== CONTEXT MODAL FOR SPECIFIC INTENT ==========
+        window.openContextModalForIntent = function(intentId) {
+            const intent = intents.find(i => i.id === intentId);
+            if (intent) {
+                activeIntent = intent;
+                // Pre-fill modal if data exists
+                document.getElementById('domain').value = intent.domain || '';
+                document.getElementById('nature').value = intent.intentNature || '';
+                document.getElementById('purpose').value = intent.contextPurpose || '';
+                document.getElementById('serve').value = intent.contextServe || '';
+                openContextModal();
+            }
+        };
+
+        // ========== CREATE INTENT ==========
+        window.createIntent = async function() {
+            const title = document.getElementById('intentTitle').value.trim();
+            const desc = document.getElementById('intentDesc').value.trim();
+            if (!title || !desc) {
+                alert('Please fill in both fields');
+                return;
+            }
+
+            // Generate a simple ID for demo
+            const intentId = 'INT-' + String(intents.length + 1).padStart(3, '0');
+            
+            const newIntent = {
+                intentId: intentId,
+                title: title,
+                description: desc,
+                creatorId: finalTSPILL_ID,
+                stage: 2,
+                signals: { count: 0, by: {} },
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                // Try to save to Firestore
+                await db.collection('intents').add(newIntent);
+            } catch (e) {
+                console.log('Firestore not available, adding locally');
+            }
+
+            // Add locally
+            intents.unshift(newIntent);
+            renderNodes();
+            closeCreateModal();
+            
+            // Clear inputs
+            document.getElementById('intentTitle').value = '';
+            document.getElementById('intentDesc').value = '';
+        };
+
+        // ========== SAVE CONTEXT ==========
+        window.saveContext = async function() {
+            if (!activeIntent) return;
+
+            const updates = {
+                domain: document.getElementById('domain').value.trim(),
+                intentNature: document.getElementById('nature').value.trim(),
+                contextPurpose: document.getElementById('purpose').value.trim(),
+                contextServe: document.getElementById('serve').value.trim(),
+                contextLocked: true,
+                stage: 3 // Ensure stage is 3
+            };
+
+            Object.assign(activeIntent, updates);
+
+            try {
+                if (activeIntent._docId) {
+                    await db.collection('intents').doc(activeIntent._docId).update(updates);
+                }
+            } catch (e) {
+                console.log('Firestore update failed', e);
+            }
+
+            // Auto-signal (counts as first signal)
+            signalIntent(activeIntent.id, true); // silent signal
+
+            closeContextModal();
+            selectIntent(activeIntent.id); // refresh inspector
+        };
+
+        // ========== SIGNAL INTENT ==========
+        window.signalIntent = async function(intentId, silent = false) {
+            const intent = intents.find(i => i.id === intentId);
+            if (!intent) return;
+
+            if (intent.creatorId === finalTSPILL_ID) {
+                if (!silent) alert('You cannot signal your own intent.');
+                return;
+            }
+
+            // Update signal count
+            if (!intent.signals) intent.signals = { count: 0, by: {} };
+            intent.signals.count = (intent.signals.count || 0) + 1;
+            intent.signals.by = intent.signals.by || {};
+            intent.signals.by[finalTSPILL_ID] = true;
+
+            // Stage progression based on signals
+            if (intent.signals.count >= 1 && intent.stage < 3) intent.stage = 3;
+            if (intent.signals.count >= 2 && intent.stage < 4) intent.stage = 4;
+
+            try {
+                if (intent._docId) {
+                    await db.collection('intents').doc(intent._docId).update({
+                        signals: intent.signals,
+                        stage: intent.stage
+                    });
+                }
+            } catch (e) {
+                console.log('Firestore update failed', e);
+            }
+
+            renderNodes();
+            if (activeIntent && activeIntent.id === intentId) {
+                selectIntent(intentId);
+            }
+        };
+
+        // ========== OPEN EXECUTION PATH (Stage 3 → 4) ==========
+        window.openExecutionPath = async function(intentId) {
+            const intent = intents.find(i => i.id === intentId);
+            if (!intent) return;
+
+            if (intent.stage === 3 && intent.contextLocked) {
+                intent.stage = 4;
+                try {
+                    if (intent._docId) {
+                        await db.collection('intents').doc(intent._docId).update({ stage: 4 });
+                    }
+                } catch (e) {
+                    console.log('Firestore update failed', e);
+                }
+                renderNodes();
+                selectIntent(intentId);
+            }
+        };
+
+        // ========== SAVE EXECUTION NOTE ==========
+        window.saveExecutionNote = async function() {
+            if (!activeIntent) return;
+            const note = document.getElementById('executionNoteInput').value;
+            activeIntent.executionNote = note;
+
+            try {
+                if (activeIntent._docId) {
+                    await db.collection('intents').doc(activeIntent._docId).update({ executionNote: note });
+                }
+            } catch (e) {
+                console.log('Firestore update failed', e);
+            }
+        };
+
+        // ========== SAVE ANCHOR ==========
+        window.saveAnchor = async function() {
+            if (!activeIntent) return;
+            const anchor = document.getElementById('anchorInput').value;
+            activeIntent.anchor = anchor;
+            activeIntent.stage = 5;
+
+            try {
+                if (activeIntent._docId) {
+                    await db.collection('intents').doc(activeIntent._docId).update({
+                        anchor: anchor,
+                        stage: 5
+                    });
+                }
+            } catch (e) {
+                console.log('Firestore update failed', e);
+            }
+
+            renderNodes();
+            selectIntent(activeIntent.id);
+        };
+
+        // ========== BACKGROUND CANVAS ==========
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3
+                });
+            }
+        }
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                for (let j = i + 1; j < particles.length; j++) {
+                    const q = particles[j];
+                    const d = Math.hypot(p.x - q.x, p.y - q.y);
+                    if (d < 180) {
+                        ctx.strokeStyle = `rgba(212,175,55,${0.3 * (1 - d / 180)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(q.x, q.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(drawCanvas);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        drawCanvas();
+
+        // ========== INIT ==========
+        loadIntents();
+
+        // Debug: check modal element
+        console.log('createModal element:', createModal);
+    </script>
+</body>
+</html>
