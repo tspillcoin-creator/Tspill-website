@@ -1,1421 +1,692 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSPILL — Node Canvas</title>
+import React, { useState, useEffect, useRef } from 'react';
+import { db } from './firebase';
+import { 
+  collection, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  addDoc, 
+  serverTimestamp, 
+  doc, 
+  updateDoc, 
+  increment, 
+  getDoc,
+  setDoc
+} from 'firebase/firestore';
+
+// Types
+interface Intent {
+  id: string;
+  intentId: string;
+  title: string;
+  description?: string;
+  creatorId: string;
+  stage: number;
+  signals: { count: number; by: Record<string, boolean> } | number;
+  createdAt: any;
+  domain?: string;
+  intentNature?: string;
+  contextPurpose?: string;
+  contextServe?: string;
+  contextLocked?: boolean;
+  executionNote?: string;
+  anchor?: string;
+  imageUrl?: string;
+  image?: { src: string; type: string };
+}
+
+// Helper Functions
+function hashAnchor(str: string) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = str.charCodeAt(i) + ((h << 5) - h);
+  }
+  return Math.abs(h).toString(16);
+}
+
+function generateTspillID(hash: string) {
+  return "TS-" + hash.slice(0, 4).toUpperCase();
+}
+
+function getStageLabel(stage: number) {
+  const labels: Record<number, string> = {
+    1: 'Draft',
+    2: 'Observed',
+    3: 'Interest',
+    4: 'Execution',
+    5: 'Anchored'
+  };
+  return labels[stage] || 'Unknown';
+}
+
+function getStageColor(stage: number) {
+  const colors: Record<number, string> = {
+    1: '#3a3a3a',
+    2: '#2a4a4a',
+    3: '#4a3a2a',
+    4: '#2a4a2a',
+    5: '#4a2a4a'
+  };
+  return colors[stage] || '#3a3a3a';
+}
+
+function formatTimestamp(ts: any) {
+  if (!ts) return '-';
+  if (ts.seconds) {
+    return new Date(ts.seconds * 1000).toLocaleDateString();
+  }
+  return ts;
+}
+
+// --- Components ---
+
+const HubView = ({ userId, onLogout }: { userId: string | null, onLogout: () => void }) => {
+  const [intents, setIntents] = useState<Intent[]>([]);
+  const [filter, setFilter] = useState('all');
+  const [activeIntent, setActiveIntent] = useState<Intent | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showContextModal, setShowContextModal] = useState(false);
+  
+  // Form states
+  const [newTitle, setNewTitle] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  
+  const [contextForm, setContextForm] = useState({
+    domain: '',
+    nature: '',
+    purpose: '',
+    serve: ''
+  });
+
+  const [executionNote, setExecutionNote] = useState('');
+  const [anchorInput, setAnchorInput] = useState('');
+
+  // Load intents
+  useEffect(() => {
+    const q = query(collection(db, 'intents'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const loadedIntents: Intent[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        // Normalize signals
+        let signals = { count: 0, by: {} as Record<string, boolean> };
+        if (typeof data.signals === 'number') {
+          signals.count = data.signals;
+        } else if (data.signals) {
+          signals = data.signals;
+        }
+
+        loadedIntents.push({
+          id: doc.id,
+          ...data,
+          signals
+        } as Intent);
+      });
+      setIntents(loadedIntents);
+      
+      // Update active intent if selected
+      if (activeIntent) {
+        const updated = loadedIntents.find(i => i.id === activeIntent.id);
+        if (updated) setActiveIntent(updated);
+      }
+    });
+    return () => unsubscribe();
+  }, [activeIntent?.id]);
+
+  // Actions
+  const handleCreateIntent = async () => {
+    if (!userId) return; // Should be blocked by UI, but safety check
+    if (!newTitle || !newDesc) return;
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    const intentId = 'INT-' + String(intents.length + 1).padStart(3, '0');
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-    <style>
-        /* (copy all CSS from the previous unified version) */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #111111;
-            --bg-tertiary: #1a1a1a;
-            --gold: #d4af37;
-            --gold-dim: rgba(212, 175, 55, 0.3);
-            --gold-subtle: rgba(212, 175, 55, 0.1);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --text-tertiary: #666666;
-            --border: #2a2a2a;
-            --border-gold: rgba(212, 175, 55, 0.2);
-            --node-stage1: #3a3a3a;
-            --node-stage2: #2a4a4a;
-            --node-stage3: #4a3a2a;
-            --node-stage4: #2a4a2a;
-            --node-stage5: #4a2a4a;
-            --accent-cyan: #2aa4a4;
-            --accent-amber: #b8860b;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Background Canvas */
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.4;
-        }
-
-        /* Main Layout */
-        .app-container {
-            position: relative;
-            z-index: 10;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            background: radial-gradient(circle at 50% 50%, rgba(10,10,10,0.95), rgba(0,0,0,0.98));
-        }
-
-        /* ===== TOP BAR ===== */
-        .top-bar {
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .logo {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 18px;
-            letter-spacing: 4px;
-            color: var(--gold);
-        }
-
-        .phase-indicator {
-            display: flex;
-            gap: 8px;
-            font-size: 12px;
-        }
-
-        .phase-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-tertiary);
-        }
-
-        .phase-dot.active {
-            background: var(--gold);
-            box-shadow: 0 0 10px var(--gold);
-        }
-
-        .identity-area {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-            font-size: 13px;
-        }
-
-        .creator-badge {
-            color: var(--gold);
-            font-family: 'JetBrains Mono', monospace;
-            background: rgba(212, 175, 55, 0.1);
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 1px solid var(--border-gold);
-        }
-
-        .system-status {
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-cyan);
-            box-shadow: 0 0 8px var(--accent-cyan);
-        }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            min-height: 0;
-        }
-
-        /* ===== LEFT PANEL: PHILOSOPHY ===== */
-        .philosophy-panel {
-            width: 280px;
-            border-right: 1px solid var(--border);
-            padding: 24px;
-            overflow-y: auto;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
-        }
-
-        .manifesto {
-            margin-bottom: 32px;
-        }
-
-        .manifesto h3 {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--gold);
-            margin-bottom: 16px;
-        }
-
-        .manifesto p {
-            font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-        }
-
-        .manifesto .highlight {
-            color: var(--gold);
-            font-weight: 500;
-        }
-
-        .roadmap-mini {
-            margin-bottom: 32px;
-        }
-
-        .roadmap-mini h4 {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-tertiary);
-            margin-bottom: 12px;
-        }
-
-        .phase-mini-item {
-            display: flex;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            font-size: 12px;
-        }
-
-        .phase-mini-num {
-            color: var(--gold);
-            font-weight: 600;
-            min-width: 20px;
-        }
-
-        .phase-mini-desc {
-            color: var(--text-secondary);
-        }
-
-        .faq-mini {
-            font-size: 12px;
-        }
-
-        .faq-mini-item {
-            margin-bottom: 16px;
-        }
-
-        .faq-mini-q {
-            color: var(--gold);
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .faq-mini-a {
-            color: var(--text-tertiary);
-            line-height: 1.5;
-        }
-
-        /* ===== CENTER CANVAS: NODE GRID ===== */
-        .node-canvas {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-            position: relative;
-            background: rgba(0,0,0,0.2);
-        }
-
-        .canvas-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .canvas-header h2 {
-            font-size: 13px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-tertiary);
-        }
-
-        .canvas-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .filter-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            padding: 4px 10px;
-            font-size: 11px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        .node-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 16px;
-        }
-
-        .node-card {
-            background: rgba(20,20,20,0.8);
-            backdrop-filter: blur(5px);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .node-card:hover {
-            border-color: var(--gold-dim);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-        }
-
-        .node-card.stage-1 { border-left: 3px solid var(--node-stage1); }
-        .node-card.stage-2 { border-left: 3px solid var(--node-stage2); }
-        .node-card.stage-3 { border-left: 3px solid var(--node-stage3); }
-        .node-card.stage-4 { border-left: 3px solid var(--node-stage4); }
-        .node-card.stage-5 { border-left: 3px solid var(--node-stage5); }
-
-        .node-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .node-id {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: var(--text-tertiary);
-            letter-spacing: 0.5px;
-        }
-
-        .node-stage-badge {
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.05);
-            text-transform: uppercase;
-        }
-
-        .node-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .node-creator {
-            font-size: 10px;
-            color: var(--text-tertiary);
-            margin-bottom: 12px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .node-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 11px;
-        }
-
-        .node-signals {
-            color: var(--gold);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .signal-icon {
-            font-size: 12px;
-        }
-
-        .node-anchor {
-            color: var(--accent-amber);
-            border: 1px solid rgba(184, 134, 11, 0.3);
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 8px;
-            text-transform: uppercase;
-        }
-
-        /* Empty state */
-        .empty-canvas {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            color: var(--text-tertiary);
-            text-align: center;
-            border: 1px dashed var(--border);
-            border-radius: 8px;
-            padding: 40px;
-        }
-
-        .empty-canvas p {
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        /* ===== RIGHT PANEL: INSPECTOR ===== */
-        .inspector-panel {
-            width: 320px;
-            border-left: 1px solid var(--border);
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .inspector-header {
-            padding: 20px 20px 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .inspector-header h3 {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-tertiary);
-        }
-
-        .inspector-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        /* Inspector states */
-        .inspector-placeholder {
-            color: var(--text-tertiary);
-            font-size: 12px;
-            text-align: center;
-            padding: 40px 0;
-            font-style: italic;
-        }
-
-        .property-group {
-            margin-bottom: 24px;
-        }
-
-        .property-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-tertiary);
-            margin-bottom: 6px;
-        }
-
-        .property-value {
-            font-size: 13px;
-            line-height: 1.5;
-            color: var(--text-secondary);
-        }
-
-        .property-value.mono {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-        }
-
-        .constraint-tag {
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid var(--border-gold);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            display: inline-block;
-            margin-right: 6px;
-            margin-bottom: 6px;
-        }
-
-        .inspector-image {
-            max-width: 100%;
-            max-height: 160px;
-            object-fit: contain;
-            border: 1px solid var(--border);
-            background: #000;
-            margin: 8px 0;
-        }
-
-        .inspector-link {
-            color: var(--gold);
-            text-decoration: none;
-            word-break: break-all;
-            font-size: 12px;
-        }
-
-        .inspector-actions {
-            margin-top: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .inspector-btn {
-            background: transparent;
-            border: 1px solid var(--gold-dim);
-            color: var(--gold);
-            padding: 10px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-radius: 4px;
-        }
-
-        .inspector-btn:hover {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: var(--gold);
-        }
-
-        .inspector-btn.primary {
-            background: var(--gold);
-            color: #000;
-            font-weight: 600;
-            border: none;
-        }
-
-        .inspector-btn.primary:hover {
-            background: #e5c158;
-        }
-
-        .inspector-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .inspector-input {
-            width: 100%;
-            background: #000;
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 10px;
-            margin-bottom: 12px;
-            border-radius: 4px;
-        }
-
-        .inspector-textarea {
-            width: 100%;
-            min-height: 80px;
-            background: #000;
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 10px;
-            margin-bottom: 12px;
-            border-radius: 4px;
-            resize: vertical;
-        }
-
-        .inspector-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 20px 0;
-        }
-
-        /* ===== BOTTOM BAR ===== */
-        .bottom-bar {
-            padding: 12px 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            font-size: 11px;
-            color: var(--text-tertiary);
-        }
-
-        .create-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .create-btn:hover {
-            background: var(--gold);
-            color: #000;
-        }
-
-        .stats {
-            display: flex;
-            gap: 24px;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .stat-value {
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        /* ===== MODALS ===== */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-card {
-            width: 380px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-gold);
-            padding: 30px;
-        }
-
-        .modal-card h2 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: var(--gold);
-        }
-
-        .modal-card input,
-        .modal-card textarea {
-            width: 100%;
-            background: #000;
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 12px;
-            margin-bottom: 16px;
-            border-radius: 4px;
-        }
-
-        .modal-card textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid var(--gold-dim);
-            color: var(--gold);
-            cursor: pointer;
-        }
-
-        .modal-btn.primary {
-            background: var(--gold);
-            color: #000;
-            border: none;
-        }
-
-        /* Hidden utility */
-        .hidden {
-            display: none;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--gold-dim);
-        }
-    </style>
-</head>
-<body>
-    <canvas id="bg-canvas"></canvas>
+    await addDoc(collection(db, 'intents'), {
+      intentId,
+      title: newTitle,
+      description: newDesc,
+      creatorId: userId,
+      stage: 2,
+      signals: { count: 0, by: {} },
+      createdAt: serverTimestamp()
+    });
     
-    <div class="app-container">
-        <!-- Top Bar -->
-        <div class="top-bar">
-            <div class="logo-area">
-                <div class="logo">TSPILL</div>
-                <div class="phase-indicator" id="phaseIndicator">
-                    <div class="phase-dot"></div>
-                    <div class="phase-dot"></div>
-                    <div class="phase-dot"></div>
-                    <div class="phase-dot"></div>
-                    <div class="phase-dot"></div>
-                    <div class="phase-dot"></div>
-                </div>
-            </div>
-            
-            <div class="identity-area">
-                <div class="creator-badge" id="creatorBadge">—</div>
-                <div class="system-status">
-                    <span class="status-dot"></span>
-                    <span>Node Sync</span>
-                </div>
-            </div>
+    setNewTitle('');
+    setNewDesc('');
+    setShowCreateModal(false);
+  };
+
+  const handleSignal = async (intent: Intent) => {
+    if (!userId) {
+      alert("Please verify identity first.");
+      return;
+    }
+    if (intent.creatorId === userId) {
+      alert("You cannot signal your own intent.");
+      return;
+    }
+
+    const intentRef = doc(db, 'intents', intent.id);
+    const currentCount = typeof intent.signals === 'number' ? intent.signals : intent.signals.count;
+    const newCount = currentCount + 1;
+    
+    let newStage = intent.stage;
+    if (newCount >= 1 && newStage < 3) newStage = 3;
+    if (newCount >= 2 && newStage < 4) newStage = 4;
+
+    await updateDoc(intentRef, {
+      "signals.count": increment(1),
+      [`signals.by.${userId}`]: true,
+      stage: newStage
+    });
+  };
+
+  const handleSaveContext = async () => {
+    if (!activeIntent || !userId) return;
+    
+    await updateDoc(doc(db, 'intents', activeIntent.id), {
+      domain: contextForm.domain,
+      intentNature: contextForm.nature,
+      contextPurpose: contextForm.purpose,
+      contextServe: contextForm.serve,
+      contextLocked: true,
+      stage: 3
+    });
+    
+    setShowContextModal(false);
+  };
+
+  const handleOpenExecutionPath = async (intent: Intent) => {
+    if (intent.stage === 3 && intent.contextLocked) {
+      await updateDoc(doc(db, 'intents', intent.id), { stage: 4 });
+    }
+  };
+
+  const handleSaveExecutionNote = async () => {
+    if (!activeIntent) return;
+    await updateDoc(doc(db, 'intents', activeIntent.id), { executionNote });
+  };
+
+  const handleSaveAnchor = async () => {
+    if (!activeIntent) return;
+    await updateDoc(doc(db, 'intents', activeIntent.id), {
+      anchor: anchorInput,
+      stage: 5,
+      anchoredAt: serverTimestamp()
+    });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!activeIntent || !e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const src = reader.result as string;
+      await updateDoc(doc(db, 'intents', activeIntent.id), {
+        imageUrl: src
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Filtered intents
+  const filteredIntents = intents.filter(i => {
+    if (filter === 'stage4') return i.stage === 4;
+    if (filter === 'stage5') return i.stage === 5;
+    return true;
+  });
+
+  // Stats
+  const stats = {
+    total: intents.length,
+    execution: intents.filter(i => i.stage === 4).length,
+    anchored: intents.filter(i => i.stage === 5).length
+  };
+
+  return (
+    <div className="app-container">
+      {/* Top Bar */}
+      <div className="top-bar">
+        <div className="logo-area">
+          <div className="logo">TSPILL</div>
+          <div className="phase-indicator">
+            {[1,2,3,4,5,6].map(i => <div key={i} className={`phase-dot ${i <= 2 ? 'active' : ''}`}></div>)}
+          </div>
+        </div>
+        <div className="identity-area">
+          <div className="creator-badge">{userId || 'OBSERVER'}</div>
+          {userId && (
+            <button 
+              onClick={onLogout}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                color: 'var(--text-tertiary)',
+                fontSize: '10px',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              LOGOUT
+            </button>
+          )}
+          <div className="system-status">
+            <span className="status-dot"></span>
+            <span>Node Sync</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="main-content">
+        {/* Left Panel */}
+        <div className="philosophy-panel">
+          <div className="manifesto">
+            <h3>THE CORE</h3>
+            <p>
+              <span className="highlight">Ideas become products.</span> Creators own the outcome.
+              TSPILL is a production-linked creative operating system,
+              where every intent earns its path from public record to global production.
+            </p>
+          </div>
+
+          <div className="roadmap-mini">
+            <h4>THE WAY →</h4>
+            {[
+              {n:'01', t:'Foundation: Public record'},
+              {n:'02', t:'Artifact: Tangible output'},
+              {n:'03', t:'Validation: Expert review'},
+              {n:'04', t:'Community: Challenges'},
+              {n:'05', t:'Activation: Marketplace'},
+              {n:'06', t:'Scale: Global network'}
+            ].map(s => (
+              <div key={s.n} className="phase-mini-item">
+                <span className="phase-mini-num">{s.n}</span>
+                <span className="phase-mini-desc">{s.t}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Left Philosophy Panel -->
-            <div class="philosophy-panel">
-                <div class="manifesto">
-                    <h3>THE CORE</h3>
-                    <p>
-                        <span class="highlight">Ideas become products.</span> Creators own the outcome.
-                        TSPILL is a production-linked creative operating system,
-                        where every intent earns its path from public record to global production.
-                    </p>
-                </div>
-
-                <div class="roadmap-mini">
-                    <h4>THE WAY →</h4>
-                    <div class="phase-mini-item">
-                        <span class="phase-mini-num">01</span>
-                        <span class="phase-mini-desc">Foundation: Public record</span>
-                    </div>
-                    <div class="phase-mini-item">
-                        <span class="phase-mini-num">02</span>
-                        <span class="phase-mini-desc">Artifact: Tangible output</span>
-                    </div>
-                    <div class="phase-mini-item">
-                        <span class="phase-mini-num">03</span>
-                        <span class="phase-mini-desc">Validation: Expert review</span>
-                    </div>
-                    <div class="phase-mini-item">
-                        <span class="phase-mini-num">04</span>
-                        <span class="phase-mini-desc">Community: Challenges</span>
-                    </div>
-                    <div class="phase-mini-item">
-                        <span class="phase-mini-num">05</span>
-                        <span class="phase-mini-desc">Activation: Marketplace</span>
-                    </div>
-                    <div class="phase-mini-item">
-                        <span class="phase-mini-num">06</span>
-                        <span class="phase-mini-desc">Scale: Global network</span>
-                    </div>
-                </div>
-
-                <div class="faq-mini">
-                    <h4>SYSTEM INTELLIGENCE</h4>
-                    <div class="faq-mini-item">
-                        <div class="faq-mini-q">Who owns the idea?</div>
-                        <div class="faq-mini-a">Creators retain authorship. TSPILL provides the production framework.</div>
-                    </div>
-                    <div class="faq-mini-item">
-                        <div class="faq-mini-q">Why the ledger?</div>
-                        <div class="faq-mini-a">Tamper-resistant attribution, validation, and revenue distribution.</div>
-                    </div>
-                </div>
+        {/* Center Canvas */}
+        <div className="node-canvas">
+          <div className="canvas-header">
+            <h2>INTENT NODES · PUBLIC LEDGER</h2>
+            <div className="canvas-controls">
+              <button className={`filter-btn ${filter==='all'?'active':''}`} onClick={()=>setFilter('all')}>All</button>
+              <button className={`filter-btn ${filter==='stage4'?'active':''}`} onClick={()=>setFilter('stage4')}>Execution</button>
+              <button className={`filter-btn ${filter==='stage5'?'active':''}`} onClick={()=>setFilter('stage5')}>Anchored</button>
             </div>
+          </div>
 
-            <!-- Center Node Canvas -->
-            <div class="node-canvas" id="nodeCanvas">
-                <div class="canvas-header">
-                    <h2>INTENT NODES · PUBLIC LEDGER</h2>
-                    <div class="canvas-controls">
-                        <button class="filter-btn" onclick="filterNodes('all')">All</button>
-                        <button class="filter-btn" onclick="filterNodes('stage4')">Execution</button>
-                        <button class="filter-btn" onclick="filterNodes('stage5')">Anchored</button>
-                    </div>
+          <div className="node-grid">
+            {filteredIntents.length === 0 ? (
+              <div className="empty-canvas">
+                <p>No intent nodes found</p>
+                {userId && <button className="filter-btn" onClick={()=>setShowCreateModal(true)}>Create First Intent</button>}
+              </div>
+            ) : (
+              filteredIntents.map(intent => (
+                <div 
+                  key={intent.id} 
+                  className={`node-card stage-${intent.stage}`}
+                  onClick={() => {
+                    setActiveIntent(intent);
+                    setExecutionNote(intent.executionNote || '');
+                    setAnchorInput(intent.anchor || '');
+                  }}
+                >
+                  <div className="node-header">
+                    <span className="node-id">{intent.intentId}</span>
+                    <span className="node-stage-badge" style={{background: `${getStageColor(intent.stage)}20`, color: getStageColor(intent.stage)}}>
+                      {getStageLabel(intent.stage)}
+                    </span>
+                  </div>
+                  <div className="node-title">{intent.title}</div>
+                  <div className="node-creator">{intent.creatorId}</div>
+                  <div className="node-footer">
+                    <span className="node-signals">
+                      <span className="signal-icon">⚡</span>
+                      {typeof intent.signals === 'number' ? intent.signals : intent.signals.count}
+                    </span>
+                    {intent.stage === 5 && <span className="node-anchor">ANCHOR</span>}
+                  </div>
                 </div>
-
-                <div class="node-grid" id="nodeGrid"></div>
-            </div>
-
-            <!-- Right Inspector Panel -->
-            <div class="inspector-panel" id="inspectorPanel">
-                <div class="inspector-header">
-                    <h3>NODE INSPECTOR</h3>
-                </div>
-                <div class="inspector-content" id="inspectorContent">
-                    <div class="inspector-placeholder">
-                        Select a node to inspect<br>or create a new intent
-                    </div>
-                </div>
-            </div>
+              ))
+            )}
+          </div>
         </div>
 
-        <!-- Bottom Bar -->
-        <div class="bottom-bar">
-            <button class="create-btn" onclick="openCreateModal()">+</button>
-            <div class="stats" id="stats"></div>
-            <div>Execution First · Validation → Production → Scale</div>
+        {/* Right Inspector Panel */}
+        <div className="inspector-panel">
+          <div className="inspector-header">
+            <h3>NODE INSPECTOR</h3>
+          </div>
+          <div className="inspector-content">
+            {!activeIntent ? (
+              <div className="inspector-placeholder">
+                Select a node to inspect<br/>or create a new intent
+              </div>
+            ) : (
+              <>
+                <div className="property-group">
+                  <div className="property-label">INTENT</div>
+                  <div className="property-value mono">{activeIntent.intentId}</div>
+                  <div className="property-value" style={{marginTop:8}}>{activeIntent.title}</div>
+                  <div className="property-value" style={{fontSize:12, color:'#888', marginTop:4}}>{activeIntent.description}</div>
+                </div>
+
+                <div className="property-group">
+                  <div className="property-label">CREATOR</div>
+                  <div className="property-value mono">{activeIntent.creatorId}</div>
+                </div>
+
+                {/* Context Display */}
+                {(activeIntent.stage >= 3 || activeIntent.contextLocked) && (
+                  <div className="property-group">
+                    <div className="property-label">CONSTRAINTS</div>
+                    <div className="property-value">
+                      {activeIntent.domain && <span className="constraint-tag">{activeIntent.domain}</span>}
+                      {activeIntent.intentNature && <span className="constraint-tag">{activeIntent.intentNature}</span>}
+                    </div>
+                    <div className="property-value" style={{marginTop:8}}>{activeIntent.contextPurpose}</div>
+                    <div className="property-value" style={{marginTop:4}}>→ {activeIntent.contextServe}</div>
+                  </div>
+                )}
+
+                {/* Execution Note & Image */}
+                {(activeIntent.stage >= 4) && (
+                  <>
+                    <div className="property-group">
+                      <div className="property-label">EXECUTION NOTE</div>
+                      {activeIntent.creatorId === userId ? (
+                        <>
+                          <textarea 
+                            className="inspector-textarea" 
+                            value={executionNote}
+                            onChange={(e) => setExecutionNote(e.target.value)}
+                            placeholder="Describe execution approach..."
+                          />
+                          <button className="inspector-btn" onClick={handleSaveExecutionNote}>Save Note</button>
+                        </>
+                      ) : (
+                        <div className="property-value">{activeIntent.executionNote || '—'}</div>
+                      )}
+                    </div>
+
+                    <div className="property-group">
+                      <div className="property-label">ARTIFACT</div>
+                      {(activeIntent.imageUrl || activeIntent.image?.src) && (
+                        <img src={activeIntent.imageUrl || activeIntent.image?.src} className="inspector-image" alt="Artifact" />
+                      )}
+                      {activeIntent.creatorId === userId && (
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="inspector-input" />
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Anchor */}
+                {(activeIntent.stage >= 4) && (
+                  <div className="property-group">
+                    <div className="property-label">ANCHOR</div>
+                    {activeIntent.creatorId === userId && activeIntent.stage < 5 ? (
+                      <>
+                        <input 
+                          className="inspector-input" 
+                          value={anchorInput}
+                          onChange={(e) => setAnchorInput(e.target.value)}
+                          placeholder="Link or reference"
+                        />
+                        <button className="inspector-btn primary" onClick={handleSaveAnchor}>Anchor & Complete</button>
+                      </>
+                    ) : (
+                      activeIntent.anchor ? (
+                        <a className="inspector-link" href={activeIntent.anchor} target="_blank" rel="noreferrer">{activeIntent.anchor}</a>
+                      ) : <div className="property-value">—</div>
+                    )}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="inspector-actions">
+                  {activeIntent.creatorId === userId ? (
+                    <>
+                      {activeIntent.stage === 2 && (
+                        <button className="inspector-btn primary" onClick={() => {
+                          setContextForm({
+                            domain: activeIntent.domain || '',
+                            nature: activeIntent.intentNature || '',
+                            purpose: activeIntent.contextPurpose || '',
+                            serve: activeIntent.contextServe || ''
+                          });
+                          setShowContextModal(true);
+                        }}>Define Constraints</button>
+                      )}
+                      {activeIntent.stage === 3 && activeIntent.contextLocked && (
+                        <button className="inspector-btn primary" onClick={() => handleOpenExecutionPath(activeIntent)}>Open Execution Path</button>
+                      )}
+                    </>
+                  ) : (
+                    <button className="inspector-btn" onClick={() => handleSignal(activeIntent)}>
+                      Signal Interest ({typeof activeIntent.signals === 'number' ? activeIntent.signals : activeIntent.signals.count})
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="bottom-bar">
+        <button 
+          className="create-btn" 
+          onClick={() => userId ? setShowCreateModal(true) : alert("Please verify identity first.")}
+          style={{ opacity: userId ? 1 : 0.5 }}
+        >+</button>
+        <div className="stats">
+          <div className="stat-item"><span>Total Nodes</span> <span className="stat-value">{stats.total}</span></div>
+          <div className="stat-item"><span>Execution</span> <span className="stat-value">{stats.execution}</span></div>
+          <div className="stat-item"><span>Anchored</span> <span className="stat-value">{stats.anchored}</span></div>
+        </div>
+        <div>Execution First · Validation → Production → Scale</div>
+      </div>
+
+      {/* Modals */}
+      <div className={`modal ${showCreateModal ? 'open' : ''}`}>
+        <div className="modal-card">
+          <h2>Declare Intent</h2>
+          <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Intent title" />
+          <textarea value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Intent description"></textarea>
+          <div className="modal-actions">
+            <button className="modal-btn" onClick={() => setShowCreateModal(false)}>Cancel</button>
+            <button className="modal-btn primary" onClick={handleCreateIntent}>Declare</button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`modal ${showContextModal ? 'open' : ''}`}>
+        <div className="modal-card">
+          <h2>Define Constraints</h2>
+          <input value={contextForm.domain} onChange={e => setContextForm({...contextForm, domain: e.target.value})} placeholder="Domain (e.g. Fashion, Art)" />
+          <input value={contextForm.nature} onChange={e => setContextForm({...contextForm, nature: e.target.value})} placeholder="Intent nature (e.g. Research, Build)" />
+          <textarea value={contextForm.purpose} onChange={e => setContextForm({...contextForm, purpose: e.target.value})} placeholder="Context purpose"></textarea>
+          <input value={contextForm.serve} onChange={e => setContextForm({...contextForm, serve: e.target.value})} placeholder="Context serve (e.g. Community)" />
+          <div className="modal-actions">
+            <button className="modal-btn" onClick={() => setShowContextModal(false)}>Cancel</button>
+            <button className="modal-btn primary" onClick={handleSaveContext}>Lock & Signal</button>
+          </div>
+        </div>
+      </div>
     </div>
+  );
+};
 
-    <!-- Create Intent Modal -->
-    <div class="modal" id="createModal">
-        <div class="modal-card">
-            <h2>Declare Intent</h2>
-            <input id="intentTitle" placeholder="Intent title" autocomplete="off">
-            <textarea id="intentDesc" placeholder="Intent description"></textarea>
-            <div class="modal-actions">
-                <button class="modal-btn" onclick="closeCreateModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="createIntent()">Declare</button>
-            </div>
+function App() {
+  const [userId, setUserId] = useState<string | null>(localStorage.getItem("TSPILL_ID"));
+  const [loginInput, setLoginInput] = useState('');
+
+  // Background canvas animation
+  useEffect(() => {
+    const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let particles: any[] = [];
+    const initCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = [];
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3
+        });
+      }
+    };
+
+    const drawCanvas = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        for (let j = i + 1; j < particles.length; j++) {
+          const q = particles[j];
+          const d = Math.hypot(p.x - q.x, p.y - q.y);
+          if (d < 180) {
+            ctx.strokeStyle = `rgba(212,175,55,${0.3 * (1 - d / 180)})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+          }
+        }
+      });
+      requestAnimationFrame(drawCanvas);
+    };
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    const animId = requestAnimationFrame(drawCanvas);
+    return () => {
+      window.removeEventListener('resize', initCanvas);
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  const handleLogin = () => {
+    if (loginInput.length < 3) {
+      alert("Please enter a valid identifier.");
+      return;
+    }
+    const anchorHash = hashAnchor(loginInput.toLowerCase());
+    const tspillID = generateTspillID(anchorHash);
+
+    // Save identity to Firestore if new
+    const ref = doc(db, "identities", tspillID);
+    getDoc(ref).then(snap => {
+      if (!snap.exists()) {
+        setDoc(ref, {
+          tspill_id: tspillID,
+          anchor_hash: anchorHash,
+          created_at: serverTimestamp(),
+          protocol_version: "v0.1"
+        });
+      }
+    });
+
+    localStorage.setItem("TSPILL_ID", tspillID);
+    setUserId(tspillID);
+    setLoginInput('');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("TSPILL_ID");
+    setUserId(null);
+  };
+
+  return (
+    <>
+      <HubView userId={userId} onLogout={handleLogout} />
+      
+      {/* LOGIN OVERLAY (If not logged in) */}
+      {!userId && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none'
+        }}>
+          <div style={{
+            pointerEvents: 'auto',
+            background: 'rgba(255, 255, 255, 0.98)',
+            padding: '40px',
+            borderRadius: '4px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+            width: '400px',
+            textAlign: 'center',
+            border: '1px solid var(--gold)'
+          }}>
+            <h2 style={{
+              color: '#000', 
+              fontSize: '24px', 
+              marginBottom: '8px', 
+              fontFamily: 'Space Grotesk, sans-serif',
+              letterSpacing: '4px'
+            }}>TSPILL</h2>
+            <p style={{
+              color: '#666', 
+              fontSize: '12px', 
+              marginBottom: '24px',
+              letterSpacing: '2px'
+            }}>IDENTITY REQUIRED</p>
+            
+            <input 
+              value={loginInput}
+              onChange={(e) => setLoginInput(e.target.value)}
+              placeholder="Email or Wallet Address"
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: '#f5f5f5',
+                border: '1px solid #ddd',
+                marginBottom: '16px',
+                textAlign: 'center',
+                color: '#000'
+              }}
+            />
+            
+            <button 
+              onClick={handleLogin}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: '#000',
+                color: '#fff',
+                border: 'none',
+                fontWeight: 'bold',
+                letterSpacing: '2px',
+                cursor: 'pointer'
+              }}
+            >
+              VERIFY IDENTITY
+            </button>
+          </div>
         </div>
-    </div>
+      )}
+    </>
+  );
+}
 
-    <!-- Context Modal (Stage 3) -->
-    <div class="modal" id="contextModal">
-        <div class="modal-card">
-            <h2>Define Constraints</h2>
-            <input id="domain" placeholder="Domain (e.g. Fashion, Art, Technology)">
-            <input id="nature" placeholder="Intent nature (e.g. Research, Build, Expression)">
-            <textarea id="purpose" placeholder="Context purpose"></textarea>
-            <input id="serve" placeholder="Context serve (e.g. Community, Self, Market)">
-            <div class="modal-actions">
-                <button class="modal-btn" onclick="closeContextModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="saveContext()">Lock & Signal</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // ========== FIREBASE INIT ==========
-        // Replace with your own Firebase config if needed
-        const firebaseConfig = {
-            apiKey: "AIzaSyAN7-bKw4_X43PURwp9hXqE5kH4UNXlyTQ",
-            authDomain: "tspill-protocol.firebaseapp.com",
-            projectId: "tspill-protocol",
-            appId: "1:863753676409:web:ae3957d697c68d877556a8"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
-        // ========== IDENTITY ==========
-        const TSPILL_ID = localStorage.getItem("TSPILL_ID");
-        if (!TSPILL_ID) {
-            // For testing, generate a dummy ID if none exists
-            // In production, you'd redirect to identity page
-            localStorage.setItem("TSPILL_ID", "TS-TEST" + Math.floor(Math.random()*1000));
-        }
-        const finalTSPILL_ID = localStorage.getItem("TSPILL_ID");
-        document.getElementById('creatorBadge').textContent = finalTSPILL_ID;
-
-        // ========== GLOBAL STATE ==========
-        let intents = [];
-        let activeIntent = null;
-        let currentFilter = 'all';
-
-        // ========== DOM ELEMENTS ==========
-        const nodeGrid = document.getElementById('nodeGrid');
-        const inspectorContent = document.getElementById('inspectorContent');
-        const createModal = document.getElementById('createModal');
-        const contextModal = document.getElementById('contextModal');
-        const statsDiv = document.getElementById('stats');
-
-        // ========== HELPER FUNCTIONS ==========
-        function formatTimestamp(ts) {
-            if (!ts) return '-';
-            if (ts.seconds) {
-                return new Date(ts.seconds * 1000).toLocaleDateString();
-            }
-            return ts;
-        }
-
-        function getStageLabel(stage) {
-            const labels = {
-                1: 'Draft',
-                2: 'Observed',
-                3: 'Interest',
-                4: 'Execution',
-                5: 'Anchored'
-            };
-            return labels[stage] || 'Unknown';
-        }
-
-        function getStageColor(stage) {
-            const colors = {
-                1: '#3a3a3a',
-                2: '#2a4a4a',
-                3: '#4a3a2a',
-                4: '#2a4a2a',
-                5: '#4a2a4a'
-            };
-            return colors[stage] || '#3a3a3a';
-        }
-
-        // ========== MODAL FUNCTIONS ==========
-        window.openCreateModal = function() {
-            console.log('openCreateModal called');
-            if (createModal) {
-                createModal.style.display = 'flex';
-            } else {
-                console.error('createModal element not found');
-            }
-        };
-
-        window.closeCreateModal = function() {
-            createModal.style.display = 'none';
-        };
-
-        window.openContextModal = function() {
-            contextModal.style.display = 'flex';
-        };
-
-        window.closeContextModal = function() {
-            contextModal.style.display = 'none';
-        };
-
-        // ========== FILTER FUNCTION ==========
-        window.filterNodes = function(filter) {
-            currentFilter = filter;
-            renderNodes();
-        };
-
-        // ========== LOAD INTENTS FROM FIREBASE ==========
-        async function loadIntents() {
-            try {
-                const snapshot = await db.collection('intents').orderBy('createdAt', 'desc').get();
-                intents = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    intents.push({
-                        ...data,
-                        id: data.intentId || doc.id,
-                        _docId: doc.id
-                    });
-                });
-                renderNodes();
-            } catch (error) {
-                console.error('Error loading intents:', error);
-                // For demo, add sample intents
-                addSampleIntents();
-            }
-        }
-
-        // ========== SAMPLE INTENTS FOR TESTING ==========
-        function addSampleIntents() {
-            intents = [
-                {
-                    id: 'INT-001',
-                    intentId: 'INT-001',
-                    title: 'Modular Furniture System',
-                    description: 'Sustainable, flat-pack furniture from recycled materials',
-                    creatorId: 'TS-ABCD',
-                    stage: 4,
-                    signals: { count: 3 },
-                    domain: 'Furniture',
-                    intentNature: 'Product Design',
-                    contextPurpose: 'Create sustainable urban furniture',
-                    contextServe: 'Urban planners, co-living spaces',
-                    executionNote: 'Exploring bamboo composites',
-                    anchor: 'https://example.com/prototype'
-                },
-                {
-                    id: 'INT-002',
-                    intentId: 'INT-002',
-                    title: 'Smart Plant Sensor',
-                    description: 'IoT device for urban farming',
-                    creatorId: 'TS-EFGH',
-                    stage: 2,
-                    signals: { count: 1 },
-                },
-                {
-                    id: 'INT-003',
-                    intentId: 'INT-003',
-                    title: 'Circular Fashion Line',
-                    description: 'Zero-waste clothing from industrial scraps',
-                    creatorId: 'TS-IJKL',
-                    stage: 5,
-                    signals: { count: 5 },
-                    domain: 'Fashion',
-                    intentNature: 'Textile Innovation',
-                    contextPurpose: 'Reduce fashion waste',
-                    contextServe: 'Eco-conscious consumers',
-                    anchor: 'https://example.com/collection'
-                }
-            ];
-            renderNodes();
-        }
-
-        // ========== RENDER NODE GRID ==========
-        function renderNodes() {
-            let filtered = intents;
-            if (currentFilter === 'stage4') {
-                filtered = intents.filter(i => i.stage === 4);
-            } else if (currentFilter === 'stage5') {
-                filtered = intents.filter(i => i.stage === 5);
-            }
-
-            if (filtered.length === 0) {
-                nodeGrid.innerHTML = `
-                    <div class="empty-canvas">
-                        <p>No intent nodes found</p>
-                        <button class="filter-btn" onclick="openCreateModal()">Create First Intent</button>
-                    </div>
-                `;
-                return;
-            }
-
-            nodeGrid.innerHTML = filtered.map(intent => `
-                <div class="node-card stage-${intent.stage || 1}" onclick="selectIntent('${intent.id}')">
-                    <div class="node-header">
-                        <span class="node-id">${intent.intentId || intent.id}</span>
-                        <span class="node-stage-badge" style="background: ${getStageColor(intent.stage)}20; color: ${getStageColor(intent.stage)}">
-                            ${getStageLabel(intent.stage)}
-                        </span>
-                    </div>
-                    <div class="node-title">${intent.title || 'Untitled'}</div>
-                    <div class="node-creator">${intent.creatorId || '—'}</div>
-                    <div class="node-footer">
-                        <span class="node-signals">
-                            <span class="signal-icon">⚡</span>
-                            ${intent.signals?.count || intent.signals || 0}
-                        </span>
-                        ${intent.stage === 5 ? '<span class="node-anchor">ANCHOR</span>' : ''}
-                    </div>
-                </div>
-            `).join('');
-
-            updateStats();
-        }
-
-        // ========== UPDATE STATS ==========
-        function updateStats() {
-            const total = intents.length;
-            const stage4 = intents.filter(i => i.stage === 4).length;
-            const stage5 = intents.filter(i => i.stage === 5).length;
-            
-            statsDiv.innerHTML = `
-                <div class="stat-item"><span>Total Nodes</span> <span class="stat-value">${total}</span></div>
-                <div class="stat-item"><span>Execution</span> <span class="stat-value">${stage4}</span></div>
-                <div class="stat-item"><span>Anchored</span> <span class="stat-value">${stage5}</span></div>
-            `;
-        }
-
-        // ========== SELECT INTENT (OPEN INSPECTOR) ==========
-        window.selectIntent = function(intentId) {
-            const intent = intents.find(i => i.id === intentId || i.intentId === intentId);
-            if (!intent) return;
-            
-            activeIntent = intent;
-            
-            const isCreator = intent.creatorId === finalTSPILL_ID;
-            
-            let inspectorHtml = '';
-
-            if (intent.stage === 2 && isCreator) {
-                // Creator of stage 2 - needs context
-                inspectorHtml = `
-                    <div class="property-group">
-                        <div class="property-label">INTENT</div>
-                        <div class="property-value mono">${intent.intentId || intent.id}</div>
-                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                        <div class="property-value" style="font-size: 12px; color: #888; margin-top: 4px;">${intent.description || ''}</div>
-                    </div>
-                    <div class="inspector-actions">
-                        <button class="inspector-btn primary" onclick="openContextModalForIntent('${intent.id}')">Define Constraints</button>
-                    </div>
-                `;
-            } else if (intent.stage === 3 && isCreator && !intent.contextLocked) {
-                inspectorHtml = `
-                    <div class="property-group">
-                        <div class="property-label">INTENT</div>
-                        <div class="property-value mono">${intent.intentId || intent.id}</div>
-                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                    </div>
-                    <div class="property-group">
-                        <div class="property-label">SIGNALS</div>
-                        <div class="property-value">${intent.signals?.count || intent.signals || 0}</div>
-                    </div>
-                    <div class="inspector-actions">
-                        <button class="inspector-btn primary" onclick="openContextModalForIntent('${intent.id}')">Define Constraints</button>
-                    </div>
-                `;
-            } else if (intent.stage === 3 && isCreator && intent.contextLocked) {
-                inspectorHtml = `
-                    <div class="property-group">
-                        <div class="property-label">INTENT</div>
-                        <div class="property-value mono">${intent.intentId || intent.id}</div>
-                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                    </div>
-                    <div class="property-group">
-                        <div class="property-label">CONSTRAINTS</div>
-                        <div class="property-value">
-                            <span class="constraint-tag">${intent.domain || '—'}</span>
-                            <span class="constraint-tag">${intent.intentNature || '—'}</span>
-                        </div>
-                        <div class="property-value" style="margin-top: 8px;">${intent.contextPurpose || ''}</div>
-                        <div class="property-value" style="margin-top: 4px;">→ ${intent.contextServe || ''}</div>
-                    </div>
-                    <div class="inspector-actions">
-                        <button class="inspector-btn primary" onclick="openExecutionPath('${intent.id}')">Open Execution Path</button>
-                    </div>
-                `;
-            } else if (intent.stage === 4) {
-                if (isCreator) {
-                    inspectorHtml = `
-                        <div class="property-group">
-                            <div class="property-label">INTENT</div>
-                            <div class="property-value mono">${intent.intentId || intent.id}</div>
-                            <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                        </div>
-                        <div class="property-group">
-                            <div class="property-label">EXECUTION NOTE</div>
-                            <textarea class="inspector-textarea" id="executionNoteInput" placeholder="Describe execution approach...">${intent.executionNote || ''}</textarea>
-                        </div>
-                        <div class="property-group">
-                            <div class="property-label">ANCHOR (OPTIONAL)</div>
-                            <input class="inspector-input" id="anchorInput" value="${intent.anchor || ''}" placeholder="Link or reference">
-                        </div>
-                        <div class="inspector-actions">
-                            <button class="inspector-btn" onclick="saveExecutionNote()">Save Note</button>
-                            <button class="inspector-btn primary" onclick="saveAnchor()">Anchor & Complete</button>
-                        </div>
-                    `;
-                } else {
-                    inspectorHtml = `
-                        <div class="property-group">
-                            <div class="property-label">INTENT</div>
-                            <div class="property-value mono">${intent.intentId || intent.id}</div>
-                            <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                        </div>
-                        <div class="property-group">
-                            <div class="property-label">CREATOR</div>
-                            <div class="property-value mono">${intent.creatorId}</div>
-                        </div>
-                        ${intent.executionNote ? `
-                        <div class="property-group">
-                            <div class="property-label">EXECUTION NOTE</div>
-                            <div class="property-value">${intent.executionNote}</div>
-                        </div>` : ''}
-                        ${intent.anchor ? `
-                        <div class="property-group">
-                            <div class="property-label">ANCHOR</div>
-                            <a class="inspector-link" href="${intent.anchor}" target="_blank">${intent.anchor}</a>
-                        </div>` : ''}
-                        <div class="inspector-actions">
-                            <button class="inspector-btn" onclick="signalIntent('${intent.id}')">Signal Interest</button>
-                        </div>
-                    `;
-                }
-            } else if (intent.stage === 5) {
-                inspectorHtml = `
-                    <div class="property-group">
-                        <div class="property-label">ANCHORED INTENT</div>
-                        <div class="property-value mono">${intent.intentId || intent.id}</div>
-                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                    </div>
-                    <div class="property-group">
-                        <div class="property-label">CREATOR</div>
-                        <div class="property-value mono">${intent.creatorId}</div>
-                    </div>
-                    ${intent.executionNote ? `
-                    <div class="property-group">
-                        <div class="property-label">EXECUTION NOTE</div>
-                        <div class="property-value">${intent.executionNote}</div>
-                    </div>` : ''}
-                    ${intent.anchor ? `
-                    <div class="property-group">
-                        <div class="property-label">ANCHOR</div>
-                        <a class="inspector-link" href="${intent.anchor}" target="_blank">${intent.anchor}</a>
-                    </div>` : ''}
-                    <div class="property-group">
-                        <div class="property-label">FINAL SIGNAL COUNT</div>
-                        <div class="property-value">${intent.signals?.count || intent.signals || 0}</div>
-                    </div>
-                `;
-            } else {
-                inspectorHtml = `
-                    <div class="property-group">
-                        <div class="property-label">INTENT</div>
-                        <div class="property-value mono">${intent.intentId || intent.id}</div>
-                        <div class="property-value" style="margin-top: 8px;">${intent.title}</div>
-                    </div>
-                    <div class="property-group">
-                        <div class="property-label">DESCRIPTION</div>
-                        <div class="property-value">${intent.description || '—'}</div>
-                    </div>
-                    <div class="property-group">
-                        <div class="property-label">CREATOR</div>
-                        <div class="property-value mono">${intent.creatorId}</div>
-                    </div>
-                    <div class="inspector-actions">
-                        <button class="inspector-btn" onclick="signalIntent('${intent.id}')">Signal Interest</button>
-                    </div>
-                `;
-            }
-
-            inspectorContent.innerHTML = inspectorHtml;
-        };
-
-        // ========== CONTEXT MODAL FOR SPECIFIC INTENT ==========
-        window.openContextModalForIntent = function(intentId) {
-            const intent = intents.find(i => i.id === intentId);
-            if (intent) {
-                activeIntent = intent;
-                // Pre-fill modal if data exists
-                document.getElementById('domain').value = intent.domain || '';
-                document.getElementById('nature').value = intent.intentNature || '';
-                document.getElementById('purpose').value = intent.contextPurpose || '';
-                document.getElementById('serve').value = intent.contextServe || '';
-                openContextModal();
-            }
-        };
-
-        // ========== CREATE INTENT ==========
-        window.createIntent = async function() {
-            const title = document.getElementById('intentTitle').value.trim();
-            const desc = document.getElementById('intentDesc').value.trim();
-            if (!title || !desc) {
-                alert('Please fill in both fields');
-                return;
-            }
-
-            // Generate a simple ID for demo
-            const intentId = 'INT-' + String(intents.length + 1).padStart(3, '0');
-            
-            const newIntent = {
-                intentId: intentId,
-                title: title,
-                description: desc,
-                creatorId: finalTSPILL_ID,
-                stage: 2,
-                signals: { count: 0, by: {} },
-                createdAt: new Date().toISOString()
-            };
-
-            try {
-                // Try to save to Firestore
-                await db.collection('intents').add(newIntent);
-            } catch (e) {
-                console.log('Firestore not available, adding locally');
-            }
-
-            // Add locally
-            intents.unshift(newIntent);
-            renderNodes();
-            closeCreateModal();
-            
-            // Clear inputs
-            document.getElementById('intentTitle').value = '';
-            document.getElementById('intentDesc').value = '';
-        };
-
-        // ========== SAVE CONTEXT ==========
-        window.saveContext = async function() {
-            if (!activeIntent) return;
-
-            const updates = {
-                domain: document.getElementById('domain').value.trim(),
-                intentNature: document.getElementById('nature').value.trim(),
-                contextPurpose: document.getElementById('purpose').value.trim(),
-                contextServe: document.getElementById('serve').value.trim(),
-                contextLocked: true,
-                stage: 3 // Ensure stage is 3
-            };
-
-            Object.assign(activeIntent, updates);
-
-            try {
-                if (activeIntent._docId) {
-                    await db.collection('intents').doc(activeIntent._docId).update(updates);
-                }
-            } catch (e) {
-                console.log('Firestore update failed', e);
-            }
-
-            // Auto-signal (counts as first signal)
-            signalIntent(activeIntent.id, true); // silent signal
-
-            closeContextModal();
-            selectIntent(activeIntent.id); // refresh inspector
-        };
-
-        // ========== SIGNAL INTENT ==========
-        window.signalIntent = async function(intentId, silent = false) {
-            const intent = intents.find(i => i.id === intentId);
-            if (!intent) return;
-
-            if (intent.creatorId === finalTSPILL_ID) {
-                if (!silent) alert('You cannot signal your own intent.');
-                return;
-            }
-
-            // Update signal count
-            if (!intent.signals) intent.signals = { count: 0, by: {} };
-            intent.signals.count = (intent.signals.count || 0) + 1;
-            intent.signals.by = intent.signals.by || {};
-            intent.signals.by[finalTSPILL_ID] = true;
-
-            // Stage progression based on signals
-            if (intent.signals.count >= 1 && intent.stage < 3) intent.stage = 3;
-            if (intent.signals.count >= 2 && intent.stage < 4) intent.stage = 4;
-
-            try {
-                if (intent._docId) {
-                    await db.collection('intents').doc(intent._docId).update({
-                        signals: intent.signals,
-                        stage: intent.stage
-                    });
-                }
-            } catch (e) {
-                console.log('Firestore update failed', e);
-            }
-
-            renderNodes();
-            if (activeIntent && activeIntent.id === intentId) {
-                selectIntent(intentId);
-            }
-        };
-
-        // ========== OPEN EXECUTION PATH (Stage 3 → 4) ==========
-        window.openExecutionPath = async function(intentId) {
-            const intent = intents.find(i => i.id === intentId);
-            if (!intent) return;
-
-            if (intent.stage === 3 && intent.contextLocked) {
-                intent.stage = 4;
-                try {
-                    if (intent._docId) {
-                        await db.collection('intents').doc(intent._docId).update({ stage: 4 });
-                    }
-                } catch (e) {
-                    console.log('Firestore update failed', e);
-                }
-                renderNodes();
-                selectIntent(intentId);
-            }
-        };
-
-        // ========== SAVE EXECUTION NOTE ==========
-        window.saveExecutionNote = async function() {
-            if (!activeIntent) return;
-            const note = document.getElementById('executionNoteInput').value;
-            activeIntent.executionNote = note;
-
-            try {
-                if (activeIntent._docId) {
-                    await db.collection('intents').doc(activeIntent._docId).update({ executionNote: note });
-                }
-            } catch (e) {
-                console.log('Firestore update failed', e);
-            }
-        };
-
-        // ========== SAVE ANCHOR ==========
-        window.saveAnchor = async function() {
-            if (!activeIntent) return;
-            const anchor = document.getElementById('anchorInput').value;
-            activeIntent.anchor = anchor;
-            activeIntent.stage = 5;
-
-            try {
-                if (activeIntent._docId) {
-                    await db.collection('intents').doc(activeIntent._docId).update({
-                        anchor: anchor,
-                        stage: 5
-                    });
-                }
-            } catch (e) {
-                console.log('Firestore update failed', e);
-            }
-
-            renderNodes();
-            selectIntent(activeIntent.id);
-        };
-
-        // ========== BACKGROUND CANVAS ==========
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function initCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            for (let i = 0; i < 60; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.3,
-                    vy: (Math.random() - 0.5) * 0.3
-                });
-            }
-        }
-
-        function drawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, i) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                for (let j = i + 1; j < particles.length; j++) {
-                    const q = particles[j];
-                    const d = Math.hypot(p.x - q.x, p.y - q.y);
-                    if (d < 180) {
-                        ctx.strokeStyle = `rgba(212,175,55,${0.3 * (1 - d / 180)})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(q.x, q.y);
-                        ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(drawCanvas);
-        }
-
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
-        drawCanvas();
-
-        // ========== INIT ==========
-        loadIntents();
-
-        // Debug: check modal element
-        console.log('createModal element:', createModal);
-    </script>
-</body>
-</html>
+export default App;
