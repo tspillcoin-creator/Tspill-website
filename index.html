@@ -1,692 +1,766 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { db } from './firebase';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  addDoc, 
-  serverTimestamp, 
-  doc, 
-  updateDoc, 
-  increment, 
-  getDoc,
-  setDoc
-} from 'firebase/firestore';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-// Types
-interface Intent {
-  id: string;
-  intentId: string;
-  title: string;
-  description?: string;
-  creatorId: string;
-  stage: number;
-  signals: { count: number; by: Record<string, boolean> } | number;
-  createdAt: any;
-  domain?: string;
-  intentNature?: string;
-  contextPurpose?: string;
-  contextServe?: string;
-  contextLocked?: boolean;
-  executionNote?: string;
-  anchor?: string;
-  imageUrl?: string;
-  image?: { src: string; type: string };
+/* Global Reset & Variables */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-// Helper Functions
-function hashAnchor(str: string) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = str.charCodeAt(i) + ((h << 5) - h);
-  }
-  return Math.abs(h).toString(16);
-}
-
-function generateTspillID(hash: string) {
-  return "TS-" + hash.slice(0, 4).toUpperCase();
-}
-
-function getStageLabel(stage: number) {
-  const labels: Record<number, string> = {
-    1: 'Draft',
-    2: 'Observed',
-    3: 'Interest',
-    4: 'Execution',
-    5: 'Anchored'
-  };
-  return labels[stage] || 'Unknown';
-}
-
-function getStageColor(stage: number) {
-  const colors: Record<number, string> = {
-    1: '#3a3a3a',
-    2: '#2a4a4a',
-    3: '#4a3a2a',
-    4: '#2a4a2a',
-    5: '#4a2a4a'
-  };
-  return colors[stage] || '#3a3a3a';
-}
-
-function formatTimestamp(ts: any) {
-  if (!ts) return '-';
-  if (ts.seconds) {
-    return new Date(ts.seconds * 1000).toLocaleDateString();
-  }
-  return ts;
-}
-
-// --- Components ---
-
-const HubView = ({ userId, onLogout }: { userId: string | null, onLogout: () => void }) => {
-  const [intents, setIntents] = useState<Intent[]>([]);
-  const [filter, setFilter] = useState('all');
-  const [activeIntent, setActiveIntent] = useState<Intent | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showContextModal, setShowContextModal] = useState(false);
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --gold: #d4af37;
+  --gold-dim: rgba(212, 175, 55, 0.3);
+  --gold-subtle: rgba(212, 175, 55, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #666666;
+  --border: #2a2a2a;
+  --border-gold: rgba(212, 175, 55, 0.2);
+  --node-stage1: #3a3a3a;
+  --node-stage2: #2a4a4a;
+  --node-stage3: #4a3a2a;
+  --node-stage4: #2a4a2a;
+  --node-stage5: #4a2a4a;
+  --accent-cyan: #2aa4a4;
+  --accent-amber: #b8860b;
   
-  // Form states
-  const [newTitle, setNewTitle] = useState('');
-  const [newDesc, setNewDesc] = useState('');
-  
-  const [contextForm, setContextForm] = useState({
-    domain: '',
-    nature: '',
-    purpose: '',
-    serve: ''
-  });
-
-  const [executionNote, setExecutionNote] = useState('');
-  const [anchorInput, setAnchorInput] = useState('');
-
-  // Load intents
-  useEffect(() => {
-    const q = query(collection(db, 'intents'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const loadedIntents: Intent[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        // Normalize signals
-        let signals = { count: 0, by: {} as Record<string, boolean> };
-        if (typeof data.signals === 'number') {
-          signals.count = data.signals;
-        } else if (data.signals) {
-          signals = data.signals;
-        }
-
-        loadedIntents.push({
-          id: doc.id,
-          ...data,
-          signals
-        } as Intent);
-      });
-      setIntents(loadedIntents);
-      
-      // Update active intent if selected
-      if (activeIntent) {
-        const updated = loadedIntents.find(i => i.id === activeIntent.id);
-        if (updated) setActiveIntent(updated);
-      }
-    });
-    return () => unsubscribe();
-  }, [activeIntent?.id]);
-
-  // Actions
-  const handleCreateIntent = async () => {
-    if (!userId) return; // Should be blocked by UI, but safety check
-    if (!newTitle || !newDesc) return;
-    
-    const intentId = 'INT-' + String(intents.length + 1).padStart(3, '0');
-    
-    await addDoc(collection(db, 'intents'), {
-      intentId,
-      title: newTitle,
-      description: newDesc,
-      creatorId: userId,
-      stage: 2,
-      signals: { count: 0, by: {} },
-      createdAt: serverTimestamp()
-    });
-    
-    setNewTitle('');
-    setNewDesc('');
-    setShowCreateModal(false);
-  };
-
-  const handleSignal = async (intent: Intent) => {
-    if (!userId) {
-      alert("Please verify identity first.");
-      return;
-    }
-    if (intent.creatorId === userId) {
-      alert("You cannot signal your own intent.");
-      return;
-    }
-
-    const intentRef = doc(db, 'intents', intent.id);
-    const currentCount = typeof intent.signals === 'number' ? intent.signals : intent.signals.count;
-    const newCount = currentCount + 1;
-    
-    let newStage = intent.stage;
-    if (newCount >= 1 && newStage < 3) newStage = 3;
-    if (newCount >= 2 && newStage < 4) newStage = 4;
-
-    await updateDoc(intentRef, {
-      "signals.count": increment(1),
-      [`signals.by.${userId}`]: true,
-      stage: newStage
-    });
-  };
-
-  const handleSaveContext = async () => {
-    if (!activeIntent || !userId) return;
-    
-    await updateDoc(doc(db, 'intents', activeIntent.id), {
-      domain: contextForm.domain,
-      intentNature: contextForm.nature,
-      contextPurpose: contextForm.purpose,
-      contextServe: contextForm.serve,
-      contextLocked: true,
-      stage: 3
-    });
-    
-    setShowContextModal(false);
-  };
-
-  const handleOpenExecutionPath = async (intent: Intent) => {
-    if (intent.stage === 3 && intent.contextLocked) {
-      await updateDoc(doc(db, 'intents', intent.id), { stage: 4 });
-    }
-  };
-
-  const handleSaveExecutionNote = async () => {
-    if (!activeIntent) return;
-    await updateDoc(doc(db, 'intents', activeIntent.id), { executionNote });
-  };
-
-  const handleSaveAnchor = async () => {
-    if (!activeIntent) return;
-    await updateDoc(doc(db, 'intents', activeIntent.id), {
-      anchor: anchorInput,
-      stage: 5,
-      anchoredAt: serverTimestamp()
-    });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!activeIntent || !e.target.files?.[0]) return;
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const src = reader.result as string;
-      await updateDoc(doc(db, 'intents', activeIntent.id), {
-        imageUrl: src
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Filtered intents
-  const filteredIntents = intents.filter(i => {
-    if (filter === 'stage4') return i.stage === 4;
-    if (filter === 'stage5') return i.stage === 5;
-    return true;
-  });
-
-  // Stats
-  const stats = {
-    total: intents.length,
-    execution: intents.filter(i => i.stage === 4).length,
-    anchored: intents.filter(i => i.stage === 5).length
-  };
-
-  return (
-    <div className="app-container">
-      {/* Top Bar */}
-      <div className="top-bar">
-        <div className="logo-area">
-          <div className="logo">TSPILL</div>
-          <div className="phase-indicator">
-            {[1,2,3,4,5,6].map(i => <div key={i} className={`phase-dot ${i <= 2 ? 'active' : ''}`}></div>)}
-          </div>
-        </div>
-        <div className="identity-area">
-          <div className="creator-badge">{userId || 'OBSERVER'}</div>
-          {userId && (
-            <button 
-              onClick={onLogout}
-              style={{
-                background: 'transparent',
-                border: '1px solid var(--border)',
-                color: 'var(--text-tertiary)',
-                fontSize: '10px',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              LOGOUT
-            </button>
-          )}
-          <div className="system-status">
-            <span className="status-dot"></span>
-            <span>Node Sync</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="main-content">
-        {/* Left Panel */}
-        <div className="philosophy-panel">
-          <div className="manifesto">
-            <h3>THE CORE</h3>
-            <p>
-              <span className="highlight">Ideas become products.</span> Creators own the outcome.
-              TSPILL is a production-linked creative operating system,
-              where every intent earns its path from public record to global production.
-            </p>
-          </div>
-
-          <div className="roadmap-mini">
-            <h4>THE WAY →</h4>
-            {[
-              {n:'01', t:'Foundation: Public record'},
-              {n:'02', t:'Artifact: Tangible output'},
-              {n:'03', t:'Validation: Expert review'},
-              {n:'04', t:'Community: Challenges'},
-              {n:'05', t:'Activation: Marketplace'},
-              {n:'06', t:'Scale: Global network'}
-            ].map(s => (
-              <div key={s.n} className="phase-mini-item">
-                <span className="phase-mini-num">{s.n}</span>
-                <span className="phase-mini-desc">{s.t}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Center Canvas */}
-        <div className="node-canvas">
-          <div className="canvas-header">
-            <h2>INTENT NODES · PUBLIC LEDGER</h2>
-            <div className="canvas-controls">
-              <button className={`filter-btn ${filter==='all'?'active':''}`} onClick={()=>setFilter('all')}>All</button>
-              <button className={`filter-btn ${filter==='stage4'?'active':''}`} onClick={()=>setFilter('stage4')}>Execution</button>
-              <button className={`filter-btn ${filter==='stage5'?'active':''}`} onClick={()=>setFilter('stage5')}>Anchored</button>
-            </div>
-          </div>
-
-          <div className="node-grid">
-            {filteredIntents.length === 0 ? (
-              <div className="empty-canvas">
-                <p>No intent nodes found</p>
-                {userId && <button className="filter-btn" onClick={()=>setShowCreateModal(true)}>Create First Intent</button>}
-              </div>
-            ) : (
-              filteredIntents.map(intent => (
-                <div 
-                  key={intent.id} 
-                  className={`node-card stage-${intent.stage}`}
-                  onClick={() => {
-                    setActiveIntent(intent);
-                    setExecutionNote(intent.executionNote || '');
-                    setAnchorInput(intent.anchor || '');
-                  }}
-                >
-                  <div className="node-header">
-                    <span className="node-id">{intent.intentId}</span>
-                    <span className="node-stage-badge" style={{background: `${getStageColor(intent.stage)}20`, color: getStageColor(intent.stage)}}>
-                      {getStageLabel(intent.stage)}
-                    </span>
-                  </div>
-                  <div className="node-title">{intent.title}</div>
-                  <div className="node-creator">{intent.creatorId}</div>
-                  <div className="node-footer">
-                    <span className="node-signals">
-                      <span className="signal-icon">⚡</span>
-                      {typeof intent.signals === 'number' ? intent.signals : intent.signals.count}
-                    </span>
-                    {intent.stage === 5 && <span className="node-anchor">ANCHOR</span>}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Right Inspector Panel */}
-        <div className="inspector-panel">
-          <div className="inspector-header">
-            <h3>NODE INSPECTOR</h3>
-          </div>
-          <div className="inspector-content">
-            {!activeIntent ? (
-              <div className="inspector-placeholder">
-                Select a node to inspect<br/>or create a new intent
-              </div>
-            ) : (
-              <>
-                <div className="property-group">
-                  <div className="property-label">INTENT</div>
-                  <div className="property-value mono">{activeIntent.intentId}</div>
-                  <div className="property-value" style={{marginTop:8}}>{activeIntent.title}</div>
-                  <div className="property-value" style={{fontSize:12, color:'#888', marginTop:4}}>{activeIntent.description}</div>
-                </div>
-
-                <div className="property-group">
-                  <div className="property-label">CREATOR</div>
-                  <div className="property-value mono">{activeIntent.creatorId}</div>
-                </div>
-
-                {/* Context Display */}
-                {(activeIntent.stage >= 3 || activeIntent.contextLocked) && (
-                  <div className="property-group">
-                    <div className="property-label">CONSTRAINTS</div>
-                    <div className="property-value">
-                      {activeIntent.domain && <span className="constraint-tag">{activeIntent.domain}</span>}
-                      {activeIntent.intentNature && <span className="constraint-tag">{activeIntent.intentNature}</span>}
-                    </div>
-                    <div className="property-value" style={{marginTop:8}}>{activeIntent.contextPurpose}</div>
-                    <div className="property-value" style={{marginTop:4}}>→ {activeIntent.contextServe}</div>
-                  </div>
-                )}
-
-                {/* Execution Note & Image */}
-                {(activeIntent.stage >= 4) && (
-                  <>
-                    <div className="property-group">
-                      <div className="property-label">EXECUTION NOTE</div>
-                      {activeIntent.creatorId === userId ? (
-                        <>
-                          <textarea 
-                            className="inspector-textarea" 
-                            value={executionNote}
-                            onChange={(e) => setExecutionNote(e.target.value)}
-                            placeholder="Describe execution approach..."
-                          />
-                          <button className="inspector-btn" onClick={handleSaveExecutionNote}>Save Note</button>
-                        </>
-                      ) : (
-                        <div className="property-value">{activeIntent.executionNote || '—'}</div>
-                      )}
-                    </div>
-
-                    <div className="property-group">
-                      <div className="property-label">ARTIFACT</div>
-                      {(activeIntent.imageUrl || activeIntent.image?.src) && (
-                        <img src={activeIntent.imageUrl || activeIntent.image?.src} className="inspector-image" alt="Artifact" />
-                      )}
-                      {activeIntent.creatorId === userId && (
-                        <input type="file" accept="image/*" onChange={handleImageUpload} className="inspector-input" />
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {/* Anchor */}
-                {(activeIntent.stage >= 4) && (
-                  <div className="property-group">
-                    <div className="property-label">ANCHOR</div>
-                    {activeIntent.creatorId === userId && activeIntent.stage < 5 ? (
-                      <>
-                        <input 
-                          className="inspector-input" 
-                          value={anchorInput}
-                          onChange={(e) => setAnchorInput(e.target.value)}
-                          placeholder="Link or reference"
-                        />
-                        <button className="inspector-btn primary" onClick={handleSaveAnchor}>Anchor & Complete</button>
-                      </>
-                    ) : (
-                      activeIntent.anchor ? (
-                        <a className="inspector-link" href={activeIntent.anchor} target="_blank" rel="noreferrer">{activeIntent.anchor}</a>
-                      ) : <div className="property-value">—</div>
-                    )}
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="inspector-actions">
-                  {activeIntent.creatorId === userId ? (
-                    <>
-                      {activeIntent.stage === 2 && (
-                        <button className="inspector-btn primary" onClick={() => {
-                          setContextForm({
-                            domain: activeIntent.domain || '',
-                            nature: activeIntent.intentNature || '',
-                            purpose: activeIntent.contextPurpose || '',
-                            serve: activeIntent.contextServe || ''
-                          });
-                          setShowContextModal(true);
-                        }}>Define Constraints</button>
-                      )}
-                      {activeIntent.stage === 3 && activeIntent.contextLocked && (
-                        <button className="inspector-btn primary" onClick={() => handleOpenExecutionPath(activeIntent)}>Open Execution Path</button>
-                      )}
-                    </>
-                  ) : (
-                    <button className="inspector-btn" onClick={() => handleSignal(activeIntent)}>
-                      Signal Interest ({typeof activeIntent.signals === 'number' ? activeIntent.signals : activeIntent.signals.count})
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="bottom-bar">
-        <button 
-          className="create-btn" 
-          onClick={() => userId ? setShowCreateModal(true) : alert("Please verify identity first.")}
-          style={{ opacity: userId ? 1 : 0.5 }}
-        >+</button>
-        <div className="stats">
-          <div className="stat-item"><span>Total Nodes</span> <span className="stat-value">{stats.total}</span></div>
-          <div className="stat-item"><span>Execution</span> <span className="stat-value">{stats.execution}</span></div>
-          <div className="stat-item"><span>Anchored</span> <span className="stat-value">{stats.anchored}</span></div>
-        </div>
-        <div>Execution First · Validation → Production → Scale</div>
-      </div>
-
-      {/* Modals */}
-      <div className={`modal ${showCreateModal ? 'open' : ''}`}>
-        <div className="modal-card">
-          <h2>Declare Intent</h2>
-          <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Intent title" />
-          <textarea value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Intent description"></textarea>
-          <div className="modal-actions">
-            <button className="modal-btn" onClick={() => setShowCreateModal(false)}>Cancel</button>
-            <button className="modal-btn primary" onClick={handleCreateIntent}>Declare</button>
-          </div>
-        </div>
-      </div>
-
-      <div className={`modal ${showContextModal ? 'open' : ''}`}>
-        <div className="modal-card">
-          <h2>Define Constraints</h2>
-          <input value={contextForm.domain} onChange={e => setContextForm({...contextForm, domain: e.target.value})} placeholder="Domain (e.g. Fashion, Art)" />
-          <input value={contextForm.nature} onChange={e => setContextForm({...contextForm, nature: e.target.value})} placeholder="Intent nature (e.g. Research, Build)" />
-          <textarea value={contextForm.purpose} onChange={e => setContextForm({...contextForm, purpose: e.target.value})} placeholder="Context purpose"></textarea>
-          <input value={contextForm.serve} onChange={e => setContextForm({...contextForm, serve: e.target.value})} placeholder="Context serve (e.g. Community)" />
-          <div className="modal-actions">
-            <button className="modal-btn" onClick={() => setShowContextModal(false)}>Cancel</button>
-            <button className="modal-btn primary" onClick={handleSaveContext}>Lock & Signal</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-function App() {
-  const [userId, setUserId] = useState<string | null>(localStorage.getItem("TSPILL_ID"));
-  const [loginInput, setLoginInput] = useState('');
-
-  // Background canvas animation
-  useEffect(() => {
-    const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let particles: any[] = [];
-    const initCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      particles = [];
-      for (let i = 0; i < 60; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3
-        });
-      }
-    };
-
-    const drawCanvas = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p, i) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-        for (let j = i + 1; j < particles.length; j++) {
-          const q = particles[j];
-          const d = Math.hypot(p.x - q.x, p.y - q.y);
-          if (d < 180) {
-            ctx.strokeStyle = `rgba(212,175,55,${0.3 * (1 - d / 180)})`;
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(q.x, q.y);
-            ctx.stroke();
-          }
-        }
-      });
-      requestAnimationFrame(drawCanvas);
-    };
-
-    window.addEventListener('resize', initCanvas);
-    initCanvas();
-    const animId = requestAnimationFrame(drawCanvas);
-    return () => {
-      window.removeEventListener('resize', initCanvas);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
-  const handleLogin = () => {
-    if (loginInput.length < 3) {
-      alert("Please enter a valid identifier.");
-      return;
-    }
-    const anchorHash = hashAnchor(loginInput.toLowerCase());
-    const tspillID = generateTspillID(anchorHash);
-
-    // Save identity to Firestore if new
-    const ref = doc(db, "identities", tspillID);
-    getDoc(ref).then(snap => {
-      if (!snap.exists()) {
-        setDoc(ref, {
-          tspill_id: tspillID,
-          anchor_hash: anchorHash,
-          created_at: serverTimestamp(),
-          protocol_version: "v0.1"
-        });
-      }
-    });
-
-    localStorage.setItem("TSPILL_ID", tspillID);
-    setUserId(tspillID);
-    setLoginInput('');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("TSPILL_ID");
-    setUserId(null);
-  };
-
-  return (
-    <>
-      <HubView userId={userId} onLogout={handleLogout} />
-      
-      {/* LOGIN OVERLAY (If not logged in) */}
-      {!userId && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          pointerEvents: 'none'
-        }}>
-          <div style={{
-            pointerEvents: 'auto',
-            background: 'rgba(255, 255, 255, 0.98)',
-            padding: '40px',
-            borderRadius: '4px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-            width: '400px',
-            textAlign: 'center',
-            border: '1px solid var(--gold)'
-          }}>
-            <h2 style={{
-              color: '#000', 
-              fontSize: '24px', 
-              marginBottom: '8px', 
-              fontFamily: 'Space Grotesk, sans-serif',
-              letterSpacing: '4px'
-            }}>TSPILL</h2>
-            <p style={{
-              color: '#666', 
-              fontSize: '12px', 
-              marginBottom: '24px',
-              letterSpacing: '2px'
-            }}>IDENTITY REQUIRED</p>
-            
-            <input 
-              value={loginInput}
-              onChange={(e) => setLoginInput(e.target.value)}
-              placeholder="Email or Wallet Address"
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: '#f5f5f5',
-                border: '1px solid #ddd',
-                marginBottom: '16px',
-                textAlign: 'center',
-                color: '#000'
-              }}
-            />
-            
-            <button 
-              onClick={handleLogin}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                fontWeight: 'bold',
-                letterSpacing: '2px',
-                cursor: 'pointer'
-              }}
-            >
-              VERIFY IDENTITY
-            </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
+  /* Login specific vars */
+  --bg:#050505;
+  --card:#ffffff;
 }
 
-export default App;
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background Canvas */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* =========================================
+   LOGIN SCREEN STYLES (from q446s3jizz.html)
+   ========================================= */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  z-index: 10;
+}
+
+.gate-card {
+  position: relative;
+  z-index: 10;
+  width: 440px;
+  padding: 60px 50px 80px;
+  background: var(--card);
+  text-align: center;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+  color: #000; /* Ensure text is visible on white card */
+}
+
+.logo-seal {
+  width: 72px;
+  margin: 0 auto 25px;
+}
+.logo-seal img {
+  width: 100%;
+}
+
+.gate-card h1 {
+  font-size: 2.8rem;
+  letter-spacing: 10px;
+  margin-bottom: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #000;
+}
+
+.gate-card .caption {
+  font-size: .65rem;
+  letter-spacing: 4px;
+  color: #666;
+  margin-bottom: 45px;
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.gate-card label {
+  font-size: .6rem;
+  letter-spacing: 3px;
+  color: #999;
+  margin-bottom: 14px;
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.gate-card input {
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 30px;
+  border: 1px solid #eee;
+  background: #f9f9f9;
+  color: #000;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.gate-card .btn {
+  width: 100%;
+  padding: 22px;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 4px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.2s;
+}
+
+.gate-card .btn:hover {
+  background: var(--gold);
+  color: #000;
+}
+
+.gate-card .enter-btn {
+  background: var(--gold);
+  color: #000;
+  margin-top: 20px;
+}
+
+#id-display {
+  display: none;
+  margin-top: 10px;
+  padding: 40px;
+  background: #0a0a0a;
+  border: 2px dashed var(--gold);
+  color: #fff;
+}
+
+.generated-id {
+  font-size: 2rem;
+  letter-spacing: 8px;
+  margin: 15px 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* =========================================
+   MAIN APP STYLES (from ljrjwvxvfr.html)
+   ========================================= */
+.app-container {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 50%, rgba(10,10,10,0.95), rgba(0,0,0,0.98));
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: var(--gold);
+}
+
+.phase-indicator {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.phase-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+
+.phase-dot.active {
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+}
+
+.identity-area {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  font-size: 13px;
+}
+
+.creator-badge {
+  color: var(--gold);
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(212, 175, 55, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-gold);
+}
+
+.system-status {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ===== LEFT PANEL: PHILOSOPHY ===== */
+.philosophy-panel {
+  width: 280px;
+  border-right: 1px solid var(--border);
+  padding: 24px;
+  overflow-y: auto;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+}
+
+.manifesto {
+  margin-bottom: 32px;
+}
+
+.manifesto h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.manifesto p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.manifesto .highlight {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.roadmap-mini {
+  margin-bottom: 32px;
+}
+
+.roadmap-mini h4 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+
+.phase-mini-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 12px;
+}
+
+.phase-mini-num {
+  color: var(--gold);
+  font-weight: 600;
+  min-width: 20px;
+}
+
+.phase-mini-desc {
+  color: var(--text-secondary);
+}
+
+/* ===== CENTER CANVAS: NODE GRID ===== */
+.node-canvas {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  position: relative;
+  background: rgba(0,0,0,0.2);
+}
+
+.canvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.canvas-header h2 {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+}
+
+.canvas-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.node-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.node-card {
+  background: rgba(20,20,20,0.8);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.node-card:hover {
+  border-color: var(--gold-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.node-card.stage-1 { border-left: 3px solid var(--node-stage1); }
+.node-card.stage-2 { border-left: 3px solid var(--node-stage2); }
+.node-card.stage-3 { border-left: 3px solid var(--node-stage3); }
+.node-card.stage-4 { border-left: 3px solid var(--node-stage4); }
+.node-card.stage-5 { border-left: 3px solid var(--node-stage5); }
+
+.node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.node-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.5px;
+}
+
+.node-stage-badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  text-transform: uppercase;
+}
+
+.node-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.node-creator {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.node-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.node-signals {
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.signal-icon {
+  font-size: 12px;
+}
+
+.node-anchor {
+  color: var(--accent-amber);
+  border: 1px solid rgba(184, 134, 11, 0.3);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+/* Empty state */
+.empty-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--text-tertiary);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 40px;
+}
+
+.empty-canvas p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ===== RIGHT PANEL: INSPECTOR ===== */
+.inspector-panel {
+  width: 320px;
+  border-left: 1px solid var(--border);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inspector-header {
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-header h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+}
+
+.inspector-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Inspector states */
+.inspector-placeholder {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: center;
+  padding: 40px 0;
+  font-style: italic;
+}
+
+.property-group {
+  margin-bottom: 24px;
+}
+
+.property-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.property-value {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.property-value.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.constraint-tag {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid var(--border-gold);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  display: inline-block;
+  margin-right: 6px;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+}
+
+.inspector-image {
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  background: #000;
+  margin: 8px 0;
+}
+
+.inspector-link {
+  color: var(--gold);
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 12px;
+}
+
+.inspector-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inspector-btn {
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  padding: 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.inspector-btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--gold);
+}
+
+.inspector-btn.primary {
+  background: var(--gold);
+  color: #000;
+  font-weight: 600;
+  border: none;
+}
+
+.inspector-btn.primary:hover {
+  background: #e5c158;
+}
+
+.inspector-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.inspector-input {
+  width: 100%;
+  background: #000;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+.inspector-textarea {
+  width: 100%;
+  min-height: 80px;
+  background: #000;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.inspector-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* ===== BOTTOM BAR ===== */
+.bottom-bar {
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.create-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.create-btn:hover {
+  background: var(--gold);
+  color: #000;
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-value {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ===== MODALS ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-card {
+  width: 380px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-gold);
+  padding: 30px;
+}
+
+.modal-card h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: var(--gold);
+}
+
+.modal-card input,
+.modal-card textarea {
+  width: 100%;
+  background: #000;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+}
+
+.modal-card textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.modal-btn.primary {
+  background: var(--gold);
+  color: #000;
+  border: none;
+}
+
+/* Hidden utility */
+.hidden {
+  display: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+}
