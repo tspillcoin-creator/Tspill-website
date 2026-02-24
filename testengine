@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSPILL · feasibility engine (phase A)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #0b0b0b;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: #e0e0e0;
+            font-weight: 400;
+            font-size: 13px;
+            line-height: 1.4;
+            letter-spacing: 0.02em;
+        }
+
+        /* thin top header (60px) */
+        .top-bar {
+            height: 60px;
+            min-height: 60px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background-color: #0b0b0b;
+            color: #bfb9ae;
+            font-size: 14px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .top-bar-left {
+            color: #d7d7d7;
+        }
+
+        .top-bar-right {
+            color: #7e7e7e;
+        }
+
+        /* main body: three columns (left/center/right) */
+        .main-panel {
+            flex: 1;
+            display: flex;
+            min-height: 0;     /* flex overflow */
+            width: 100%;
+            padding: 16px 20px 12px 20px;
+            gap: 16px;
+        }
+
+        /* LEFT COLUMN 30–35% */
+        .col-left {
+            flex: 0 0 32%;     
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        /* CENTER COLUMN 20–25% */
+        .col-center {
+            flex: 0 0 23%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            min-width: 0;
+        }
+
+        /* RIGHT COLUMN 35–40% (here 38%) */
+        .col-right {
+            flex: 0 0 38%;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-width: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* --- left column blocks --- */
+        .section-title {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #9e9486;        /* muted gold-ish */
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+
+        .wire-upload-area {
+            border: 1px solid #3a3a3a;
+            background-color: #101010;
+            aspect-ratio: 1 / 1;    /* square */
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            transition: border 0.1s ease;
+        }
+
+        .wire-upload-area:hover {
+            border: 1px solid #7e6b4f;   /* muted gold */
+        }
+
+        .wire-placeholder {
+            color: #5a5a5a;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        /* constraint modules (stacked) */
+        .constraint-modules {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .module-block {
+            border: 1px solid #3a3a3a;
+            background-color: #0f0f0f;
+            padding: 16px 16px;
+            font-size: 13px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #beb3a4;
+            transition: border 0.15s, background 0.15s, box-shadow 0.15s;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .module-block.active-module {
+            border: 1px solid #947e60;      /* soft industrial gold */
+            box-shadow: 0 0 10px -2px rgba(170, 140, 100, 0.15);
+            background-color: #151515;
+            color: #e2d9cc;
+        }
+
+        /* subtle hover glow (non-active also gets) */
+        .module-block:hover {
+            border: 1px solid #5e5548;
+            background-color: #141414;
+        }
+
+        /* small pseudo element for left connecting line dots? we'll draw lines via SVG later in center */
+
+        /* --- center column reactor --- */
+        .reactor-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .core-reactor {
+            width: 200px;
+            height: 200px;
+            border: 2px solid #3e3e3e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0d0d0d;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0 0 0 1px #1e1e1e;
+            transition: border 0.2s;
+            /* subtle rotating thin ring (pseudo) */
+        }
+
+        .core-reactor::after {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            border-top: 1px solid #6a614e;
+            border-bottom: 1px solid #4f4a3e;
+            opacity: 0.25;
+            animation: spin 10s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .core-label {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: #988f7c;
+            word-break: keep-all;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* thin connecting lines — using SVG overlay */
+        .connection-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        svg.connections {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            stroke: #4e4a42;
+            stroke-width: 1;
+            stroke-dasharray: 2 4;
+            fill: transparent;
+            opacity: 0.45;
+        }
+
+        /* right column panels */
+        .feasibility-score-block {
+            border: 1px solid #2f2f2f;
+            background: #0c0c0c;
+            padding: 16px 18px;
+        }
+
+        .big-score {
+            font-size: 48px;
+            font-weight: 350;
+            color: #c9b690;   /* muted gold */
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .score-label {
+            color: #8b8275;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.2em;
+        }
+
+        /* four indicators */
+        .indicators-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .indicator-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #2f2f2f;
+            padding-bottom: 6px;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #b3aa9c;
+        }
+
+        .indicator-value {
+            color: #cfc5b4;
+            font-weight: 400;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .sub-section {
+            margin-top: 16px;
+        }
+
+        .sub-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: #8e8576;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+        }
+
+        .bullet-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .bullet-list li {
+            padding-left: 14px;
+            position: relative;
+            margin-bottom: 8px;
+            color: #bcb2a2;
+            font-size: 12px;
+        }
+
+        .bullet-list li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: #9b8a70;
+            font-size: 13px;
+        }
+
+        .risk-note {
+            background-color: #0e0e0e;
+            border-left: 2px solid #7e6b4f;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #cfc5b4;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .suggest-adjust {
+            color: #b8aa94;
+            font-size: 12px;
+            background: #0f0f0f;
+            padding: 10px 14px;
+            border: 1px solid #303030;
+        }
+
+        /* bottom status bar */
+        .bottom-bar {
+            height: 34px;
+            min-height: 34px;
+            border-top: 1px solid #262626;
+            background: #0b0b0b;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 12px;
+            color: #7e7e7e;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* custom scroll for right col if needed */
+        .col-right::-webkit-scrollbar {
+            width: 4px;
+            background: #0b0b0b;
+        }
+        .col-right::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+        }
+
+        /* responsive handling */
+        @media (max-width: 1000px) {
+            .main-panel { gap: 8px; }
+            .col-left { flex: 0 0 30%; }
+            .col-center { flex: 0 0 25%; }
+            .col-right { flex: 0 0 40%; }
+        }
+
+        /* utility */
+        .text-mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- THIN TOP HEADER 60px -->
+    <div class="top-bar">
+        <div class="top-bar-left">TSPILL — Feasibility Engine (Phase A)</div>
+        <div class="top-bar-right">Mode: Educational | v0.1</div>
+    </div>
+
+    <!-- MAIN BODY: THREE COLUMNS -->
+    <div class="main-panel">
+        <!-- LEFT COLUMN (structural input + constraint modules) -->
+        <div class="col-left">
+            <div>
+                <div class="section-title">Structural Input</div>
+                <div class="wire-upload-area">
+                    <span class="wire-placeholder">[ wire model .igs .stp ]</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Constraint Modules</div>
+                <div class="constraint-modules" id="constraintModules">
+                    <div class="module-block" data-module="app">Application Layer</div>
+                    <div class="module-block" data-module="mat">Material System</div>
+                    <div class="module-block" data-module="mfg">Manufacturing Method</div>
+                    <div class="module-block" data-module="scale">Deployment Scale</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER COLUMN: reactor + connection lines (svg overlays) -->
+        <div class="col-center">
+            <div class="reactor-wrapper" id="reactorWrapper">
+                <!-- The reactor circle -->
+                <div class="core-reactor">
+                    <div class="core-label">FEASIBILITY<br>ENGINE</div>
+                </div>
+
+                <!-- SVG thin connecting lines (left modules to core / core to right) 
+                     we draw them dynamically based on column positions? simpler: hardcoded path that visually connects -->
+                <svg class="connections" style="pointer-events: none;" viewBox="0 0 400 600" preserveAspectRatio="none">
+                    <!-- left side lines (from approx module area) will be drawn via js later? but we want minimal js. 
+                         For serious industrial look we keep them fixed as abstract. 
+                         However because columns fluid, we prefer to draw them via JS on resize.
+                         We'll generate lines via js in a minimal script. But we also add static paths that are hidden? 
+                         Let's do pure JS to make them connect from left-center to reactor center and reactor to right panel.
+                         The design says subtle lines – we can draw three lines (from left to core) but that might be messy.
+                         Instead we add an SVG line that is updated by JS: from left col to core and core to right.
+                         For simplicity we will create two lines via requestAnimationFrame/update. -->
+                </svg>
+                <!-- we will re-draw lines with JS -->
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN (Production analysis) -->
+        <div class="col-right">
+            <!-- Feasibility score -->
+            <div class="feasibility-score-block">
+                <div class="score-label">Feasibility Score</div>
+                <div class="big-score">78%</div>
+            </div>
+
+            <!-- four indicators -->
+            <div class="indicators-grid">
+                <div class="indicator-item"><span>Structural Integrity</span><span class="indicator-value">0.82</span></div>
+                <div class="indicator-item"><span>Material Compatibility</span><span class="indicator-value">0.74</span></div>
+                <div class="indicator-item"><span>Fabrication Complexity</span><span class="indicator-value">0.63</span></div>
+                <div class="indicator-item"><span>Scalability Index</span><span class="indicator-value">0.91</span></div>
+            </div>
+
+            <!-- Production path snapshot (bullet style) -->
+            <div class="sub-section">
+                <div class="sub-title">Production Path Snapshot</div>
+                <ul class="bullet-list">
+                    <li>Additive · Inconel 718</li>
+                    <li>5-axis finish (3 stages)</li>
+                    <li>Heat treat cycle T6</li>
+                </ul>
+            </div>
+
+            <!-- Risk Notes -->
+            <div class="sub-section">
+                <div class="sub-title">Risk Notes</div>
+                <div class="risk-note">thin-wall distortion &gt;0.2mm · NDT required</div>
+            </div>
+
+            <!-- Suggested Adjustment -->
+            <div class="sub-section">
+                <div class="sub-title">Suggested Adjustment</div>
+                <div class="suggest-adjust">increase draft angle on ribs / reduce infill</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM STATUS BAR -->
+    <div class="bottom-bar">
+        System Mode: Educational | Validation Threshold: Not Enforced
+    </div>
+
+    <!-- minimal vanilla JS: module active glow + connecting lines (very subtle) -->
+    <script>
+        (function() {
+            // 1. constraint module interaction: active on click, simulate selection.
+            const modules = document.querySelectorAll('.module-block');
+            modules.forEach(mod => {
+                mod.addEventListener('click', (e) => {
+                    // remove active from others
+                    modules.forEach(m => m.classList.remove('active-module'));
+                    mod.classList.add('active-module');
+                    // (hardcoded feasibility remains 78% as requested)
+                });
+            });
+            // set first as active example (optional)
+            if(modules.length) modules[0].classList.add('active-module');
+
+            // 2. thin connecting lines from left col area → core → right col area.
+            // we draw an SVG line using the wrapper.
+            function updateConnectingLines() {
+                const wrapper = document.querySelector('.reactor-wrapper');
+                const leftCol = document.querySelector('.col-left');
+                const rightCol = document.querySelector('.col-right');
+                const core = document.querySelector('.core-reactor');
+                if (!wrapper || !leftCol || !rightCol || !core) return;
+
+                // get relative positions within wrapper
+                const wrapperRect = wrapper.getBoundingClientRect();
+                const coreRect = core.getBoundingClientRect();
+
+                // approximate left connection point: from middle left area (right edge of left col)
+                const leftColRect = leftCol.getBoundingClientRect();
+                const rightColRect = rightCol.getBoundingClientRect();
+
+                // points relative to wrapper (svg)
+                const leftX = leftColRect.right - wrapperRect.left - 8;    // a bit inside from right edge
+                const leftY = (leftColRect.top + leftColRect.bottom) / 2 - wrapperRect.top;
+
+                const coreCenterX = (coreRect.left + coreRect.width/2) - wrapperRect.left;
+                const coreCenterY = (coreRect.top + coreRect.height/2) - wrapperRect.top;
+
+                const rightX = rightColRect.left - wrapperRect.left + 8;   // from left edge of right col
+                const rightY = (rightColRect.top + rightColRect.bottom) / 2 - wrapperRect.top;
+
+                // remove any existing dynamic line
+                let svg = wrapper.querySelector('svg.connections');
+                if (!svg) {
+                    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('class', 'connections');
+                    svg.setAttribute('viewBox', `0 0 ${wrapperRect.width} ${wrapperRect.height}`);
+                    svg.setAttribute('preserveAspectRatio', 'none');
+                    wrapper.appendChild(svg);
+                } else {
+                    // clear previous paths
+                    while (svg.firstChild) svg.removeChild(svg.firstChild);
+                    svg.setAttribute('viewBox', `0 0 ${wrapperRect.width} ${wrapperRect.height}`);
+                }
+
+                // don't draw if positions invalid
+                if (leftX < 0 || rightX < 0 || coreCenterX < 0) return;
+
+                // line from left to core (curved or straight? we use straight thin dashed line)
+                const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                path1.setAttribute('x1', leftX);
+                path1.setAttribute('y1', leftY);
+                path1.setAttribute('x2', coreCenterX - 10); // stop near core
+                path1.setAttribute('y2', coreCenterY - 8);
+                path1.setAttribute('stroke', '#6b624f');
+                path1.setAttribute('stroke-width', '1');
+                path1.setAttribute('stroke-dasharray', '3 4');
+                svg.appendChild(path1);
+
+                // second line from core to right
+                const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                path2.setAttribute('x1', coreCenterX + 14);
+                path2.setAttribute('y1', coreCenterY + 4);
+                path2.setAttribute('x2', rightX);
+                path2.setAttribute('y2', rightY);
+                path2.setAttribute('stroke', '#6b624f');
+                path2.setAttribute('stroke-width', '1');
+                path2.setAttribute('stroke-dasharray', '3 4');
+                svg.appendChild(path2);
+
+                // also optional additional lines from other modules? keep minimal: only two representative.
+                // To suggest multiple inputs, add two faint extra lines from slightly different y offsets.
+                const path1b = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                path1b.setAttribute('x1', leftX-4);
+                path1b.setAttribute('y1', leftY-18);
+                path1b.setAttribute('x2', coreCenterX-18);
+                path1b.setAttribute('y2', coreCenterY-18);
+                path1b.setAttribute('stroke', '#5f5849');
+                path1b.setAttribute('stroke-width', '1');
+                path1b.setAttribute('stroke-dasharray', '2 6');
+                path1b.setAttribute('opacity', '0.5');
+                svg.appendChild(path1b);
+
+                const path2b = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                path2b.setAttribute('x1', coreCenterX+22);
+                path2b.setAttribute('y1', coreCenterY+18);
+                path2b.setAttribute('x2', rightX+6);
+                path2b.setAttribute('y2', rightY-10);
+                path2b.setAttribute('stroke', '#5f5849');
+                path2b.setAttribute('stroke-width', '1');
+                path2b.setAttribute('stroke-dasharray', '2 6');
+                path2b.setAttribute('opacity', '0.4');
+                svg.appendChild(path2b);
+            }
+
+            // initial update
+            window.addEventListener('load', () => {
+                updateConnectingLines();
+            });
+
+            // update on resize with debounce
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    updateConnectingLines();
+                }, 60);
+            });
+
+            // small mutationobserver in case layout shifts? not needed.
+            // also update on module click? maybe lines move slightly if left col changes height, but fine.
+            // for robustness, call again after 300ms (some fonts)
+            setTimeout(updateConnectingLines, 120);
+        })();
+    </script>
+    <!-- subtle pulse animation on reactor border? already have rotating ring, add a second opacity pulse? too flashy, but we can add a tiny core glow -->
+    <style>
+        /* additional extremely subtle pulse on core reactor (barely visible) */
+        .core-reactor {
+            animation: corePulse 6s infinite ease-in-out;
+        }
+        @keyframes corePulse {
+            0% { box-shadow: 0 0 0 1px #2b2b2b, 0 0 0 2px #1f1f1f; }
+            50% { box-shadow: 0 0 0 1px #4b4439, 0 0 0 3px #26221d; }
+            100% { box-shadow: 0 0 0 1px #2b2b2b, 0 0 0 2px #1f1f1f; }
+        }
+        /* hexagon option? but we stick to circular with thin border */
+    </style>
+</body>
+</html>
